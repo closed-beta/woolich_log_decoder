@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WoolichFileDecoderForm));
             this.txtLogging = new System.Windows.Forms.TextBox();
             this.btnOpenFile = new System.Windows.Forms.Button();
             this.openWRLFileDialog = new System.Windows.Forms.OpenFileDialog();
@@ -41,7 +42,10 @@
             this.btnAutoTuneExport = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label18 = new System.Windows.Forms.Label();
+            this.textBox4 = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
             this.btnExportCRCHack = new System.Windows.Forms.Button();
             this.btnExportTargetColumn = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -68,10 +72,9 @@
             this.label14 = new System.Windows.Forms.Label();
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.progressLabel = new System.Windows.Forms.Label();
-            this.label16 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
-            this.textBox4 = new System.Windows.Forms.TextBox();
-            this.label18 = new System.Windows.Forms.Label();
+            this.label19 = new System.Windows.Forms.Label();
+            this.lblDirName = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -92,7 +95,7 @@
             // 
             // btnOpenFile
             // 
-            this.btnOpenFile.Location = new System.Drawing.Point(10, 11);
+            this.btnOpenFile.Location = new System.Drawing.Point(10, 53);
             this.btnOpenFile.Margin = new System.Windows.Forms.Padding(2);
             this.btnOpenFile.Name = "btnOpenFile";
             this.btnOpenFile.Size = new System.Drawing.Size(112, 28);
@@ -111,12 +114,12 @@
             // 
             this.lblFileName.AutoSize = true;
             this.lblFileName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblFileName.Location = new System.Drawing.Point(92, 43);
+            this.lblFileName.Location = new System.Drawing.Point(119, 27);
             this.lblFileName.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblFileName.Name = "lblFileName";
-            this.lblFileName.Size = new System.Drawing.Size(85, 13);
+            this.lblFileName.Size = new System.Drawing.Size(33, 13);
             this.lblFileName.TabIndex = 3;
-            this.lblFileName.Text = "No File Selected";
+            this.lblFileName.Text = "None";
             // 
             // txtFeedback
             // 
@@ -136,7 +139,7 @@
             // 
             this.lblExportPacketsCount.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lblExportPacketsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblExportPacketsCount.Location = new System.Drawing.Point(325, 64);
+            this.lblExportPacketsCount.Location = new System.Drawing.Point(333, 47);
             this.lblExportPacketsCount.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblExportPacketsCount.Name = "lblExportPacketsCount";
             this.lblExportPacketsCount.Size = new System.Drawing.Size(109, 13);
@@ -149,7 +152,7 @@
             // 
             this.lblExportFilename.AutoSize = true;
             this.lblExportFilename.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblExportFilename.Location = new System.Drawing.Point(127, 11);
+            this.lblExportFilename.Location = new System.Drawing.Point(333, 259);
             this.lblExportFilename.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblExportFilename.Name = "lblExportFilename";
             this.lblExportFilename.Size = new System.Drawing.Size(132, 13);
@@ -159,10 +162,10 @@
             // 
             // btnExportCSV
             // 
-            this.btnExportCSV.Location = new System.Drawing.Point(343, 427);
+            this.btnExportCSV.Location = new System.Drawing.Point(351, 195);
             this.btnExportCSV.Margin = new System.Windows.Forms.Padding(2);
             this.btnExportCSV.Name = "btnExportCSV";
-            this.btnExportCSV.Size = new System.Drawing.Size(124, 21);
+            this.btnExportCSV.Size = new System.Drawing.Size(114, 21);
             this.btnExportCSV.TabIndex = 11;
             this.btnExportCSV.Text = "Export CSV";
             this.toolTip1.SetToolTip(this.btnExportCSV, "Export and save file in CSV format");
@@ -176,10 +179,10 @@
             this.cmbExportType.Items.AddRange(new object[] {
             "Export Full File",
             "Export Analysis Only"});
-            this.cmbExportType.Location = new System.Drawing.Point(126, 427);
+            this.cmbExportType.Location = new System.Drawing.Point(94, 195);
             this.cmbExportType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cmbExportType.Name = "cmbExportType";
-            this.cmbExportType.Size = new System.Drawing.Size(210, 21);
+            this.cmbExportType.Size = new System.Drawing.Size(246, 21);
             this.cmbExportType.TabIndex = 12;
             this.cmbExportType.SelectedIndexChanged += new System.EventHandler(this.cmbExportType_SelectedIndexChanged);
             // 
@@ -201,12 +204,13 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(14, 435);
+            this.label2.Location = new System.Drawing.Point(7, 198);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(107, 13);
+            this.label2.Size = new System.Drawing.Size(79, 13);
             this.label2.TabIndex = 15;
-            this.label2.Text = "CSV Export Type:";
+            this.label2.Text = "Export Type:";
+            this.label2.Click += new System.EventHandler(this.label2_Click_1);
             // 
             // panel1
             // 
@@ -214,7 +218,6 @@
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.label18);
             this.panel1.Controls.Add(this.textBox4);
-            this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.label16);
             this.panel1.Controls.Add(this.btnExportCRCHack);
             this.panel1.Controls.Add(this.btnExportTargetColumn);
@@ -222,27 +225,60 @@
             this.panel1.Controls.Add(this.txtBreakOnChange);
             this.panel1.Controls.Add(this.btnAnalyse);
             this.panel1.Controls.Add(this.lblExportPacketsCount);
-            this.panel1.Location = new System.Drawing.Point(14, 451);
+            this.panel1.Location = new System.Drawing.Point(14, 469);
             this.panel1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(451, 123);
+            this.panel1.Size = new System.Drawing.Size(451, 105);
             this.panel1.TabIndex = 16;
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label18.Location = new System.Drawing.Point(256, 76);
+            this.label18.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(60, 15);
+            this.label18.TabIndex = 38;
+            this.label18.Text = "CRC size:";
+            // 
+            // textBox4
+            // 
+            this.textBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.textBox4.Location = new System.Drawing.Point(359, 75);
+            this.textBox4.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox4.Name = "textBox4";
+            this.textBox4.Size = new System.Drawing.Size(48, 20);
+            this.textBox4.TabIndex = 37;
+            this.textBox4.Text = "100";
+            this.textBox4.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label3.Location = new System.Drawing.Point(9, 9);
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label3.Location = new System.Drawing.Point(13, 453);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(323, 13);
+            this.label3.Size = new System.Drawing.Size(390, 13);
             this.label3.TabIndex = 20;
             this.label3.Text = "Log File Analysis Functions (To analyse a particular packet column)";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label16.Location = new System.Drawing.Point(256, 45);
+            this.label16.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(53, 15);
+            this.label16.TabIndex = 36;
+            this.label16.Text = "Packets:";
             // 
             // btnExportCRCHack
             // 
             this.btnExportCRCHack.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnExportCRCHack.Location = new System.Drawing.Point(13, 88);
+            this.btnExportCRCHack.Location = new System.Drawing.Point(13, 71);
             this.btnExportCRCHack.Margin = new System.Windows.Forms.Padding(2);
             this.btnExportCRCHack.Name = "btnExportCRCHack";
             this.btnExportCRCHack.Size = new System.Drawing.Size(237, 26);
@@ -254,7 +290,7 @@
             // btnExportTargetColumn
             // 
             this.btnExportTargetColumn.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnExportTargetColumn.Location = new System.Drawing.Point(13, 56);
+            this.btnExportTargetColumn.Location = new System.Drawing.Point(13, 39);
             this.btnExportTargetColumn.Margin = new System.Windows.Forms.Padding(2);
             this.btnExportTargetColumn.Name = "btnExportTargetColumn";
             this.btnExportTargetColumn.Size = new System.Drawing.Size(237, 28);
@@ -267,7 +303,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label1.Location = new System.Drawing.Point(254, 32);
+            this.label1.Location = new System.Drawing.Point(254, 15);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(86, 13);
@@ -277,7 +313,7 @@
             // txtBreakOnChange
             // 
             this.txtBreakOnChange.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.txtBreakOnChange.Location = new System.Drawing.Point(359, 29);
+            this.txtBreakOnChange.Location = new System.Drawing.Point(359, 12);
             this.txtBreakOnChange.Margin = new System.Windows.Forms.Padding(2);
             this.txtBreakOnChange.Name = "txtBreakOnChange";
             this.txtBreakOnChange.Size = new System.Drawing.Size(48, 20);
@@ -287,7 +323,7 @@
             // btnAnalyse
             // 
             this.btnAnalyse.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnAnalyse.Location = new System.Drawing.Point(13, 24);
+            this.btnAnalyse.Location = new System.Drawing.Point(13, 7);
             this.btnAnalyse.Margin = new System.Windows.Forms.Padding(2);
             this.btnAnalyse.Name = "btnAnalyse";
             this.btnAnalyse.Size = new System.Drawing.Size(237, 28);
@@ -334,12 +370,12 @@
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label6.Location = new System.Drawing.Point(10, 41);
+            this.label6.Location = new System.Drawing.Point(7, 25);
             this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(68, 15);
+            this.label6.Size = new System.Drawing.Size(87, 15);
             this.label6.TabIndex = 20;
-            this.label6.Text = "File Path:";
+            this.label6.Text = "Loaded File:";
             // 
             // toolTip1
             // 
@@ -466,7 +502,7 @@
             this.panel2.Controls.Add(this.label8);
             this.panel2.Controls.Add(this.textBox2);
             this.panel2.Controls.Add(this.label10);
-            this.panel2.Location = new System.Drawing.Point(10, 255);
+            this.panel2.Location = new System.Drawing.Point(14, 358);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(249, 63);
             this.panel2.TabIndex = 31;
@@ -478,7 +514,7 @@
             this.panel3.Controls.Add(this.textBox1);
             this.panel3.Controls.Add(this.label9);
             this.panel3.Controls.Add(this.label7);
-            this.panel3.Location = new System.Drawing.Point(10, 221);
+            this.panel3.Location = new System.Drawing.Point(14, 324);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(249, 28);
             this.panel3.TabIndex = 32;
@@ -498,7 +534,7 @@
             // 
             this.label14.AutoSize = true;
             this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label14.Location = new System.Drawing.Point(10, 203);
+            this.label14.Location = new System.Drawing.Point(14, 306);
             this.label14.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(125, 15);
@@ -507,32 +543,22 @@
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(304, 398);
+            this.progressBar.Location = new System.Drawing.Point(178, 218);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(163, 23);
+            this.progressBar.Size = new System.Drawing.Size(287, 23);
             this.progressBar.TabIndex = 34;
             this.progressBar.Visible = false;
             // 
             // progressLabel
             // 
             this.progressLabel.AutoSize = true;
-            this.progressLabel.Location = new System.Drawing.Point(123, 398);
+            this.progressLabel.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.progressLabel.Location = new System.Drawing.Point(7, 218);
             this.progressLabel.MinimumSize = new System.Drawing.Size(170, 22);
             this.progressLabel.Name = "progressLabel";
             this.progressLabel.Size = new System.Drawing.Size(170, 22);
             this.progressLabel.TabIndex = 35;
             this.progressLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // label16
-            // 
-            this.label16.AutoSize = true;
-            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label16.Location = new System.Drawing.Point(256, 62);
-            this.label16.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(53, 15);
-            this.label16.TabIndex = 36;
-            this.label16.Text = "Packets:";
             // 
             // label17
             // 
@@ -545,33 +571,37 @@
             this.label17.TabIndex = 37;
             this.label17.Text = "Feedback: ";
             // 
-            // textBox4
+            // label19
             // 
-            this.textBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.textBox4.Location = new System.Drawing.Point(359, 92);
-            this.textBox4.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(48, 20);
-            this.textBox4.TabIndex = 37;
-            this.textBox4.Text = "100";
-            this.textBox4.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.label19.AutoSize = true;
+            this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label19.Location = new System.Drawing.Point(7, 9);
+            this.label19.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(104, 15);
+            this.label19.TabIndex = 38;
+            this.label19.Text = "Work Directory:";
             // 
-            // label18
+            // lblDirName
             // 
-            this.label18.AutoSize = true;
-            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label18.Location = new System.Drawing.Point(256, 93);
-            this.label18.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(60, 15);
-            this.label18.TabIndex = 38;
-            this.label18.Text = "CRC size:";
+            this.lblDirName.AutoSize = true;
+            this.lblDirName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.lblDirName.Location = new System.Drawing.Point(119, 11);
+            this.lblDirName.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblDirName.Name = "lblDirName";
+            this.lblDirName.Size = new System.Drawing.Size(41, 13);
+            this.lblDirName.TabIndex = 39;
+            this.lblDirName.Text = "Current";
+            this.lblDirName.Click += new System.EventHandler(this.lblDirName_Click);
             // 
             // WoolichFileDecoderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1284, 586);
+            this.Controls.Add(this.lblDirName);
+            this.Controls.Add(this.label19);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.label17);
             this.Controls.Add(this.progressLabel);
             this.Controls.Add(this.progressBar);
@@ -593,6 +623,7 @@
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.aTFCheckedListBox);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(2);
             this.MaximumSize = new System.Drawing.Size(1300, 625);
             this.MinimumSize = new System.Drawing.Size(1300, 625);
@@ -655,6 +686,8 @@
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.TextBox textBox4;
         private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.Label lblDirName;
     }
 }
 

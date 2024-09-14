@@ -363,7 +363,9 @@ namespace WoolichDecoder
                 this.lblFileName.Text = "Error: File Not Found";
                 return;
             }
-            this.lblFileName.Text = inputFileName;
+            this.lblFileName.Text = System.IO.Path.GetFileName(inputFileName); // Shows only the file name
+            this.lblDirName.Text = System.IO.Path.GetDirectoryName(inputFileName); // Shows only the directory path
+
 
             FileStream fileStream = new FileStream(inputFileName, FileMode.Open, FileAccess.Read);
             BinaryReader binReader = new BinaryReader(fileStream, Encoding.ASCII);
@@ -1285,7 +1287,6 @@ namespace WoolichDecoder
             }
         }
 
-
         private void btnExportCRCHack_Click(object sender, EventArgs e)
         {
             if (!IsFileLoaded())
@@ -1358,5 +1359,14 @@ namespace WoolichDecoder
 
         }
 
+        private void lblDirName_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click_1(object sender, EventArgs e)
+        {
+
+        }
     }
 }
