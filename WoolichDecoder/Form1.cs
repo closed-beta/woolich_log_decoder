@@ -5,26 +5,16 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using WoolichDecoder.Models;
 using WoolichDecoder.Settings;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using static WoolichDecoder.WoolichFileDecoderForm;
 
 namespace WoolichDecoder
 {
     public partial class WoolichFileDecoderForm : Form
     {
-        private bool IsFileLoaded()
-        {
-            if (string.IsNullOrEmpty(OpenFileName))
-            {
-                MessageBox.Show("Please open a file first.");
-                return false;
-            }
-            return true;
-        }
-
         public static class LogPrefix
         {
             // Date and Time format
@@ -84,6 +74,17 @@ namespace WoolichDecoder
         List<int> analysisColumn = new List<int> { };
 
         // Constructor for form???
+
+        private bool IsFileLoaded()
+        {
+            if (string.IsNullOrEmpty(OpenFileName))
+            {
+                MessageBox.Show("Please open a file first.");
+                return false;
+            }
+            return true;
+        }
+
         public WoolichFileDecoderForm()
         {
             InitializeComponent();
@@ -333,7 +334,7 @@ namespace WoolichDecoder
             if (openWRLFileDialog.ShowDialog() != DialogResult.OK)
             {
                 return;
-            }
+            };
 
             var filename = openWRLFileDialog.FileNames.FirstOrDefault();
             OpenFileName = filename;
@@ -366,7 +367,6 @@ namespace WoolichDecoder
             FileStream fileStream = new FileStream(inputFileName, FileMode.Open, FileAccess.Read);
             BinaryReader binReader = new BinaryReader(fileStream, Encoding.ASCII);
 
-            // Read the primary header first
             logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
 
             // Search for the byte sequence 01 02 5D 01
@@ -383,6 +383,7 @@ namespace WoolichDecoder
                 {
                     // Read the secondary header only if the sequence is not at position logs.PrimaryHeaderLength + 1
                     logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+
                     exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
                 }
             }
@@ -452,10 +453,11 @@ namespace WoolichDecoder
             binWriter.Close();
 
             fileStream.Close();
-            this.txtLogging.AppendText($"{LogPrefix.Prefix}BIN file created and saved." + Environment.NewLine);
+
+            string fileName = Path.GetFileName(binOutputFileName);
+            this.txtLogging.AppendText($"{LogPrefix.Prefix}BIN file created and saved as: " + fileName + Environment.NewLine);
 
         }
-
         // Method to search for a pattern in a file
         private long FindPatternInFile(string filePath, byte[] pattern)
         {
@@ -485,43 +487,40 @@ namespace WoolichDecoder
             return -1; // Pattern not found
         }
 
-
         /// <summary>
         /// This is intended to analyse a specific column and filter the changes down to just where that single field changes.
         /// It's basically redundant now but may serve a purpose in the future.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnAnalyse_Click(object sender, EventArgs e)
-        {
+        
 
+
+        private async void btnAnalyse_Click(object sender, EventArgs e)
+        {
             if (!IsFileLoaded())
+            {
+                txtFeedback.AppendText("No file loaded." + Environment.NewLine);
                 return;
+            }
+
+            txtFeedback.AppendText("Analysis started..." + Environment.NewLine);
+
+            txtFeedback.AppendText($"Packet format: {logs.PacketFormat:X}" + Environment.NewLine);
 
             if (logs.PacketFormat == 0x01)
             {
+                txtFeedback.AppendText("MT09 packet format detected. Setting static columns..." + Environment.NewLine);
                 SetMT09_StaticColumns();
             }
             else if (logs.PacketFormat == 0x10)
             {
+                txtFeedback.AppendText("S1000RR packet format detected. Setting static columns..." + Environment.NewLine);
                 SetS1000RR_StaticColumns();
-                /*
-                combinedCols = new List<int> { 12, 13,
-                    14, 15, 16,
-                    22, 23,
-                    32, 33,
-                    // nice pattern here.
-                    42, 43, 46, 47,
-                    52, 53, 56, 57,
-                    62, 63, 66, 67,
-
-                    75, 76,
-                    83, 84,
-                    85, 86 };
-                */
             }
             else
             {
+                txtFeedback.AppendText("Unknown packet format. Clearing presumed static columns..." + Environment.NewLine);
                 this.presumedStaticColumns.Clear();
             }
 
@@ -529,146 +528,176 @@ namespace WoolichDecoder
             {
                 try
                 {
-                    analysisColumn.Add(int.Parse(txtBreakOnChange.Text));
+                    int columnNumber = int.Parse(txtBreakOnChange.Text);
+                    txtFeedback.AppendText($"Monitoring changes on column: {columnNumber}" + Environment.NewLine);
+                    analysisColumn.Add(columnNumber);
+
+                    var columnFunctions = new Dictionary<int, Func<byte[], double>>()
+            {
+                { 10, packet => WoolichConversions.getRPM(packet) },    // RPM
+                { 12, packet => WoolichConversions.getTrueTPS(packet) }, // True TPS
+                { 15, packet => WoolichConversions.getWoolichTPS(packet) }, // Woolich TPS
+                { 18, packet => WoolichConversions.getCorrectETV(packet) }, // Correct ETV
+                { 21, packet => WoolichConversions.getIAP(packet) }, // IAP
+                { 23, packet => WoolichConversions.getATMPressure(packet) }, // ATM Pressure
+                { 24, packet => WoolichConversions.getGear(packet) }, // Gear
+                { 26, packet => WoolichConversions.getEngineTemperature(packet) }, // Engine Temperature
+                { 27, packet => WoolichConversions.getInletTemperature(packet) }, // Inlet Temperature
+                { 28, packet => WoolichConversions.getInjectorDuration(packet) }, // Injector Duration
+                { 29, packet => WoolichConversions.getIgnitionOffset(packet) }, // Ignition Offset
+                { 31, packet => WoolichConversions.getSpeedo(packet) }, // Speedo
+                { 33, packet => WoolichConversions.getFrontWheelSpeed(packet) }, // Front Wheel Speed
+                { 35, packet => WoolichConversions.getRearWheelSpeed(packet) }, // Rear Wheel Speed
+                { 41, packet => WoolichConversions.getBatteryVoltage(packet) }, // Battery Voltage
+                { 42, packet => WoolichConversions.getAFR(packet) } // AFR
+            };
+
+                    if (columnFunctions.ContainsKey(columnNumber))
+                    {
+                        txtFeedback.AppendText($"Analyzing column {columnNumber}..." + Environment.NewLine);
+                        txtFeedback.Clear();
+                        lblExportPacketsCount.Text = string.Empty;
+                        exportLogs.ClearPackets();
+
+                        StringBuilder feedbackBuffer = new StringBuilder();
+                        Func<byte[], double> conversionFunction = columnFunctions[columnNumber];
+
+                        double? previousValue = null;
+                        double? minValue = null;
+                        double? maxValue = null;
+
+                        var packets = logs.GetPackets();
+                        int totalPackets = packets.Count;
+                        int processedPackets = 0;
+
+                        // Show progress bar and initialize it
+                        progressBar.Visible = true;
+                        progressLabel.Visible = true;
+                        progressBar.Value = 0;
+                        UpdateProgressLabel("Starting analysis...");
+
+                        await Task.Run(() =>
+                        {
+                            foreach (KeyValuePair<string, byte[]> packet in packets)
+                            {
+                                try
+                                {
+                                    double currentValue = conversionFunction(packet.Value);
+
+                                    if (previousValue == null)
+                                    {
+                                        minValue = currentValue;
+                                        maxValue = currentValue;
+                                        previousValue = currentValue;
+                                        feedbackBuffer.AppendLine($"Initial value in column {columnNumber}: {currentValue}");
+                                        continue;
+                                    }
+
+                                    if (currentValue > maxValue) maxValue = currentValue;
+                                    if (currentValue < minValue) minValue = currentValue;
+
+                                    if (currentValue != previousValue)
+                                    {
+                                        feedbackBuffer.AppendLine($"Column {columnNumber} changed from {previousValue} to {currentValue}");
+                                        previousValue = currentValue;
+
+                                        if (analysisColumn.Contains(columnNumber))
+                                        {
+                                            exportLogs.AddPacket(packet.Value, logs.PacketLength, logs.PacketFormat);
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    feedbackBuffer.AppendLine($"Error processing column {columnNumber}: {ex.Message}");
+                                }
+
+                                processedPackets++;
+                                int progressPercentage = (processedPackets * 100) / totalPackets;
+
+                                // Update progress bar and label
+                                this.Invoke(new Action(() =>
+                                {
+                                    progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum);
+                                    UpdateProgressLabel($"Analyzing... {progressPercentage}% completed");
+                                }));
+
+                                // Allow UI to update
+                                Application.DoEvents();
+                            }
+                        });
+
+                        feedbackBuffer.AppendLine($"Column {columnNumber} min value: {minValue}, max value: {maxValue}");
+                        txtFeedback.AppendText(feedbackBuffer.ToString());
+                    }
+                    else
+                    {
+                        txtFeedback.AppendText("Column not supported for analysis. Displaying legend..." + Environment.NewLine);
+                        DisplayLegend();
+                    }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    txtFeedback.AppendText($"Error parsing column number: {ex.Message}" + Environment.NewLine);
+                    MessageBox.Show("Wrong column number.");
                 }
             }
 
             if (logs.GetPacketCount() == 0)
             {
+                txtFeedback.AppendText("No packets in logs." + Environment.NewLine);
                 MessageBox.Show("File not open");
-            }
-
-            clearLog();
-            txtFeedback.Clear();
-            lblExportPacketsCount.Text = string.Empty;
-
-            exportLogs.ClearPackets();
-
-            for (int packetColumn = 0; packetColumn < logs.PacketLength; packetColumn++)
-            {
-                if (decodedColumns.Contains(packetColumn))
-                {
-                    log($"skipping know packet item {packetColumn}");
-                    continue;
-                }
-
-                if (knownPacketDefinitionColumns.Contains(packetColumn))
-                {
-                    log($"skipping static packet item {packetColumn}");
-                    continue;
-                }
-
-
-                int? max = 0;
-                int? min = 0;
-                // log($"processing packet {(packetColumn + 1)}");
-
-                bool first = true;
-
-                byte[] firstPacket = { };
-
-                KeyValuePair<string, byte[]> previousPacket = new KeyValuePair<string, byte[]> { };
-
-                foreach (KeyValuePair<string, byte[]> packet in logs.GetPackets())
-                {
-
-                    if (first)
-                    {
-                        if (analysisColumn.Contains(packetColumn))
-                        {
-                            exportLogs.AddPacket(packet.Value, logs.PacketLength, logs.PacketFormat);
-                        }
-                        max = min = packet.Value[packetColumn];
-                        first = false;
-                    }
-                    else
-                    {
-
-                        if (previousPacket.Value[packetColumn] != packet.Value[packetColumn])
-                        {
-                            // Our column changed.
-                            if (analysisColumn.Contains(packetColumn))
-                            {
-                                exportLogs.AddPacket(packet.Value, logs.PacketLength, logs.PacketFormat);
-                            }
-                        }
-
-                        // These range values are for our benefit and not related to the modified WRL file.
-                        if (max < packet.Value[packetColumn])
-                        {
-                            max = packet.Value[packetColumn];
-                        }
-
-                        if (min > packet.Value[packetColumn])
-                        {
-                            min = packet.Value[packetColumn];
-                        }
-                    }
-
-                    // set the current packet as previous so we have it on the next loop
-                    previousPacket = packet;
-                }
-
-                var presumedStaticColumn = presumedStaticColumns.Where(ps => ps.Column == packetColumn).FirstOrDefault();
-                // We don't think this is static
-                if (presumedStaticColumn == null)
-                {
-                    if (max == min)
-                    {
-                        log($"packet {(packetColumn)} has no variations");
-                        txtFeedback.AppendText($"presumedStaticColumns.Add(new StaticPacketColumn() {{ Column = {packetColumn}, StaticValue = {min}, File = string.Empty }});" + Environment.NewLine);
-
-                    }
-                    else
-                    {
-                        log($"packet {(packetColumn)} varies from {min} to {max}");
-                    }
-
-                }
-                else
-                {
-                    if (max == min)
-                    {
-                        if (max != presumedStaticColumn.StaticValue)
-                        {
-                            txtFeedback.AppendText($"presumed Static Column {packetColumn} contains an unexpected variation from {presumedStaticColumn.StaticValue} != {max});" + Environment.NewLine);
-                        }
-                        else
-                        {
-                            // It's static. We don't need to inform us of this.
-                            // log($"packet {(packetColumn)} has no variations");
-                        }
-                    }
-                    else
-                    {
-
-                        if (max != presumedStaticColumn.StaticValue)
-                        {
-                            txtFeedback.AppendText($"presumed Static Column {packetColumn} contains an unexpected variation from {presumedStaticColumn.StaticValue});" + Environment.NewLine);
-                        }
-                        log($"packet {(packetColumn)} varies from {min} to {max}");
-
-                    }
-                }
             }
 
             if (exportLogs.GetPacketCount() > 0)
             {
+                txtFeedback.AppendText($"Exporting {exportLogs.GetPacketCount()} packets..." + Environment.NewLine);
                 lblExportPacketsCount.Text = $"{exportLogs.GetPacketCount()}";
                 outputFileNameWithExtension = outputFileNameWithoutExtension + $"_C{txtBreakOnChange.Text.Trim()}.WRL";
                 lblExportFilename.Text = outputFileNameWithExtension;
             }
             else
             {
+                txtFeedback.AppendText("No packets to export." + Environment.NewLine);
                 lblExportPacketsCount.Text = "No packets to export.";
                 lblExportFilename.Text = "Export filename not defined";
             }
+
+            txtFeedback.AppendText("Analysis completed." + Environment.NewLine);
+
+            // Hide progress bar and reset label
+            UpdateProgressLabel("Analysis finished.");
+            System.Threading.Thread.Sleep(3000);
+            progressBar.Visible = false;
+            progressLabel.Visible = false;
+            
         }
 
+        private void DisplayLegend()
+        {
+            StringBuilder legend = new StringBuilder();
+            legend.AppendLine("Wrong column number. Available:");
+            legend.AppendLine("10: RPM");
+            legend.AppendLine("12: True TPS");
+            legend.AppendLine("15: Woolich TPS");
+            legend.AppendLine("18: Correct ETV");
+            legend.AppendLine("21: IAP");
+            legend.AppendLine("23: ATM Pressure");
+            legend.AppendLine("24: Gear");
+            legend.AppendLine("26: Engine Temperature");
+            legend.AppendLine("27: Inlet Temperature");
+            legend.AppendLine("28: Injector Duration");
+            legend.AppendLine("29: Ignition Offset");
+            legend.AppendLine("31: Speedo");
+            legend.AppendLine("33: Front Wheel Speed");
+            legend.AppendLine("35: Rear Wheel Speed");
+            legend.AppendLine("41: Battery Voltage");
+            legend.AppendLine("42: AFR");
 
+
+            txtFeedback.Clear();
+            txtFeedback.AppendText(legend.ToString());
+        }
         void log(string logData)
         {
             txtLogging.AppendText(logData + Environment.NewLine);
@@ -684,6 +713,7 @@ namespace WoolichDecoder
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
+        
         private void btnExportTargetColumn_Click(object sender, EventArgs e)
         {
             if (!IsFileLoaded())
@@ -707,148 +737,42 @@ namespace WoolichDecoder
 
             if (!string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
             {
+                string outputFileNameWithExtension = ""; 
+
                 try
                 {
                     var columnToExport = int.Parse(txtBreakOnChange.Text.Trim());
 
-                    // Trial output to file...
-                    BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create));
-                    // push to disk
-                    // binWriter.Flush();
-                    binWriter.Write(exportItem.PrimaryHeaderData);
-                    binWriter.Write(exportItem.SecondaryHeaderData);
-                    foreach (var packet in exportItem.GetPackets())
-                    {
-                        binWriter.Write(packet.Value);
-                    }
-                    binWriter.Close();
+                    
+                    outputFileNameWithExtension = outputFileNameWithoutExtension + $"_C{columnToExport}.WRL";
 
+                    
+                    using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
+                    {
+                        binWriter.Write(exportItem.PrimaryHeaderData);
+                        binWriter.Write(exportItem.SecondaryHeaderData);
+                        foreach (var packet in exportItem.GetPackets())
+                        {
+                            binWriter.Write(packet.Value);
+                        }
+                    }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    
+                    MessageBox.Show($"Error during file export: {ex.Message}");
                 }
+
+                log($"{LogPrefix.Prefix}Analysis WRL File saved as:" + Path.GetFileName(outputFileNameWithExtension));
+                //log($"{LogPrefix.Prefix}Analysis WRL File saved as: " + Environment.NewLine + outputFileNameWithExtension);
             }
+
 
         }
 
         private void cmbExportType_SelectedIndexChanged(object sender, EventArgs e)
         {
 
-        }
-
-        private void btnExportCSV_Click(object sender, EventArgs e)
-        {
-            if (!IsFileLoaded())
-                return;
-
-            WoolichMT09Log exportItem = null;
-
-            var csvFileName = outputFileNameWithoutExtension + $".csv";
-
-            // "Export Full File",
-            // "Export Analysis Only"
-            if (cmbExportType.SelectedIndex == 0)
-            {
-                // "Export Full File",
-                exportItem = logs;
-            }
-            else
-            {
-                // "Export Analysis Only"
-                exportItem = exportLogs;
-            }
-
-
-            // Show the progress bar and initialize it
-            progressBar.Visible = true;
-            progressBar.Value = 0;
-            UpdateProgressLabel("Starting export...");
-
-
-            int packetCount = exportItem.GetPacketCount();
-
-            int count = 0;
-            List<int> combinedCols = new List<int>();
-
-
-            if (exportItem.PacketFormat == 0x01)
-            {
-                SetMT09_StaticColumns();
-            }
-            else if (exportItem.PacketFormat == 0x10)
-            {
-                SetS1000RR_StaticColumns();
-                /*
-                combinedCols = new List<int> { 12, 13,
-                    14, 15, 16,
-                    22, 23,
-                    32, 33,
-                    // nice pattern here.
-                    42, 43, 46, 47,
-                    52, 53, 56, 57,
-                    62, 63, 66, 67,
-
-                    75, 76,
-                    83, 84,
-                    85, 86 };
-                */
-            }
-            else
-            {
-                this.presumedStaticColumns.Clear();
-            }
-
-
-            try
-            {
-
-                using (StreamWriter outputFile = new StreamWriter(csvFileName))
-                {
-                    string csvHeader = exportItem.GetHeader(this.presumedStaticColumns, combinedCols);
-                    outputFile.WriteLine(csvHeader);
-
-                    foreach (var packet in exportItem.GetPackets())
-                    {
-
-                        var exportLine = WoolichMT09Log.getCSV(packet.Value, packet.Key, exportItem.PacketFormat, this.presumedStaticColumns, combinedCols);
-                        outputFile.WriteLine(exportLine);
-                        outputFile.Flush();
-                        // Update progress bar and label
-                        progressLabel.Visible = true;
-                        processedPackets++;
-                        int progressPercentage = (processedPackets * 100) / totalPackets;
-                        progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum); // Ensure value is within bounds
-                        UpdateProgressLabel($"Exporting... {progressPercentage}% completed");
-
-                        // Allow the UI to update
-                        Application.DoEvents();
-
-                        count++;
-
-                        if (count > 100000 && exportItem.PacketFormat != 0x01)
-                        {
-                            // if the file format is unknown then limit the output to make excel easier to use.
-                            // break;
-                        }
-
-                    }
-                    outputFile.Close();
-                }
-                log($"{LogPrefix.Prefix}File in CSV format saved");
-                UpdateProgressLabel("Export completed successfully.");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"An error occurred: {ex.Message}");
-                UpdateProgressLabel("Error occurred during export.");
-            }
-            finally
-            {
-                // Hide the progress bar and reset label
-                progressBar.Visible = false;
-                progressLabel.Visible = false;
-                UpdateProgressLabel("Export finished.");
-            }
         }
 
         private void UpdateProgressLabel(string text)
@@ -862,222 +786,372 @@ namespace WoolichDecoder
                 progressLabel.Text = text;
             }
         }
-    }
 
 
-
-    private void btnAutoTuneExport_Click(object sender, EventArgs e)
-    {
-        if (!IsFileLoaded())
-            return;
-
-        WoolichMT09Log exportItem = logs;
-
-        if (exportItem.PacketFormat != 0x01)
+        private async void btnExportCSV_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("This bikes file cannot be adjusted by this software yet.");
-            return;
-        }
+            if (!IsFileLoaded())
+                return;
 
-        string outputFileNameWithExtension = outputFileNameWithoutExtension + $"_AT.WRL";
-        try
-        {
+            WoolichMT09Log exportItem = null;
+            var csvFileName = outputFileNameWithoutExtension + $".csv"; // Default file name
 
-            List<string> selectedFilterOptions = new List<string>();
-
-            var selectedCount = this.aTFCheckedListBox.CheckedItems.Count;
-
-            for (int i = 0; i < this.aTFCheckedListBox.CheckedItems.Count; i++)
+            // "Export Full File" (Index 0) or "Export Analysis Only" (Index 1)
+            if (cmbExportType.SelectedIndex == 0)
             {
-                selectedFilterOptions.Add(this.aTFCheckedListBox.CheckedItems[i].ToString());
+                // "Export Full File" option selected
+                exportItem = logs;
+            }
+            else
+            {
+                // "Export Analysis Only" option selected
+                exportItem = exportLogs;
+
+                // Get the column number if provided
+                if (!string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
+                {
+                    try
+                    {
+                        // Parse the column number from the text input
+                        int columnNumber = int.Parse(txtBreakOnChange.Text.Trim());
+
+                        // Modify the file name to include the column number for analysis
+                        csvFileName = outputFileNameWithoutExtension + $"_C{columnNumber}.csv";
+                    }
+                    catch (Exception ex)
+                    {
+                        // Handle parsing errors if the input is not a valid integer
+                        MessageBox.Show("Invalid column number. Please provide a valid column number for analysis.}" + ex.Message);
+                        return; // Exit function if the column number is invalid
+                    }
+                }
+                else
+                {
+                    // No column number provided, show a warning message
+                    MessageBox.Show("No column number provided for analysis.");
+                    return;
+                }
             }
 
-            // Trial output to file...
-            BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create));
-            // push to disk
-            // binWriter.Flush();
-            binWriter.Write(exportItem.PrimaryHeaderData);
-            binWriter.Write(exportItem.SecondaryHeaderData);
-            foreach (var packet in exportItem.GetPackets())
+            // Proceed with export
+            progressBar.Visible = true;
+            progressLabel.Visible = true;
+            UpdateProgressLabel("Starting export...");
+
+            // Run the export process asynchronously using Task.Run
+            await Task.Run(() =>
             {
+                int packetCount = exportItem.GetPacketCount();
+                int count = 0;
+                List<int> combinedCols = new List<int>();
 
-                // break the reference
-                byte[] exportPackets = packet.Value.ToArray();
-
-                int diff = 0;
-                // I'm going to change the approach to this... Rather than eliminate the record i'm going to make it one that woolich will filter out.
-                // The reason for this is that we may drop an AFR record for a prior record.
-                // Options are:
-                // Temperature
-                // gear
-                // clutch
-                // 0 RPM
-                // I'm choosing gear first. Lets make it 0
-                var outputGear = packet.Value.getGear();
-
-                // {
-                // 0 "MT09 ETV correction",
-                // 1 "Remove Gear 2 logs",
-                // 2 "Exclude below 1200 rpm",
-                // 3 "Remove Gear 1, 2 & 3 engine braking",
-                // 4 "Remove non launch gear 1"
-                // };
-
-
-
-                // "Remove Gear 2 logs"
-                if (outputGear == 2 && selectedFilterOptions.Contains(autoTuneFilterOptions[1]))
+                if (exportItem.PacketFormat == 0x01)
                 {
-                    // 2nd gear is just for slow speed tight corners.
-                    // 0 gear is neutral and is supposed to be filterable in autotune.
-
-                    // adjust the gear packet to make woolich autotune filter it out.
-                    byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                    diff = diff + newOutputGearByte - outputGear;
-                    outputGear = newOutputGearByte;
-                    exportPackets[24] = newOutputGearByte;
-
-                    // continue;
+                    SetMT09_StaticColumns();
+                }
+                else if (exportItem.PacketFormat == 0x10)
+                {
+                    SetS1000RR_StaticColumns();
+                }
+                else
+                {
+                    this.presumedStaticColumns.Clear();
                 }
 
-
-                // 4 "Remove non launch gear 1 - customizable"
-
-                int minRPM = int.Parse(textBox2.Text);  // Read and convert textBox2
-                int maxRPM = int.Parse(textBox3.Text);  // Read and convert textBox3
-
-                if (outputGear == 1 && (packet.Value.getRPM() < minRPM || packet.Value.getRPM() > maxRPM) && selectedFilterOptions.Contains(autoTuneFilterOptions[4]))
-
-                // 4 "Remove non launch gear 1"
-                //if (outputGear == 1 && (packet.Value.getRPM() < 1000 || packet.Value.getRPM() > 4500) && selectedFilterOptions.Contains(autoTuneFilterOptions[4]))
+                try
                 {
-                    // We don't want first gear but we do want launch RPM ranges
-                    // Exclude anything outside of the launch ranges.
+                    using (StreamWriter outputFile = new StreamWriter(csvFileName))
+                    {
+                        // Write the header
+                        string csvHeader = exportItem.GetHeader(this.presumedStaticColumns, combinedCols);
+                        outputFile.WriteLine(csvHeader);
 
-                    byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                    diff = diff + newOutputGearByte - outputGear;
-                    outputGear = newOutputGearByte;
-                    exportPackets[24] = newOutputGearByte;
+                        var packets = exportItem.GetPackets();
+                        int totalPackets = packets.Count;
+                        int processedPackets = 0;
 
+                        // Write packet data to CSV
+                        foreach (var packet in packets)
+                        {
+                            var exportLine = WoolichMT09Log.getCSV(packet.Value, packet.Key, exportItem.PacketFormat, this.presumedStaticColumns, combinedCols);
+                            outputFile.WriteLine(exportLine);
+                            outputFile.Flush();
 
+                            // Update progress bar and label
+                            processedPackets++;
+                            int progressPercentage = (processedPackets * 100) / totalPackets;
+                            Invoke(new Action(() => progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum)));
+                            Invoke(new Action(() => UpdateProgressLabel($"Exporting... {progressPercentage}% completed")));
 
-                    // continue;
+                            count++;
+
+                            // Limiting the output for non-MT09 formats if count exceeds 100,000
+                            if (count > 100000 && exportItem.PacketFormat != 0x01)
+                            {
+                                break;
+                            }
+                        }
+
+                        outputFile.Close(); // Close the file after writing is complete
+                    }
+
+                    // Log success and update UI
+                    Invoke(new Action(() => log($"{LogPrefix.Prefix}File in CSV format saved as: " + Path.GetFileName(csvFileName))));
+                    Invoke(new Action(() => UpdateProgressLabel("Export completed successfully.")));
                 }
-
-
-                // Get rid of any RPM below defined by textBox1
-
-                int rpmLimit = int.Parse(textBox1.Text);
-
-                if (outputGear != 1 && packet.Value.getRPM() <= rpmLimit && selectedFilterOptions.Contains(autoTuneFilterOptions[2]))
-
-
-                // Get rid of anything below 1200 RPM
-                // 2 "Exclude below 1200 rpm"
-                //if (outputGear != 1 && packet.Value.getRPM() <= 1200 && selectedFilterOptions.Contains(autoTuneFilterOptions[2]))
+                catch (Exception ex)
                 {
-                    // We aren't interested in below idle changes.
-
-                    byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                    diff = diff + newOutputGearByte - outputGear;
-                    outputGear = newOutputGearByte;
-                    exportPackets[24] = newOutputGearByte;
-
-                    // continue;
+                    // Handle any errors during file writing
+                    Invoke(new Action(() => MessageBox.Show($"An error occurred: {ex.Message}")));
+                    Invoke(new Action(() => UpdateProgressLabel("Error occurred during export.")));
                 }
-
-                // This one is tricky due to wooliches error in decoding the etv packet.
-                // 3 "Remove Gear 1, 2 & 3 engine braking",
-                if (packet.Value.getCorrectETV() <= 1.2 && outputGear < 4 && selectedFilterOptions.Contains(autoTuneFilterOptions[3]))
+                finally
                 {
-                    // We aren't interested closed throttle engine braking.
-
-                    byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                    diff = diff + newOutputGearByte - outputGear;
-                    outputGear = newOutputGearByte;
-                    exportPackets[24] = newOutputGearByte;
-
-                    // continue;
+                    // Hide progress bar and reset labels
+                    Invoke(new Action(() => UpdateProgressLabel("Export finished.")));
+                    System.Threading.Thread.Sleep(3000);
+                    Invoke(new Action(() => progressBar.Visible = false));
+                    Invoke(new Action(() => progressLabel.Visible = false));
+                    
                 }
-
-
-                if (selectedFilterOptions.Contains(autoTuneFilterOptions[0]))
-                {
-                    // adjust the etv packet to make woolich put it in the right place.
-                    double correctETV = exportPackets.getCorrectETV();
-                    byte hackedETVbyte = (byte)((correctETV * 1.66) + 38);
-                    diff = diff + hackedETVbyte - exportPackets[18];
-                    exportPackets[18] = hackedETVbyte;
-                }
-                exportPackets[95] += (byte)diff;
-
-                binWriter.Write(exportPackets);
-            }
-            binWriter.Close();
-            log($"{LogPrefix.Prefix}Autotune WRL File saved");
+            });
         }
-        catch
-        {
-            log($"{LogPrefix.Prefix}Autotune WRL File saving error");
 
-        }
-    }
 
-    // Utility function for testing the checksum. Not used anymore.
-    private void btnExportCRCHack_Click(object sender, EventArgs e)
-    {
-        try
+
+
+        private void btnAutoTuneExport_Click(object sender, EventArgs e)
         {
-            int size = 1000;
+            if (!IsFileLoaded())
+                return;
             WoolichMT09Log exportItem = logs;
-            var outputFileNameWithExtension = outputFileNameWithoutExtension + $"_CRC.{size}.WRL";
 
-            // Trial output to file...
-            BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create));
-            // push to disk
-            // binWriter.Flush();
-            binWriter.Write(exportItem.PrimaryHeaderData);
-            binWriter.Write(exportItem.SecondaryHeaderData);
-
-            var packets = exportItem.GetPackets().Take(size);
-
-            foreach (var packet in packets)
+            if (exportItem.PacketFormat != 0x01)
             {
-                binWriter.Write(packet.Value);
+                MessageBox.Show("This bikes file cannot be adjusted by this software yet.");
+                return;
             }
 
+            string outputFileNameWithExtension = outputFileNameWithoutExtension + $"_AT.WRL";
+            try
+            {
 
-            binWriter.Close();
+                List<string> selectedFilterOptions = new List<string>();
 
+                var selectedCount = this.aTFCheckedListBox.CheckedItems.Count;
+
+                for (int i = 0; i < this.aTFCheckedListBox.CheckedItems.Count; i++)
+                {
+                    selectedFilterOptions.Add(this.aTFCheckedListBox.CheckedItems[i].ToString());
+                }
+
+                // Trial output to file...
+                BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create));
+                // push to disk
+                // binWriter.Flush();
+                binWriter.Write(exportItem.PrimaryHeaderData);
+                binWriter.Write(exportItem.SecondaryHeaderData);
+                foreach (var packet in exportItem.GetPackets())
+                {
+
+                    // break the reference
+                    byte[] exportPackets = packet.Value.ToArray();
+
+                    int diff = 0;
+                    // I'm going to change the approach to this... Rather than eliminate the record i'm going to make it one that woolich will filter out.
+                    // The reason for this is that we may drop an AFR record for a prior record.
+                    // Options are:
+                    // Temperature
+                    // gear
+                    // clutch
+                    // 0 RPM
+                    // I'm choosing gear first. Lets make it 0
+                    var outputGear = packet.Value.getGear();
+
+                    // {
+                    // 0 "MT09 ETV correction",
+                    // 1 "Remove Gear 2 logs",
+                    // 2 "Exclude below 1200 rpm",
+                    // 3 "Remove Gear 1, 2 & 3 engine braking",
+                    // 4 "Remove non launch gear 1"
+                    // };
+
+
+
+                    // "Remove Gear 2 logs"
+                    if (outputGear == 2 && selectedFilterOptions.Contains(autoTuneFilterOptions[1]))
+                    {
+                        // 2nd gear is just for slow speed tight corners.
+                        // 0 gear is neutral and is supposed to be filterable in autotune.
+
+                        // adjust the gear packet to make woolich autotune filter it out.
+                        byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                        diff = diff + newOutputGearByte - outputGear;
+                        outputGear = newOutputGearByte;
+                        exportPackets[24] = newOutputGearByte;
+
+                        // continue;
+                    }
+
+                    // 4 "Remove non launch gear 1 - customizable"
+
+                    int minRPM = int.Parse(textBox2.Text);  // Read and convert textBox2
+                    int maxRPM = int.Parse(textBox3.Text);  // Read and convert textBox3
+
+                    if (outputGear == 1 && (packet.Value.getRPM() < minRPM || packet.Value.getRPM() > maxRPM) && selectedFilterOptions.Contains(autoTuneFilterOptions[4]))
+
+                    // 4 "Remove non launch gear 1"
+                    //if (outputGear == 1 && (packet.Value.getRPM() < 1000 || packet.Value.getRPM() > 4500) && selectedFilterOptions.Contains(autoTuneFilterOptions[4]))
+                    {
+                        // We don't want first gear but we do want launch RPM ranges
+                        // Exclude anything outside of the launch ranges.
+
+                        byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                        diff = diff + newOutputGearByte - outputGear;
+                        outputGear = newOutputGearByte;
+                        exportPackets[24] = newOutputGearByte;
+
+
+
+                        // continue;
+                    }
+
+
+                    // Get rid of any RPM below defined by textBox1
+
+                    int rpmLimit = int.Parse(textBox1.Text);
+
+                    if (outputGear != 1 && packet.Value.getRPM() <= rpmLimit && selectedFilterOptions.Contains(autoTuneFilterOptions[2]))
+
+
+                    // Get rid of anything below 1200 RPM
+                    // 2 "Exclude below 1200 rpm"
+                    //if (outputGear != 1 && packet.Value.getRPM() <= 1200 && selectedFilterOptions.Contains(autoTuneFilterOptions[2]))
+                    {
+                        // We aren't interested in below idle changes.
+
+                        byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                        diff = diff + newOutputGearByte - outputGear;
+                        outputGear = newOutputGearByte;
+                        exportPackets[24] = newOutputGearByte;
+
+                        // continue;
+                    }
+
+                    // This one is tricky due to wooliches error in decoding the etv packet.
+                    // 3 "Remove Gear 1, 2 & 3 engine braking",
+                    if (packet.Value.getCorrectETV() <= 1.2 && outputGear < 4 && selectedFilterOptions.Contains(autoTuneFilterOptions[3]))
+                    {
+                        // We aren't interested closed throttle engine braking.
+
+                        byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                        diff = diff + newOutputGearByte - outputGear;
+                        outputGear = newOutputGearByte;
+                        exportPackets[24] = newOutputGearByte;
+
+                        // continue;
+                    }
+
+
+                    if (selectedFilterOptions.Contains(autoTuneFilterOptions[0]))
+                    {
+                        // adjust the etv packet to make woolich put it in the right place.
+                        double correctETV = exportPackets.getCorrectETV();
+                        byte hackedETVbyte = (byte)((correctETV * 1.66) + 38);
+                        diff = diff + hackedETVbyte - exportPackets[18];
+                        exportPackets[18] = hackedETVbyte;
+                    }
+                    exportPackets[95] += (byte)diff;
+
+                    binWriter.Write(exportPackets);
+                }
+                binWriter.Close();
+
+
+                //log($"{LogPrefix.Prefix}Autotune WRL File saved as: " + outputFileNameWithExtension);
+                log($"{LogPrefix.Prefix}Autotune WRL File saved as: " + Path.GetFileName(outputFileNameWithExtension));
+
+            }
+            catch
+            {
+                log($"{LogPrefix.Prefix}Autotune WRL File saving error" + Environment.NewLine);
+
+            }
         }
-        catch
+
+        // Utility function for testing the checksum. Not used anymore.
+
+        private void btnExportCRCHack_Click(object sender, EventArgs e)
         {
+            if (!IsFileLoaded())
+                return;
+
+            try
+            {
+                // Get size from textBox4
+                // Attempt to parse the size from the text box. If parsing fails, show an error message and exit.
+                if (!int.TryParse(textBox4.Text.Trim(), out int size))
+                {
+                    MessageBox.Show("Invalid size. Please enter a valid number.");
+                    return;
+                }
+
+                // Generate the file name based on the size
+                // Create the file name using the size entered by the user.
+                var outputFileNameWithExtension = outputFileNameWithoutExtension + $"_CRC.{size}.WRL";
+
+                WoolichMT09Log exportItem = logs;
+
+                // Write data to a binary file
+                // Open a binary file stream for writing, and use it to save the header data and packets.
+                using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
+                {
+                    binWriter.Write(exportItem.PrimaryHeaderData);
+                    binWriter.Write(exportItem.SecondaryHeaderData);
+
+                    var packets = exportItem.GetPackets().Take(size);
+
+                    foreach (var packet in packets)
+                    {
+                        binWriter.Write(packet.Value);
+                    }
+                }
+
+                // Log information about the saved file
+                // Log the message with the name of the file that was saved, using only the file name without the path.
+                log($"{LogPrefix.Prefix}CRC saved as: " + Path.GetFileName(outputFileNameWithExtension));
+            }
+            catch (Exception ex)
+            {
+                // Log any error that occurs during the export process
+                // If an error occurs, log a message with the error details.
+                log($"Error while exporting CRC: {ex.Message}");
+            }
         }
-        log($"CRC written?");
+
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void WoolichFileDecoderForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            userSettings.LogDirectory = this.logFolder;
+
+            // save the user settings.
+            userSettings.Save();
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void aTFCheckedListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
     }
-
-    private void label2_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    private void WoolichFileDecoderForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        userSettings.LogDirectory = this.logFolder;
-
-        // save the user settings.
-        userSettings.Save();
-    }
-
-    private void label3_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    private void aTFCheckedListBox_SelectedIndexChanged(object sender, EventArgs e)
-    {
-
-    }
-
-}
 }
