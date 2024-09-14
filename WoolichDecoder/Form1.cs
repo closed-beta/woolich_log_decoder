@@ -79,11 +79,12 @@ namespace WoolichDecoder
         {
             if (string.IsNullOrEmpty(OpenFileName))
             {
-                MessageBox.Show("Please open a file first.");
+                MessageBox.Show("Please open a file first.", "File Not Loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return false;
             }
             return true;
         }
+
 
         public WoolichFileDecoderForm()
         {
@@ -713,21 +714,89 @@ namespace WoolichDecoder
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        
+
+        //private void btnExportTargetColumn_Click(object sender, EventArgs e)
+        //{
+        //    if (!IsFileLoaded())
+        //        return;
+
+        //    WoolichMT09Log exportItem = null;
+        //    // "Export Full File",
+        //    // "Export Analysis Only"
+        //    if (cmbExportType.SelectedIndex == 0)
+        //    {
+        //        // "Export Full File",
+        //        exportItem = logs;
+        //        // Error condition.
+        //        MessageBox.Show(
+        //            "Export Analysis Only is supported at the moment.",
+        //            "Export Not Supported",
+        //            MessageBoxButtons.OK,
+        //            MessageBoxIcon.Information
+        //        );
+        //    }
+        //    else
+        //    {
+        //        // "Export Analysis Only"
+        //        exportItem = exportLogs;
+        //    }
+
+        //    if (!string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
+        //    {
+        //        string outputFileNameWithExtension = ""; 
+
+        //        try
+        //        {
+        //            var columnToExport = int.Parse(txtBreakOnChange.Text.Trim());
+
+
+        //            outputFileNameWithExtension = outputFileNameWithoutExtension + $"_C{columnToExport}.WRL";
+
+
+        //            using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
+        //            {
+        //                binWriter.Write(exportItem.PrimaryHeaderData);
+        //                binWriter.Write(exportItem.SecondaryHeaderData);
+        //                foreach (var packet in exportItem.GetPackets())
+        //                {
+        //                    binWriter.Write(packet.Value);
+        //                }
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+
+        //            MessageBox.Show($"Error during file export: {ex.Message}");
+        //        }
+
+        //        log($"{LogPrefix.Prefix}Analysis WRL File saved as:" + Path.GetFileName(outputFileNameWithExtension));
+        //        //log($"{LogPrefix.Prefix}Analysis WRL File saved as: " + Environment.NewLine + outputFileNameWithExtension);
+        //    }
+
+
+        //}
+
         private void btnExportTargetColumn_Click(object sender, EventArgs e)
         {
             if (!IsFileLoaded())
                 return;
 
             WoolichMT09Log exportItem = null;
-            // "Export Full File",
-            // "Export Analysis Only"
+
+            // Check if the selected export type is supported
             if (cmbExportType.SelectedIndex == 0)
             {
-                // "Export Full File",
+                // "Export Full File"
                 exportItem = logs;
-                // Error condition.
-                MessageBox.Show("Only export of analysis is supported at the moment.");
+
+                // Inform the user that only "Export Analysis Only" is supported
+                MessageBox.Show(
+                    "Export Analysis Only is supported at the moment.",
+                    "Export Not Supported",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+                return; // Exit the method if the export type is not supported
             }
             else
             {
@@ -735,40 +804,60 @@ namespace WoolichDecoder
                 exportItem = exportLogs;
             }
 
-            if (!string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
+            // Check if there are any packets to process
+            if (exportItem == null || !exportItem.GetPackets().Any())
             {
-                string outputFileNameWithExtension = ""; 
-
-                try
-                {
-                    var columnToExport = int.Parse(txtBreakOnChange.Text.Trim());
-
-                    
-                    outputFileNameWithExtension = outputFileNameWithoutExtension + $"_C{columnToExport}.WRL";
-
-                    
-                    using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
-                    {
-                        binWriter.Write(exportItem.PrimaryHeaderData);
-                        binWriter.Write(exportItem.SecondaryHeaderData);
-                        foreach (var packet in exportItem.GetPackets())
-                        {
-                            binWriter.Write(packet.Value);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    
-                    MessageBox.Show($"Error during file export: {ex.Message}");
-                }
-
-                log($"{LogPrefix.Prefix}Analysis WRL File saved as:" + Path.GetFileName(outputFileNameWithExtension));
-                //log($"{LogPrefix.Prefix}Analysis WRL File saved as: " + Environment.NewLine + outputFileNameWithExtension);
+                // Show a message prompting the user to select and analyze data
+                MessageBox.Show(
+                    "No packets available for export.",
+                    "No Data Available",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return; // Exit the method if no packets are available
             }
 
+            // Check if a valid column number is provided
+            if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
+            {
+                // Prompt the user to enter a column number
+                MessageBox.Show(
+                    "Please enter a column number for export analysis.",
+                    "Column Number Required",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+                return; // Exit the method if no column number is provided
+            }
 
+            string outputFileNameWithExtension = "";
+
+            try
+            {
+                var columnToExport = int.Parse(txtBreakOnChange.Text.Trim());
+
+                outputFileNameWithExtension = outputFileNameWithoutExtension + $"_C{columnToExport}.WRL";
+
+                using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
+                {
+                    binWriter.Write(exportItem.PrimaryHeaderData);
+                    binWriter.Write(exportItem.SecondaryHeaderData);
+                    foreach (var packet in exportItem.GetPackets())
+                    {
+                        binWriter.Write(packet.Value);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions and provide feedback
+                MessageBox.Show($"Error during file export: {ex.Message}");
+            }
+
+            // Log the successful export
+            log($"{LogPrefix.Prefix}Analysis WRL File saved as: " + Path.GetFileName(outputFileNameWithExtension));
         }
+
 
         private void cmbExportType_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -920,166 +1009,282 @@ namespace WoolichDecoder
 
 
 
+        //private void btnAutoTuneExport_Click(object sender, EventArgs e)
+        //{
+        //    if (!IsFileLoaded())
+        //        return;
+        //    WoolichMT09Log exportItem = logs;
+
+        //    if (exportItem.PacketFormat != 0x01)
+        //    {
+        //        MessageBox.Show("This bikes file cannot be adjusted by this software yet.");
+        //        return;
+        //    }
+
+        //    string outputFileNameWithExtension = outputFileNameWithoutExtension + $"_AT.WRL";
+        //    try
+        //    {
+
+        //        List<string> selectedFilterOptions = new List<string>();
+
+        //        var selectedCount = this.aTFCheckedListBox.CheckedItems.Count;
+
+        //        for (int i = 0; i < this.aTFCheckedListBox.CheckedItems.Count; i++)
+        //        {
+        //            selectedFilterOptions.Add(this.aTFCheckedListBox.CheckedItems[i].ToString());
+        //        }
+
+        //        // Trial output to file...
+        //        BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create));
+        //        // push to disk
+        //        // binWriter.Flush();
+        //        binWriter.Write(exportItem.PrimaryHeaderData);
+        //        binWriter.Write(exportItem.SecondaryHeaderData);
+        //        foreach (var packet in exportItem.GetPackets())
+        //        {
+
+        //            // break the reference
+        //            byte[] exportPackets = packet.Value.ToArray();
+
+        //            int diff = 0;
+        //            // I'm going to change the approach to this... Rather than eliminate the record i'm going to make it one that woolich will filter out.
+        //            // The reason for this is that we may drop an AFR record for a prior record.
+        //            // Options are:
+        //            // Temperature
+        //            // gear
+        //            // clutch
+        //            // 0 RPM
+        //            // I'm choosing gear first. Lets make it 0
+        //            var outputGear = packet.Value.getGear();
+
+        //            // {
+        //            // 0 "MT09 ETV correction",
+        //            // 1 "Remove Gear 2 logs",
+        //            // 2 "Exclude below 1200 rpm",
+        //            // 3 "Remove Gear 1, 2 & 3 engine braking",
+        //            // 4 "Remove non launch gear 1"
+        //            // };
+
+
+
+        //            // "Remove Gear 2 logs"
+        //            if (outputGear == 2 && selectedFilterOptions.Contains(autoTuneFilterOptions[1]))
+        //            {
+        //                // 2nd gear is just for slow speed tight corners.
+        //                // 0 gear is neutral and is supposed to be filterable in autotune.
+
+        //                // adjust the gear packet to make woolich autotune filter it out.
+        //                byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+        //                diff = diff + newOutputGearByte - outputGear;
+        //                outputGear = newOutputGearByte;
+        //                exportPackets[24] = newOutputGearByte;
+
+        //                // continue;
+        //            }
+
+        //            // 4 "Remove non launch gear 1 - customizable"
+
+        //            int minRPM = int.Parse(textBox2.Text);  // Read and convert textBox2
+        //            int maxRPM = int.Parse(textBox3.Text);  // Read and convert textBox3
+
+        //            if (outputGear == 1 && (packet.Value.getRPM() < minRPM || packet.Value.getRPM() > maxRPM) && selectedFilterOptions.Contains(autoTuneFilterOptions[4]))
+
+        //            // 4 "Remove non launch gear 1"
+        //            //if (outputGear == 1 && (packet.Value.getRPM() < 1000 || packet.Value.getRPM() > 4500) && selectedFilterOptions.Contains(autoTuneFilterOptions[4]))
+        //            {
+        //                // We don't want first gear but we do want launch RPM ranges
+        //                // Exclude anything outside of the launch ranges.
+
+        //                byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+        //                diff = diff + newOutputGearByte - outputGear;
+        //                outputGear = newOutputGearByte;
+        //                exportPackets[24] = newOutputGearByte;
+
+
+
+        //                // continue;
+        //            }
+
+
+        //            // Get rid of any RPM below defined by textBox1
+
+        //            int rpmLimit = int.Parse(textBox1.Text);
+
+        //            if (outputGear != 1 && packet.Value.getRPM() <= rpmLimit && selectedFilterOptions.Contains(autoTuneFilterOptions[2]))
+
+
+        //            // Get rid of anything below 1200 RPM
+        //            // 2 "Exclude below 1200 rpm"
+        //            //if (outputGear != 1 && packet.Value.getRPM() <= 1200 && selectedFilterOptions.Contains(autoTuneFilterOptions[2]))
+        //            {
+        //                // We aren't interested in below idle changes.
+
+        //                byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+        //                diff = diff + newOutputGearByte - outputGear;
+        //                outputGear = newOutputGearByte;
+        //                exportPackets[24] = newOutputGearByte;
+
+        //                // continue;
+        //            }
+
+        //            // This one is tricky due to wooliches error in decoding the etv packet.
+        //            // 3 "Remove Gear 1, 2 & 3 engine braking",
+        //            if (packet.Value.getCorrectETV() <= 1.2 && outputGear < 4 && selectedFilterOptions.Contains(autoTuneFilterOptions[3]))
+        //            {
+        //                // We aren't interested closed throttle engine braking.
+
+        //                byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+        //                diff = diff + newOutputGearByte - outputGear;
+        //                outputGear = newOutputGearByte;
+        //                exportPackets[24] = newOutputGearByte;
+
+        //                // continue;
+        //            }
+
+
+        //            if (selectedFilterOptions.Contains(autoTuneFilterOptions[0]))
+        //            {
+        //                // adjust the etv packet to make woolich put it in the right place.
+        //                double correctETV = exportPackets.getCorrectETV();
+        //                byte hackedETVbyte = (byte)((correctETV * 1.66) + 38);
+        //                diff = diff + hackedETVbyte - exportPackets[18];
+        //                exportPackets[18] = hackedETVbyte;
+        //            }
+        //            exportPackets[95] += (byte)diff;
+
+        //            binWriter.Write(exportPackets);
+        //        }
+        //        binWriter.Close();
+
+
+        //        //log($"{LogPrefix.Prefix}Autotune WRL File saved as: " + outputFileNameWithExtension);
+        //        log($"{LogPrefix.Prefix}Autotune WRL File saved as: " + Path.GetFileName(outputFileNameWithExtension));
+
+        //    }
+        //    catch
+        //    {
+        //        log($"{LogPrefix.Prefix}Autotune WRL File saving error" + Environment.NewLine);
+
+        //    }
+        //}
+
+        // Utility function for testing the checksum. Not used anymore.
+
         private void btnAutoTuneExport_Click(object sender, EventArgs e)
         {
+            // Check if a file is loaded
             if (!IsFileLoaded())
+            {
+                //MessageBox.Show("File not loaded. Please open file first.");
                 return;
+            }
+
             WoolichMT09Log exportItem = logs;
 
+            // Check if the packet format is supported
             if (exportItem.PacketFormat != 0x01)
             {
                 MessageBox.Show("This bikes file cannot be adjusted by this software yet.");
                 return;
             }
 
-            string outputFileNameWithExtension = outputFileNameWithoutExtension + $"_AT.WRL";
+            // Define the filter options and their corresponding binary values
+            var filterOptionMap = new Dictionary<string, int>
+    {
+        { autoTuneFilterOptions[0], 0 }, // MT09 ETV correction
+        { autoTuneFilterOptions[1], 1 }, // Remove Gear 2 logs
+        { autoTuneFilterOptions[2], 2 }, // Exclude below 1200 rpm
+        { autoTuneFilterOptions[3], 3 }, // Remove Gear 1, 2 & 3 engine braking
+        { autoTuneFilterOptions[4], 4 }  // Remove non-launch gear 1
+    };
+
+            // Create a binary string based on selected filter options
+            char[] binaryArray = new char[5];
+            for (int i = 0; i < 5; i++)
+            {
+                string filterOption = autoTuneFilterOptions[i];
+                binaryArray[i] = this.aTFCheckedListBox.CheckedItems.Contains(filterOption) ? '1' : '0';
+            }
+
+            string binaryString = new string(binaryArray);
+            string outputFileNameWithExtension = outputFileNameWithoutExtension + $"_{binaryString}_AT.WRL"; // Correctly defined only once
+
             try
             {
-
-                List<string> selectedFilterOptions = new List<string>();
-
-                var selectedCount = this.aTFCheckedListBox.CheckedItems.Count;
-
-                for (int i = 0; i < this.aTFCheckedListBox.CheckedItems.Count; i++)
+                // Write data to the output file
+                using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
                 {
-                    selectedFilterOptions.Add(this.aTFCheckedListBox.CheckedItems[i].ToString());
+                    binWriter.Write(exportItem.PrimaryHeaderData);
+                    binWriter.Write(exportItem.SecondaryHeaderData);
+
+                    foreach (var packet in exportItem.GetPackets())
+                    {
+                        byte[] exportPackets = packet.Value.ToArray();
+                        int diff = 0;
+
+                        var outputGear = packet.Value.getGear();
+
+                        // Apply filters based on selected options
+                        if (outputGear == 2 && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[1]))
+                        {
+                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                            diff = diff + newOutputGearByte - outputGear;
+                            outputGear = newOutputGearByte;
+                            exportPackets[24] = newOutputGearByte;
+                        }
+
+                        int minRPM = int.Parse(textBox2.Text);  // Read and convert minimum RPM from textBox2
+                        int maxRPM = int.Parse(textBox3.Text);  // Read and convert maximum RPM from textBox3
+
+                        if (outputGear == 1 && (packet.Value.getRPM() < minRPM || packet.Value.getRPM() > maxRPM) && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[4]))
+                        {
+                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                            diff = diff + newOutputGearByte - outputGear;
+                            outputGear = newOutputGearByte;
+                            exportPackets[24] = newOutputGearByte;
+                        }
+
+                        int rpmLimit = int.Parse(textBox1.Text);  // Read and convert RPM limit from textBox1
+
+                        if (outputGear != 1 && packet.Value.getRPM() <= rpmLimit && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[2]))
+                        {
+                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                            diff = diff + newOutputGearByte - outputGear;
+                            outputGear = newOutputGearByte;
+                            exportPackets[24] = newOutputGearByte;
+                        }
+
+                        if (packet.Value.getCorrectETV() <= 1.2 && outputGear < 4 && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[3]))
+                        {
+                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                            diff = diff + newOutputGearByte - outputGear;
+                            outputGear = newOutputGearByte;
+                            exportPackets[24] = newOutputGearByte;
+                        }
+
+                        if (this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[0]))
+                        {
+                            double correctETV = exportPackets.getCorrectETV();
+                            byte hackedETVbyte = (byte)((correctETV * 1.66) + 38);
+                            diff = diff + hackedETVbyte - exportPackets[18];
+                            exportPackets[18] = hackedETVbyte;
+                        }
+                        exportPackets[95] += (byte)diff;
+
+                        binWriter.Write(exportPackets);
+                    }
                 }
 
-                // Trial output to file...
-                BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create));
-                // push to disk
-                // binWriter.Flush();
-                binWriter.Write(exportItem.PrimaryHeaderData);
-                binWriter.Write(exportItem.SecondaryHeaderData);
-                foreach (var packet in exportItem.GetPackets())
-                {
-
-                    // break the reference
-                    byte[] exportPackets = packet.Value.ToArray();
-
-                    int diff = 0;
-                    // I'm going to change the approach to this... Rather than eliminate the record i'm going to make it one that woolich will filter out.
-                    // The reason for this is that we may drop an AFR record for a prior record.
-                    // Options are:
-                    // Temperature
-                    // gear
-                    // clutch
-                    // 0 RPM
-                    // I'm choosing gear first. Lets make it 0
-                    var outputGear = packet.Value.getGear();
-
-                    // {
-                    // 0 "MT09 ETV correction",
-                    // 1 "Remove Gear 2 logs",
-                    // 2 "Exclude below 1200 rpm",
-                    // 3 "Remove Gear 1, 2 & 3 engine braking",
-                    // 4 "Remove non launch gear 1"
-                    // };
-
-
-
-                    // "Remove Gear 2 logs"
-                    if (outputGear == 2 && selectedFilterOptions.Contains(autoTuneFilterOptions[1]))
-                    {
-                        // 2nd gear is just for slow speed tight corners.
-                        // 0 gear is neutral and is supposed to be filterable in autotune.
-
-                        // adjust the gear packet to make woolich autotune filter it out.
-                        byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                        diff = diff + newOutputGearByte - outputGear;
-                        outputGear = newOutputGearByte;
-                        exportPackets[24] = newOutputGearByte;
-
-                        // continue;
-                    }
-
-                    // 4 "Remove non launch gear 1 - customizable"
-
-                    int minRPM = int.Parse(textBox2.Text);  // Read and convert textBox2
-                    int maxRPM = int.Parse(textBox3.Text);  // Read and convert textBox3
-
-                    if (outputGear == 1 && (packet.Value.getRPM() < minRPM || packet.Value.getRPM() > maxRPM) && selectedFilterOptions.Contains(autoTuneFilterOptions[4]))
-
-                    // 4 "Remove non launch gear 1"
-                    //if (outputGear == 1 && (packet.Value.getRPM() < 1000 || packet.Value.getRPM() > 4500) && selectedFilterOptions.Contains(autoTuneFilterOptions[4]))
-                    {
-                        // We don't want first gear but we do want launch RPM ranges
-                        // Exclude anything outside of the launch ranges.
-
-                        byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                        diff = diff + newOutputGearByte - outputGear;
-                        outputGear = newOutputGearByte;
-                        exportPackets[24] = newOutputGearByte;
-
-
-
-                        // continue;
-                    }
-
-
-                    // Get rid of any RPM below defined by textBox1
-
-                    int rpmLimit = int.Parse(textBox1.Text);
-
-                    if (outputGear != 1 && packet.Value.getRPM() <= rpmLimit && selectedFilterOptions.Contains(autoTuneFilterOptions[2]))
-
-
-                    // Get rid of anything below 1200 RPM
-                    // 2 "Exclude below 1200 rpm"
-                    //if (outputGear != 1 && packet.Value.getRPM() <= 1200 && selectedFilterOptions.Contains(autoTuneFilterOptions[2]))
-                    {
-                        // We aren't interested in below idle changes.
-
-                        byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                        diff = diff + newOutputGearByte - outputGear;
-                        outputGear = newOutputGearByte;
-                        exportPackets[24] = newOutputGearByte;
-
-                        // continue;
-                    }
-
-                    // This one is tricky due to wooliches error in decoding the etv packet.
-                    // 3 "Remove Gear 1, 2 & 3 engine braking",
-                    if (packet.Value.getCorrectETV() <= 1.2 && outputGear < 4 && selectedFilterOptions.Contains(autoTuneFilterOptions[3]))
-                    {
-                        // We aren't interested closed throttle engine braking.
-
-                        byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                        diff = diff + newOutputGearByte - outputGear;
-                        outputGear = newOutputGearByte;
-                        exportPackets[24] = newOutputGearByte;
-
-                        // continue;
-                    }
-
-
-                    if (selectedFilterOptions.Contains(autoTuneFilterOptions[0]))
-                    {
-                        // adjust the etv packet to make woolich put it in the right place.
-                        double correctETV = exportPackets.getCorrectETV();
-                        byte hackedETVbyte = (byte)((correctETV * 1.66) + 38);
-                        diff = diff + hackedETVbyte - exportPackets[18];
-                        exportPackets[18] = hackedETVbyte;
-                    }
-                    exportPackets[95] += (byte)diff;
-
-                    binWriter.Write(exportPackets);
-                }
-                binWriter.Close();
-
-
-                //log($"{LogPrefix.Prefix}Autotune WRL File saved as: " + outputFileNameWithExtension);
+                // Log success message
                 log($"{LogPrefix.Prefix}Autotune WRL File saved as: " + Path.GetFileName(outputFileNameWithExtension));
-
             }
-            catch
+            catch (Exception ex)
             {
-                log($"{LogPrefix.Prefix}Autotune WRL File saving error" + Environment.NewLine);
-
+                // Log any errors that occur during file saving
+                log($"{LogPrefix.Prefix}Autotune WRL File saving error: {ex.Message}");
             }
         }
 
-        // Utility function for testing the checksum. Not used anymore.
 
         private void btnExportCRCHack_Click(object sender, EventArgs e)
         {
