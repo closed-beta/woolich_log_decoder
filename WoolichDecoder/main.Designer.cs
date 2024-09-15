@@ -308,6 +308,7 @@
             this.txtBreakOnChange.Size = new System.Drawing.Size(48, 20);
             this.txtBreakOnChange.TabIndex = 16;
             this.txtBreakOnChange.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            txtBreakOnChange.TextChanged += TxtBreakOnChange_TextChanged;
             // 
             // btnAnalyse
             // 
