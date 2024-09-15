@@ -115,64 +115,17 @@ namespace WoolichDecoder
                 29, // ignition 
             };
 
-
             presumedStaticColumns.Clear();
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 20, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 22, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 39, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 40, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 43, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 44, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 45, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 46, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 47, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 48, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 49, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 50, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 51, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 52, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 53, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 54, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 55, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 56, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 57, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 58, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 59, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 60, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 61, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 62, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 63, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 64, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 65, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 66, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 67, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 68, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 69, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 70, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 71, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 72, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 73, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 74, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 75, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 76, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 77, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 78, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 79, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 80, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 81, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 82, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 83, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 84, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 85, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 86, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 87, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 88, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 89, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 90, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 91, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 92, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 93, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 94, StaticValue = 0, File = string.Empty });
+
+            int[] columns = new int[] { 20, 22, 39, 40, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58,
+                            59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78,
+                            79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94 };
+
+            foreach (int column in columns)
+            {
+                presumedStaticColumns.Add(new StaticPacketColumn { Column = column, StaticValue = 0, File = string.Empty });
+            }
+
         }
 
         public void SetS1000RR_StaticColumns()
@@ -182,108 +135,17 @@ namespace WoolichDecoder
 
             presumedStaticColumns.Clear();
 
+            int[] columns = new int[] { 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169,
+                            170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189,
+                            190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209,
+                            210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229,
+                            230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249,
+                            250 };
 
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 150, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 151, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 152, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 153, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 154, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 155, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 156, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 157, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 158, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 159, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 160, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 161, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 162, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 163, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 164, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 165, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 166, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 167, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 168, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 169, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 170, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 171, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 172, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 173, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 174, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 175, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 176, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 177, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 178, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 179, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 180, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 181, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 182, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 183, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 184, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 185, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 186, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 187, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 188, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 189, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 190, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 191, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 192, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 193, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 194, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 195, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 196, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 197, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 198, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 199, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 200, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 201, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 202, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 203, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 204, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 205, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 206, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 207, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 208, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 209, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 210, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 211, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 212, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 213, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 214, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 215, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 216, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 217, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 218, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 219, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 220, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 221, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 222, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 223, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 224, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 225, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 226, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 227, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 228, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 229, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 230, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 231, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 232, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 233, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 234, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 235, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 236, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 237, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 238, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 239, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 240, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 241, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 242, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 243, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 244, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 245, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 246, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 247, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 248, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 249, StaticValue = 0, File = string.Empty });
-            presumedStaticColumns.Add(new StaticPacketColumn() { Column = 250, StaticValue = 0, File = string.Empty });
+            foreach (int column in columns)
+            {
+                presumedStaticColumns.Add(new StaticPacketColumn { Column = column, StaticValue = 0, File = string.Empty });
+            }
 
         }
 
@@ -313,24 +175,19 @@ namespace WoolichDecoder
 
         }
 
+
         private void btnOpenFile_Click(object sender, EventArgs e)
         {
-
             openWRLFileDialog.Title = "Select WRL file to inspect";
+            openWRLFileDialog.InitialDirectory = string.IsNullOrWhiteSpace(openWRLFileDialog.InitialDirectory)
+                ? logFolder ?? Directory.GetCurrentDirectory()
+                : openWRLFileDialog.InitialDirectory;
 
-            if (string.IsNullOrWhiteSpace(this.openWRLFileDialog.InitialDirectory))
-            {
-
-                this.openWRLFileDialog.InitialDirectory = this.logFolder ?? Directory.GetCurrentDirectory();
-            }
-
-            this.openWRLFileDialog.Multiselect = false;
-            this.openWRLFileDialog.Filter = "WRL files (*.wrl)|*.wrl|BIN files (*.bin)|*.bin|All files (*.*)|*.*";
+            openWRLFileDialog.Multiselect = false;
+            openWRLFileDialog.Filter = "WRL files (*.wrl)|*.wrl|BIN files (*.bin)|*.bin|All files (*.*)|*.*";
 
             if (openWRLFileDialog.ShowDialog() != DialogResult.OK)
-            {
                 return;
-            };
 
             var filename = openWRLFileDialog.FileNames.FirstOrDefault();
             OpenFileName = filename;
@@ -339,124 +196,83 @@ namespace WoolichDecoder
             Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
             Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
 
-            string path = string.Empty;
-            string binOutputFileName = string.Empty;
-            string inputFileName = string.Empty;
-            if (File.Exists(filename))
+            if (!File.Exists(filename))
             {
-                this.logFolder = Path.GetDirectoryName(filename);
-                this.openWRLFileDialog.InitialDirectory = this.logFolder;
-
-                outputFileNameWithoutExtension = Path.GetDirectoryName(filename) + "\\" + Path.GetFileNameWithoutExtension(filename);
-                binOutputFileName = Path.GetDirectoryName(filename) + "\\" + Path.GetFileNameWithoutExtension(filename) + ".bin";
-                // outputFileName = Path.GetFileNameWithoutExtension(filename) + ".sql";
-                inputFileName = filename;
-
-            }
-            else
-            {
-                this.lblFileName.Text = "Error: File Not Found";
+                lblFileName.Text = "Error: File Not Found";
                 return;
             }
-            this.lblFileName.Text = System.IO.Path.GetFileName(inputFileName); // Shows only the file name
-            this.lblDirName.Text = System.IO.Path.GetDirectoryName(inputFileName); // Shows only the directory path
 
+            logFolder = Path.GetDirectoryName(filename);
+            openWRLFileDialog.InitialDirectory = logFolder;
 
-            FileStream fileStream = new FileStream(inputFileName, FileMode.Open, FileAccess.Read);
-            BinaryReader binReader = new BinaryReader(fileStream, Encoding.ASCII);
+            string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(filename) + ".bin");
+            lblFileName.Text = Path.GetFileName(filename);
+            lblDirName.Text = Path.GetDirectoryName(filename);
 
-            logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
-
-            // Search for the byte sequence 01 02 5D 01
-            byte[] searchPattern = new byte[] { 0x01, 0x02, 0x5D, 0x01 };
-            long position = FindPatternInFile(inputFileName, searchPattern);
-
-            if (position >= 0)
+            using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
+            using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
             {
-                // Append information to txtLogging
-                this.txtLogging.AppendText($"{LogPrefix.Prefix}Header marker was found at position {position} bytes." + Environment.NewLine);
+                logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
 
-                // If the pattern is found at a distance of logs.PrimaryHeaderLength + 1 bytes, skip reading the secondary header
-                if (position != logs.PrimaryHeaderLength + 1)
+                // Search for the byte sequence 01 02 5D 01
+                byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
+                long position = FindPatternInFile(filename, searchPattern);
+
+                if (position >= 0)
                 {
-                    // Read the secondary header only if the sequence is not at position logs.PrimaryHeaderLength + 1
-                    logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                    // Append information to txtLogging
+                    log($"{LogPrefix.Prefix}Header marker was found at position {position} bytes.");
 
+                    // If the pattern is found at a distance of logs.PrimaryHeaderLength + 1 bytes, skip reading the secondary header
+                    if (position != logs.PrimaryHeaderLength + 1)
+                    {
+                        // Read the secondary header only if the sequence is not at position logs.PrimaryHeaderLength + 1
+                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                    }
+                }
+                else
+                {
+                    // If the pattern is not found, read the secondary header as usual
+                    logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
                     exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
                 }
-            }
-            else
-            {
-                // If the pattern is not found, read the secondary header as usual
-                logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-            }
 
-            exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
+                exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
 
-            // Continue loading the data
-            bool eof = false;
-
-            while (!eof)
-            {
-
-                byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
-                if (packetPrefixBytes.Length < 5)
+                while (true)
                 {
-                    eof = true;
-                    continue;
+                    byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
+                    if (packetPrefixBytes.Length < 5)
+                        break;
+
+                    // It's wierd that I have to do - 2 but it works... I hope.
+                    int remainingPacketBytes = packetPrefixBytes[3] - 2;
+                    byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
+
+                    if (packetBytes.Length < remainingPacketBytes)
+                        break;
+
+                    int totalPacketLength = packetPrefixBytes[3] + 3;
+                    logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, packetPrefixBytes[4]);
                 }
 
-                // It's wierd that I have to do - 2 but it works... I hope.
-                int calculatedRemainingPacketBytes = (int)packetPrefixBytes[3] - 2;
-
-                byte[] packetBytes = binReader.ReadBytes(calculatedRemainingPacketBytes);
-                if (packetBytes.Length < calculatedRemainingPacketBytes)
-                {
-                    eof = true;
-                    continue;
-                }
-
-                int totalPacketLength = (int)packetPrefixBytes[3] + 3;
-                logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, (int)packetPrefixBytes[4]);
-
+                log($"{LogPrefix.Prefix}Data Loaded and {logs.GetPacketCount()} packets found.");
             }
 
-            this.txtLogging.AppendText($"{LogPrefix.Prefix}Data Loaded and {logs.GetPacketCount()} packets found." + Environment.NewLine);
-
-            // byte[] headerBytes = binReader.ReadBytes((int)fileStream.Length);
-            // byte[] fileBytes = System.IO.File.ReadAllBytes(fileNameWithPath_); // this also works
-
-            binReader.Close();
-            fileStream.Close();
-
-
-            // Trial output to file... This is the output cut down .bin file. 
-            fileStream = File.Open(binOutputFileName, FileMode.Create);
-            BinaryWriter binWriter = new BinaryWriter(fileStream);
-
-            // push to disk
-            binWriter.Flush();
-            foreach (KeyValuePair<string, byte[]> packet in logs.GetPackets())
+            using (var fileStream = new FileStream(binOutputFileName, FileMode.Create))
+            using (var binWriter = new BinaryWriter(fileStream))
             {
-                // byte[] outPacket = new byte[48];
-                // Array.Copy(packet, outPacket, 48);
-
-                binWriter.Write(packet.Value);
-                // binWriter.Write(outPacket);
+                foreach (var packet in logs.GetPackets())
+                {
+                    binWriter.Write(packet.Value);
+                }
             }
-            // binWriter.Write(fileBytes); // just feed it the contents verbatim
-            binWriter.Flush();
-            fileStream.Flush();
-            binWriter.Close();
-
-            fileStream.Close();
 
             string fileName = Path.GetFileName(binOutputFileName);
-            this.txtLogging.AppendText($"{LogPrefix.Prefix}BIN file created and saved as: " + fileName + Environment.NewLine);
-
+            log($"{LogPrefix.Prefix}BIN file created and saved as: {fileName}");
         }
-        // Method to search for a pattern in a file
+
         private long FindPatternInFile(string filePath, byte[] pattern)
         {
             using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
@@ -491,184 +307,192 @@ namespace WoolichDecoder
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        
+
 
 
         private async void btnAnalyse_Click(object sender, EventArgs e)
         {
             if (!IsFileLoaded())
             {
-                txtFeedback.AppendText("No file loaded." + Environment.NewLine);
+                log($"{LogPrefix.Prefix}No file loaded.");
                 return;
             }
 
-            txtFeedback.AppendText("Analysis started..." + Environment.NewLine);
+            // Start the timer
+            DateTime startTime = DateTime.Now;
+            log($"{LogPrefix.Prefix}Analysis started...");
 
-            txtFeedback.AppendText($"Packet format: {logs.PacketFormat:X}" + Environment.NewLine);
+            feedback($"{LogPrefix.Prefix}Packet format: {logs.PacketFormat:X}");
 
             if (logs.PacketFormat == 0x01)
             {
-                txtFeedback.AppendText("MT09 packet format detected. Setting static columns..." + Environment.NewLine);
+                feedback($"{LogPrefix.Prefix}MT09 packet format detected. Setting static columns...");
                 SetMT09_StaticColumns();
             }
             else if (logs.PacketFormat == 0x10)
             {
-                txtFeedback.AppendText("S1000RR packet format detected. Setting static columns..." + Environment.NewLine);
+                feedback($"{LogPrefix.Prefix}S1000RR packet format detected. Setting static columns...");
                 SetS1000RR_StaticColumns();
             }
             else
             {
-                txtFeedback.AppendText("Unknown packet format. Clearing presumed static columns..." + Environment.NewLine);
+                feedback($"{LogPrefix.Prefix}Unknown packet format. Clearing presumed static columns...");
                 this.presumedStaticColumns.Clear();
             }
+
+            // Define column functions outside the try block
+            var columnFunctions = new Dictionary<int, Func<byte[], double>>()
+    {
+        { 10, packet => WoolichConversions.getRPM(packet) },    // RPM
+        { 12, packet => WoolichConversions.getTrueTPS(packet) }, // True TPS
+        { 15, packet => WoolichConversions.getWoolichTPS(packet) }, // Woolich TPS
+        { 18, packet => WoolichConversions.getCorrectETV(packet) }, // Correct ETV
+        { 21, packet => WoolichConversions.getIAP(packet) }, // IAP
+        { 23, packet => WoolichConversions.getATMPressure(packet) }, // ATM Pressure
+        { 24, packet => WoolichConversions.getGear(packet) }, // Gear
+        { 26, packet => WoolichConversions.getEngineTemperature(packet) }, // Engine Temperature
+        { 27, packet => WoolichConversions.getInletTemperature(packet) }, // Inlet Temperature
+        { 28, packet => WoolichConversions.getInjectorDuration(packet) }, // Injector Duration
+        { 29, packet => WoolichConversions.getIgnitionOffset(packet) }, // Ignition Offset
+        { 31, packet => WoolichConversions.getSpeedo(packet) }, // Speedo
+        { 33, packet => WoolichConversions.getFrontWheelSpeed(packet) }, // Front Wheel Speed
+        { 35, packet => WoolichConversions.getRearWheelSpeed(packet) }, // Rear Wheel Speed
+        { 41, packet => WoolichConversions.getBatteryVoltage(packet) }, // Battery Voltage
+        { 42, packet => WoolichConversions.getAFR(packet) } // AFR
+    };
 
             if (!string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
             {
                 try
                 {
                     int columnNumber = int.Parse(txtBreakOnChange.Text);
-                    txtFeedback.AppendText($"Monitoring changes on column: {columnNumber}" + Environment.NewLine);
+
+                    if (!columnFunctions.ContainsKey(columnNumber))
+                    {
+                        feedback($"{LogPrefix.Prefix}Column not supported for analysis. Displaying legend...");
+                        DisplayLegend();
+                        log($"{LogPrefix.Prefix}Analysis cancelled due to invalid column number.");
+                        return;
+                    }
+
+                    feedback($"{LogPrefix.Prefix}Monitoring changes on column: {columnNumber}");
                     analysisColumn.Add(columnNumber);
 
-                    var columnFunctions = new Dictionary<int, Func<byte[], double>>()
-            {
-                { 10, packet => WoolichConversions.getRPM(packet) },    // RPM
-                { 12, packet => WoolichConversions.getTrueTPS(packet) }, // True TPS
-                { 15, packet => WoolichConversions.getWoolichTPS(packet) }, // Woolich TPS
-                { 18, packet => WoolichConversions.getCorrectETV(packet) }, // Correct ETV
-                { 21, packet => WoolichConversions.getIAP(packet) }, // IAP
-                { 23, packet => WoolichConversions.getATMPressure(packet) }, // ATM Pressure
-                { 24, packet => WoolichConversions.getGear(packet) }, // Gear
-                { 26, packet => WoolichConversions.getEngineTemperature(packet) }, // Engine Temperature
-                { 27, packet => WoolichConversions.getInletTemperature(packet) }, // Inlet Temperature
-                { 28, packet => WoolichConversions.getInjectorDuration(packet) }, // Injector Duration
-                { 29, packet => WoolichConversions.getIgnitionOffset(packet) }, // Ignition Offset
-                { 31, packet => WoolichConversions.getSpeedo(packet) }, // Speedo
-                { 33, packet => WoolichConversions.getFrontWheelSpeed(packet) }, // Front Wheel Speed
-                { 35, packet => WoolichConversions.getRearWheelSpeed(packet) }, // Rear Wheel Speed
-                { 41, packet => WoolichConversions.getBatteryVoltage(packet) }, // Battery Voltage
-                { 42, packet => WoolichConversions.getAFR(packet) } // AFR
-            };
+                    feedback($"{LogPrefix.Prefix}Analyzing column {columnNumber}...");
+                    lblExportPacketsCount.Text = string.Empty;
+                    exportLogs.ClearPackets();
 
-                    if (columnFunctions.ContainsKey(columnNumber))
+                    StringBuilder feedbackBuffer = new StringBuilder();
+                    Func<byte[], double> conversionFunction = columnFunctions[columnNumber];
+
+                    double? previousValue = null;
+                    double? minValue = null;
+                    double? maxValue = null;
+
+                    var packets = logs.GetPackets();
+                    int totalPackets = packets.Count;
+                    int processedPackets = 0;
+
+                    // Show progress bar and initialize it
+                    progressBar.Visible = true;
+                    progressLabel.Visible = true;
+                    progressBar.Value = 0;
+                    UpdateProgressLabel("Starting analysis...");
+
+                    await Task.Run(() =>
                     {
-                        txtFeedback.AppendText($"Analyzing column {columnNumber}..." + Environment.NewLine);
-                        txtFeedback.Clear();
-                        lblExportPacketsCount.Text = string.Empty;
-                        exportLogs.ClearPackets();
-
-                        StringBuilder feedbackBuffer = new StringBuilder();
-                        Func<byte[], double> conversionFunction = columnFunctions[columnNumber];
-
-                        double? previousValue = null;
-                        double? minValue = null;
-                        double? maxValue = null;
-
-                        var packets = logs.GetPackets();
-                        int totalPackets = packets.Count;
-                        int processedPackets = 0;
-
-                        // Show progress bar and initialize it
-                        progressBar.Visible = true;
-                        progressLabel.Visible = true;
-                        progressBar.Value = 0;
-                        UpdateProgressLabel("Starting analysis...");
-
-                        await Task.Run(() =>
+                        foreach (KeyValuePair<string, byte[]> packet in packets)
                         {
-                            foreach (KeyValuePair<string, byte[]> packet in packets)
+                            try
                             {
-                                try
+                                double currentValue = conversionFunction(packet.Value);
+
+                                if (previousValue == null)
                                 {
-                                    double currentValue = conversionFunction(packet.Value);
-
-                                    if (previousValue == null)
-                                    {
-                                        minValue = currentValue;
-                                        maxValue = currentValue;
-                                        previousValue = currentValue;
-                                        feedbackBuffer.AppendLine($"Initial value in column {columnNumber}: {currentValue}");
-                                        continue;
-                                    }
-
-                                    if (currentValue > maxValue) maxValue = currentValue;
-                                    if (currentValue < minValue) minValue = currentValue;
-
-                                    if (currentValue != previousValue)
-                                    {
-                                        feedbackBuffer.AppendLine($"Column {columnNumber} changed from {previousValue} to {currentValue}");
-                                        previousValue = currentValue;
-
-                                        if (analysisColumn.Contains(columnNumber))
-                                        {
-                                            exportLogs.AddPacket(packet.Value, logs.PacketLength, logs.PacketFormat);
-                                        }
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    feedbackBuffer.AppendLine($"Error processing column {columnNumber}: {ex.Message}");
+                                    minValue = currentValue;
+                                    maxValue = currentValue;
+                                    previousValue = currentValue;
+                                    feedbackBuffer.AppendLine($"Initial value in column {columnNumber}: {currentValue}");
+                                    continue;
                                 }
 
-                                processedPackets++;
-                                int progressPercentage = (processedPackets * 100) / totalPackets;
+                                if (currentValue > maxValue) maxValue = currentValue;
+                                if (currentValue < minValue) minValue = currentValue;
 
-                                // Update progress bar and label
-                                this.Invoke(new Action(() =>
+                                if (currentValue != previousValue)
                                 {
-                                    progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum);
-                                    UpdateProgressLabel($"Analyzing... {progressPercentage}% completed");
-                                }));
+                                    feedbackBuffer.AppendLine($"Column {columnNumber} changed from {previousValue} to {currentValue}");
+                                    previousValue = currentValue;
 
-                                // Allow UI to update
-                                Application.DoEvents();
+                                    if (analysisColumn.Contains(columnNumber))
+                                    {
+                                        exportLogs.AddPacket(packet.Value, logs.PacketLength, logs.PacketFormat);
+                                    }
+                                }
                             }
-                        });
+                            catch (Exception ex)
+                            {
+                                feedbackBuffer.AppendLine($"Error processing column {columnNumber}: {ex.Message}");
+                            }
 
-                        feedbackBuffer.AppendLine($"Column {columnNumber} min value: {minValue}, max value: {maxValue}");
-                        txtFeedback.AppendText(feedbackBuffer.ToString());
-                    }
-                    else
-                    {
-                        txtFeedback.AppendText("Column not supported for analysis. Displaying legend..." + Environment.NewLine);
-                        DisplayLegend();
-                    }
+                            processedPackets++;
+                            int progressPercentage = (processedPackets * 100) / totalPackets;
+
+                            // Update progress bar and label
+                            this.Invoke(new Action(() =>
+                            {
+                                progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum);
+                                UpdateProgressLabel($"Analyzing... {progressPercentage}% completed");
+                            }));
+
+                            // Allow UI to update
+                            Application.DoEvents();
+                        }
+                    });
+
+                    feedbackBuffer.AppendLine($"Column {columnNumber} min value: {minValue}, max value: {maxValue}");
+                    feedback(feedbackBuffer.ToString());
                 }
                 catch (Exception ex)
                 {
-                    txtFeedback.AppendText($"Error parsing column number: {ex.Message}" + Environment.NewLine);
+                    feedback($"{LogPrefix.Prefix}Error parsing column number: {ex.Message}");
                     MessageBox.Show("Wrong column number.");
+                    log($"{LogPrefix.Prefix}Analysis cancelled due to error: {ex.Message}");
+                    return;
                 }
+            }
+            else
+            {
+                log($"{LogPrefix.Prefix}Analysis cancelled due to empty column number.");
+                return;
             }
 
             if (logs.GetPacketCount() == 0)
             {
-                txtFeedback.AppendText("No packets in logs." + Environment.NewLine);
+                feedback($"{LogPrefix.Prefix}No packets in logs.");
                 MessageBox.Show("File not open");
+                log($"{LogPrefix.Prefix}Analysis completed with no packets found.");
+                return;
             }
 
-            if (exportLogs.GetPacketCount() > 0)
-            {
-                txtFeedback.AppendText($"Exporting {exportLogs.GetPacketCount()} packets..." + Environment.NewLine);
-                lblExportPacketsCount.Text = $"{exportLogs.GetPacketCount()}";
-                outputFileNameWithExtension = outputFileNameWithoutExtension + $"_C{txtBreakOnChange.Text.Trim()}.WRL";
-                lblExportFilename.Text = outputFileNameWithExtension;
-            }
-            else
-            {
-                txtFeedback.AppendText("No packets to export." + Environment.NewLine);
-                lblExportPacketsCount.Text = "No packets to export.";
-                lblExportFilename.Text = "Export filename not defined";
-            }
+            int exportedPacketsCount = exportLogs.GetPacketCount();
+            feedback($"{LogPrefix.Prefix}Exporting {exportedPacketsCount} packets...");
+            lblExportPacketsCount.Text = $"{exportedPacketsCount}";
+            outputFileNameWithExtension = outputFileNameWithoutExtension + $"_C{txtBreakOnChange.Text.Trim()}.WRL";
+            lblExportFilename.Text = outputFileNameWithExtension;
 
-            txtFeedback.AppendText("Analysis completed." + Environment.NewLine);
+            DateTime endTime = DateTime.Now;
+            TimeSpan duration = endTime - startTime;
+            string durationFormatted = duration.ToString(@"mm\:ss\.ff");
+
+            log($"{LogPrefix.Prefix}Analysis completed in {durationFormatted}.");
+            //log($"{LogPrefix.Prefix}Duration: {durationFormatted}" + Environment.NewLine);
 
             // Hide progress bar and reset label
             UpdateProgressLabel("Analysis finished.");
             System.Threading.Thread.Sleep(3000);
             progressBar.Visible = false;
             progressLabel.Visible = false;
-            
         }
 
         private void DisplayLegend()
@@ -694,12 +518,61 @@ namespace WoolichDecoder
 
 
             txtFeedback.Clear();
-            txtFeedback.AppendText(legend.ToString());
+            feedback(legend.ToString());
         }
-        void log(string logData)
+
+        //void log(string logData)
+        //{
+        //    txtLogging.AppendText(logData + Environment.NewLine);
+        //}
+
+
+        private void feedback(string fbData)
         {
-            txtLogging.AppendText(logData + Environment.NewLine);
+            // Get the directory path from lblDirName
+            string directoryPath = lblDirName.Text;
+
+            // Append the log data to the TextBox
+            txtFeedback.AppendText(fbData + Environment.NewLine);
+
+            // Define the path to the log file
+            string feedbackFilePath = Path.Combine(directoryPath, "feedback.txt");
+
+            try
+            {
+                // Write the log data to the file with a timestamp
+                File.AppendAllText(feedbackFilePath, $"{fbData}{Environment.NewLine}");
+            }
+            catch (Exception ex)
+            {
+                // Display an error message if there is a problem writing to the file
+                MessageBox.Show($"An error occurred while saving the log: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
+
+        private void log(string logData)
+        {
+            // Get the directory path from lblDirName
+            string directoryPath = lblDirName.Text;
+
+            // Append the log data to the TextBox
+            txtLogging.AppendText(logData + Environment.NewLine);
+
+            // Define the path to the log file
+            string logFilePath = Path.Combine(directoryPath, "log.txt");
+
+            try
+            {
+                // Write the log data to the file with a timestamp
+                File.AppendAllText(logFilePath, $"{logData}{Environment.NewLine}");
+            }
+            catch (Exception ex)
+            {
+                // Display an error message if there is a problem writing to the file
+                MessageBox.Show($"An error occurred while saving the log: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
 
         void clearLog()
         {
@@ -712,7 +585,7 @@ namespace WoolichDecoder
         /// <param name="sender"></param>
         /// <param name="e"></param>
 
-        
+
         private void btnExportTargetColumn_Click(object sender, EventArgs e)
         {
             if (!IsFileLoaded())
@@ -771,10 +644,16 @@ namespace WoolichDecoder
 
             try
             {
+                // Extract the base file name from lblFileName
+                string baseFileName = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
+
+                // Get the column number from the text box
                 var columnToExport = int.Parse(txtBreakOnChange.Text.Trim());
 
-                outputFileNameWithExtension = outputFileNameWithoutExtension + $"_C{columnToExport}.WRL";
+                // Construct the output file name
+                outputFileNameWithExtension = $"{baseFileName}_C{columnToExport}.WRL";
 
+                // Write data to a binary file
                 using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
                 {
                     binWriter.Write(exportItem.PrimaryHeaderData);
@@ -796,6 +675,7 @@ namespace WoolichDecoder
         }
 
 
+
         private void UpdateProgressLabel(string text)
         {
             if (progressLabel.InvokeRequired)
@@ -809,13 +689,34 @@ namespace WoolichDecoder
         }
 
 
+        
         private async void btnExportCSV_Click(object sender, EventArgs e)
         {
             if (!IsFileLoaded())
                 return;
 
             WoolichMT09Log exportItem = null;
-            var csvFileName = outputFileNameWithoutExtension + $".csv"; // Default file name
+
+            // Get the directory path from lblDirName
+            string directoryPath = lblDirName.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(directoryPath))
+            {
+                MessageBox.Show("Directory path is not defined.");
+                return;
+            }
+
+            // Get the file name from lblFileName and remove the extension
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
+
+            if (string.IsNullOrWhiteSpace(fileNameWithoutExtension))
+            {
+                MessageBox.Show("File name is not defined.");
+                return;
+            }
+
+            // Set the CSV file name
+            var csvFileName = Path.Combine(directoryPath, fileNameWithoutExtension + ".csv");
 
             // "Export Full File" (Index 0) or "Export Analysis Only" (Index 1)
             if (cmbExportType.SelectedIndex == 0)
@@ -837,12 +738,12 @@ namespace WoolichDecoder
                         int columnNumber = int.Parse(txtBreakOnChange.Text.Trim());
 
                         // Modify the file name to include the column number for analysis
-                        csvFileName = outputFileNameWithoutExtension + $"_C{columnNumber}.csv";
+                        csvFileName = Path.Combine(directoryPath, fileNameWithoutExtension + $"_C{columnNumber}.csv");
                     }
                     catch (Exception ex)
                     {
                         // Handle parsing errors if the input is not a valid integer
-                        MessageBox.Show("Invalid column number. Please provide a valid column number for analysis.}" + ex.Message);
+                        MessageBox.Show("Invalid column number. Please provide a valid column number for analysis. " + ex.Message);
                         return; // Exit function if the column number is invalid
                     }
                 }
@@ -850,6 +751,23 @@ namespace WoolichDecoder
                 {
                     // No column number provided, show a warning message
                     MessageBox.Show("No column number provided for analysis.");
+                    return;
+                }
+            }
+
+            // Log file name for debugging
+            Console.WriteLine($"Exporting to file: {csvFileName}");
+
+            // Check if the directory exists; if not, create it
+            if (!Directory.Exists(directoryPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to create directory: {directoryPath}. Error: {ex.Message}");
                     return;
                 }
             }
@@ -912,8 +830,6 @@ namespace WoolichDecoder
                                 break;
                             }
                         }
-
-                        outputFile.Close(); // Close the file after writing is complete
                     }
 
                     // Log success and update UI
@@ -933,11 +849,13 @@ namespace WoolichDecoder
                     System.Threading.Thread.Sleep(3000);
                     Invoke(new Action(() => progressBar.Visible = false));
                     Invoke(new Action(() => progressLabel.Visible = false));
-                    
                 }
             });
         }
-        
+
+
+
+
 
         private void btnAutoTuneExport_Click(object sender, EventArgs e)
         {
@@ -976,7 +894,12 @@ namespace WoolichDecoder
             }
 
             string binaryString = new string(binaryArray);
-            string outputFileNameWithExtension = outputFileNameWithoutExtension + $"_{binaryString}_AT.WRL"; // Correctly defined only once
+
+            // Extract the base file name from lblFileName
+            string baseFileName = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
+
+            // Create the output file name based on the extracted base file name and binary string
+            string outputFileNameWithExtension = $"{baseFileName}_{binaryString}_AT.WRL";
 
             try
             {
@@ -1054,6 +977,8 @@ namespace WoolichDecoder
             }
         }
 
+        
+
         private void btnExportCRCHack_Click(object sender, EventArgs e)
         {
             if (!IsFileLoaded())
@@ -1062,21 +987,22 @@ namespace WoolichDecoder
             try
             {
                 // Get size from textBox
-                // Attempt to parse the size from the text box. If parsing fails, show an error message and exit.
                 if (!int.TryParse(CRCsize.Text.Trim(), out int size))
                 {
                     MessageBox.Show("Invalid size. Please enter a valid number.");
                     return;
                 }
 
-                // Generate the file name based on the size
-                // Create the file name using the size entered by the user.
-                var outputFileNameWithExtension = outputFileNameWithoutExtension + $"_CRC.{size}.WRL";
+                // Extract the base file name from lblFilename (excluding any file extension)
+                string baseFileName = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
 
+                // Generate the file name based on the size
+                var outputFileNameWithExtension = $"{baseFileName}_CRC.{size}.WRL";
+
+                
                 WoolichMT09Log exportItem = logs;
 
                 // Write data to a binary file
-                // Open a binary file stream for writing, and use it to save the header data and packets.
                 using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
                 {
                     binWriter.Write(exportItem.PrimaryHeaderData);
@@ -1091,16 +1017,16 @@ namespace WoolichDecoder
                 }
 
                 // Log information about the saved file
-                // Log the message with the name of the file that was saved, using only the file name without the path.
                 log($"{LogPrefix.Prefix}CRC saved as: " + Path.GetFileName(outputFileNameWithExtension));
             }
             catch (Exception ex)
             {
                 // Log any error that occurs during the export process
-                // If an error occurs, log a message with the error details.
                 log($"Error while exporting CRC: {ex.Message}");
             }
         }
+
+
 
 
         private void WoolichFileDecoderForm_FormClosing(object sender, FormClosingEventArgs e)

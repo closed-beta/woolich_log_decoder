@@ -137,13 +137,15 @@
             // lblExportPacketsCount
             // 
             this.lblExportPacketsCount.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.lblExportPacketsCount.BackColor = System.Drawing.SystemColors.Window;
+            this.lblExportPacketsCount.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblExportPacketsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblExportPacketsCount.Location = new System.Drawing.Point(344, 47);
+            this.lblExportPacketsCount.Location = new System.Drawing.Point(368, 43);
             this.lblExportPacketsCount.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblExportPacketsCount.Name = "lblExportPacketsCount";
-            this.lblExportPacketsCount.Size = new System.Drawing.Size(109, 13);
+            this.lblExportPacketsCount.Size = new System.Drawing.Size(48, 20);
             this.lblExportPacketsCount.TabIndex = 9;
-            this.lblExportPacketsCount.Text = "No packets to export";
+            this.lblExportPacketsCount.Text = "0";
             this.lblExportPacketsCount.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblExportPacketsCount.UseMnemonic = false;
             // 
