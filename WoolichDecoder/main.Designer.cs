@@ -43,14 +43,14 @@
             this.label2 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label18 = new System.Windows.Forms.Label();
-            this.textBox4 = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.CRCsize = new System.Windows.Forms.TextBox();
             this.label16 = new System.Windows.Forms.Label();
             this.btnExportCRCHack = new System.Windows.Forms.Button();
             this.btnExportTargetColumn = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.txtBreakOnChange = new System.Windows.Forms.TextBox();
             this.btnAnalyse = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
             this.aTFCheckedListBox = new System.Windows.Forms.CheckedListBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -58,23 +58,22 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.idleRPM = new System.Windows.Forms.TextBox();
+            this.minRPM = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.label10 = new System.Windows.Forms.Label();
+            this.maxRPM = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
-            this.label15 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.progressLabel = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
             this.label19 = new System.Windows.Forms.Label();
             this.lblDirName = new System.Windows.Forms.Label();
+            this.btnSettings = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -139,7 +138,7 @@
             // 
             this.lblExportPacketsCount.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lblExportPacketsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblExportPacketsCount.Location = new System.Drawing.Point(333, 47);
+            this.lblExportPacketsCount.Location = new System.Drawing.Point(344, 47);
             this.lblExportPacketsCount.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblExportPacketsCount.Name = "lblExportPacketsCount";
             this.lblExportPacketsCount.Size = new System.Drawing.Size(109, 13);
@@ -152,7 +151,7 @@
             // 
             this.lblExportFilename.AutoSize = true;
             this.lblExportFilename.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblExportFilename.Location = new System.Drawing.Point(333, 259);
+            this.lblExportFilename.Location = new System.Drawing.Point(129, 62);
             this.lblExportFilename.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblExportFilename.Name = "lblExportFilename";
             this.lblExportFilename.Size = new System.Drawing.Size(132, 13);
@@ -162,10 +161,10 @@
             // 
             // btnExportCSV
             // 
-            this.btnExportCSV.Location = new System.Drawing.Point(351, 195);
+            this.btnExportCSV.Location = new System.Drawing.Point(349, 428);
             this.btnExportCSV.Margin = new System.Windows.Forms.Padding(2);
             this.btnExportCSV.Name = "btnExportCSV";
-            this.btnExportCSV.Size = new System.Drawing.Size(114, 21);
+            this.btnExportCSV.Size = new System.Drawing.Size(117, 21);
             this.btnExportCSV.TabIndex = 11;
             this.btnExportCSV.Text = "Export CSV";
             this.toolTip1.SetToolTip(this.btnExportCSV, "Export and save file in CSV format");
@@ -174,17 +173,17 @@
             // 
             // cmbExportType
             // 
+            this.cmbExportType.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.cmbExportType.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.cmbExportType.FormattingEnabled = true;
             this.cmbExportType.Items.AddRange(new object[] {
             "Export Full File",
             "Export Analysis Only"});
-            this.cmbExportType.Location = new System.Drawing.Point(94, 195);
+            this.cmbExportType.Location = new System.Drawing.Point(10, 428);
             this.cmbExportType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cmbExportType.Name = "cmbExportType";
-            this.cmbExportType.Size = new System.Drawing.Size(246, 21);
+            this.cmbExportType.Size = new System.Drawing.Size(333, 21);
             this.cmbExportType.TabIndex = 12;
-            this.cmbExportType.SelectedIndexChanged += new System.EventHandler(this.cmbExportType_SelectedIndexChanged);
             // 
             // btnAutoTuneExport
             // 
@@ -204,20 +203,19 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 198);
+            this.label2.Location = new System.Drawing.Point(9, 412);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(79, 13);
             this.label2.TabIndex = 15;
             this.label2.Text = "Export Type:";
-            this.label2.Click += new System.EventHandler(this.label2_Click_1);
             // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.ControlLight;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.label18);
-            this.panel1.Controls.Add(this.textBox4);
+            this.panel1.Controls.Add(this.CRCsize);
             this.panel1.Controls.Add(this.label16);
             this.panel1.Controls.Add(this.btnExportCRCHack);
             this.panel1.Controls.Add(this.btnExportTargetColumn);
@@ -225,50 +223,39 @@
             this.panel1.Controls.Add(this.txtBreakOnChange);
             this.panel1.Controls.Add(this.btnAnalyse);
             this.panel1.Controls.Add(this.lblExportPacketsCount);
-            this.panel1.Location = new System.Drawing.Point(14, 469);
+            this.panel1.Location = new System.Drawing.Point(10, 469);
             this.panel1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(451, 105);
+            this.panel1.Size = new System.Drawing.Size(455, 105);
             this.panel1.TabIndex = 16;
             // 
             // label18
             // 
             this.label18.AutoSize = true;
             this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label18.Location = new System.Drawing.Point(256, 76);
+            this.label18.Location = new System.Drawing.Point(265, 76);
             this.label18.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(60, 15);
             this.label18.TabIndex = 38;
             this.label18.Text = "CRC size:";
             // 
-            // textBox4
+            // CRCsize
             // 
-            this.textBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.textBox4.Location = new System.Drawing.Point(359, 75);
-            this.textBox4.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(48, 20);
-            this.textBox4.TabIndex = 37;
-            this.textBox4.Text = "100";
-            this.textBox4.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label3.Location = new System.Drawing.Point(13, 453);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(390, 13);
-            this.label3.TabIndex = 20;
-            this.label3.Text = "Log File Analysis Functions (To analyse a particular packet column)";
+            this.CRCsize.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.CRCsize.Location = new System.Drawing.Point(368, 75);
+            this.CRCsize.Margin = new System.Windows.Forms.Padding(2);
+            this.CRCsize.Name = "CRCsize";
+            this.CRCsize.Size = new System.Drawing.Size(48, 20);
+            this.CRCsize.TabIndex = 37;
+            this.CRCsize.Text = "100";
+            this.CRCsize.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label16
             // 
             this.label16.AutoSize = true;
             this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label16.Location = new System.Drawing.Point(256, 45);
+            this.label16.Location = new System.Drawing.Point(265, 45);
             this.label16.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(53, 15);
@@ -303,7 +290,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label1.Location = new System.Drawing.Point(254, 15);
+            this.label1.Location = new System.Drawing.Point(263, 15);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(86, 13);
@@ -313,7 +300,7 @@
             // txtBreakOnChange
             // 
             this.txtBreakOnChange.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.txtBreakOnChange.Location = new System.Drawing.Point(359, 12);
+            this.txtBreakOnChange.Location = new System.Drawing.Point(368, 12);
             this.txtBreakOnChange.Margin = new System.Windows.Forms.Padding(2);
             this.txtBreakOnChange.Name = "txtBreakOnChange";
             this.txtBreakOnChange.Size = new System.Drawing.Size(48, 20);
@@ -332,6 +319,17 @@
             this.btnAnalyse.UseVisualStyleBackColor = true;
             this.btnAnalyse.Click += new System.EventHandler(this.btnAnalyse_Click);
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label3.Location = new System.Drawing.Point(9, 453);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(390, 13);
+            this.label3.TabIndex = 20;
+            this.label3.Text = "Log File Analysis Functions (To analyse a particular packet column)";
+            // 
             // aTFCheckedListBox
             // 
             this.aTFCheckedListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
@@ -339,7 +337,7 @@
             this.aTFCheckedListBox.Location = new System.Drawing.Point(10, 108);
             this.aTFCheckedListBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.aTFCheckedListBox.Name = "aTFCheckedListBox";
-            this.aTFCheckedListBox.Size = new System.Drawing.Size(331, 79);
+            this.aTFCheckedListBox.Size = new System.Drawing.Size(335, 79);
             this.aTFCheckedListBox.TabIndex = 17;
             this.toolTip1.SetToolTip(this.aTFCheckedListBox, "Tick required settings. More information at: https://github.com/mt09sp/woolich_lo" +
         "g_decoder");
@@ -351,9 +349,9 @@
             this.label4.Location = new System.Drawing.Point(10, 90);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(162, 15);
+            this.label4.Size = new System.Drawing.Size(166, 15);
             this.label4.TabIndex = 18;
-            this.label4.Text = "Autotune export options ";
+            this.label4.Text = "Autotune export options: ";
             // 
             // label5
             // 
@@ -385,46 +383,46 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label7.Location = new System.Drawing.Point(4, 6);
+            this.label7.Location = new System.Drawing.Point(38, 6);
             this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(94, 13);
+            this.label7.Size = new System.Drawing.Size(103, 13);
             this.label7.TabIndex = 21;
-            this.label7.Text = "Filter out Idle RPM";
+            this.label7.Text = "Filter out Idle RPM <";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label8.Location = new System.Drawing.Point(4, 10);
+            this.label8.Location = new System.Drawing.Point(12, 10);
             this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(120, 13);
+            this.label8.Size = new System.Drawing.Size(129, 13);
             this.label8.TabIndex = 22;
-            this.label8.Text = "Filter out RPM in Gear 1";
+            this.label8.Text = "Filter out RPM in Gear 1 <\r\n";
             // 
-            // textBox1
+            // idleRPM
             // 
-            this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.textBox1.Location = new System.Drawing.Point(150, 3);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textBox1.MaxLength = 2000;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(55, 20);
-            this.textBox1.TabIndex = 23;
-            this.textBox1.Text = "1200";
-            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.idleRPM.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.idleRPM.Location = new System.Drawing.Point(150, 3);
+            this.idleRPM.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.idleRPM.MaxLength = 2000;
+            this.idleRPM.Name = "idleRPM";
+            this.idleRPM.Size = new System.Drawing.Size(55, 20);
+            this.idleRPM.TabIndex = 23;
+            this.idleRPM.Text = "1200";
+            this.idleRPM.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // textBox2
+            // minRPM
             // 
-            this.textBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.textBox2.Location = new System.Drawing.Point(150, 7);
-            this.textBox2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(55, 20);
-            this.textBox2.TabIndex = 24;
-            this.textBox2.Text = "1000";
-            this.textBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.minRPM.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.minRPM.Location = new System.Drawing.Point(150, 7);
+            this.minRPM.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.minRPM.Name = "minRPM";
+            this.minRPM.Size = new System.Drawing.Size(55, 20);
+            this.minRPM.TabIndex = 24;
+            this.minRPM.Text = "1000";
+            this.minRPM.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label9
             // 
@@ -437,27 +435,16 @@
             this.label9.TabIndex = 25;
             this.label9.Text = "RPM";
             // 
-            // textBox3
+            // maxRPM
             // 
-            this.textBox3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.textBox3.Location = new System.Drawing.Point(150, 33);
-            this.textBox3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(55, 20);
-            this.textBox3.TabIndex = 26;
-            this.textBox3.Text = "4500";
-            this.textBox3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label10.Location = new System.Drawing.Point(128, 10);
-            this.label10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(13, 13);
-            this.label10.TabIndex = 27;
-            this.label10.Text = "<";
+            this.maxRPM.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.maxRPM.Location = new System.Drawing.Point(150, 33);
+            this.maxRPM.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.maxRPM.Name = "maxRPM";
+            this.maxRPM.Size = new System.Drawing.Size(55, 20);
+            this.maxRPM.TabIndex = 26;
+            this.maxRPM.Text = "4500";
+            this.maxRPM.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label11
             // 
@@ -497,12 +484,11 @@
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel2.Controls.Add(this.label11);
             this.panel2.Controls.Add(this.label13);
-            this.panel2.Controls.Add(this.textBox3);
+            this.panel2.Controls.Add(this.maxRPM);
             this.panel2.Controls.Add(this.label12);
             this.panel2.Controls.Add(this.label8);
-            this.panel2.Controls.Add(this.textBox2);
-            this.panel2.Controls.Add(this.label10);
-            this.panel2.Location = new System.Drawing.Point(14, 358);
+            this.panel2.Controls.Add(this.minRPM);
+            this.panel2.Location = new System.Drawing.Point(10, 248);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(249, 63);
             this.panel2.TabIndex = 31;
@@ -510,40 +496,28 @@
             // panel3
             // 
             this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel3.Controls.Add(this.label15);
-            this.panel3.Controls.Add(this.textBox1);
+            this.panel3.Controls.Add(this.idleRPM);
             this.panel3.Controls.Add(this.label9);
             this.panel3.Controls.Add(this.label7);
-            this.panel3.Location = new System.Drawing.Point(14, 324);
+            this.panel3.Location = new System.Drawing.Point(10, 214);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(249, 28);
             this.panel3.TabIndex = 32;
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label15.Location = new System.Drawing.Point(128, 6);
-            this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(13, 13);
-            this.label15.TabIndex = 26;
-            this.label15.Text = "<";
             // 
             // label14
             // 
             this.label14.AutoSize = true;
             this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label14.Location = new System.Drawing.Point(14, 306);
+            this.label14.Location = new System.Drawing.Point(10, 196);
             this.label14.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(125, 15);
+            this.label14.Size = new System.Drawing.Size(129, 15);
             this.label14.TabIndex = 33;
-            this.label14.Text = "Additional settings";
+            this.label14.Text = "Additional settings:";
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(178, 218);
+            this.progressBar.Location = new System.Drawing.Point(559, 261);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(287, 23);
             this.progressBar.TabIndex = 34;
@@ -552,13 +526,14 @@
             // progressLabel
             // 
             this.progressLabel.AutoSize = true;
-            this.progressLabel.BackColor = System.Drawing.SystemColors.ButtonFace;
-            this.progressLabel.Location = new System.Drawing.Point(7, 218);
-            this.progressLabel.MinimumSize = new System.Drawing.Size(170, 22);
+            this.progressLabel.BackColor = System.Drawing.SystemColors.Window;
+            this.progressLabel.Location = new System.Drawing.Point(556, 242);
+            this.progressLabel.MinimumSize = new System.Drawing.Size(170, 16);
             this.progressLabel.Name = "progressLabel";
-            this.progressLabel.Size = new System.Drawing.Size(170, 22);
+            this.progressLabel.Size = new System.Drawing.Size(170, 16);
             this.progressLabel.TabIndex = 35;
             this.progressLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.progressLabel.Visible = false;
             // 
             // label17
             // 
@@ -592,13 +567,25 @@
             this.lblDirName.Size = new System.Drawing.Size(41, 13);
             this.lblDirName.TabIndex = 39;
             this.lblDirName.Text = "Current";
-            this.lblDirName.Click += new System.EventHandler(this.lblDirName_Click);
+            // 
+            // btnSettings
+            // 
+            this.btnSettings.Location = new System.Drawing.Point(126, 53);
+            this.btnSettings.Margin = new System.Windows.Forms.Padding(2);
+            this.btnSettings.Name = "btnSettings";
+            this.btnSettings.Size = new System.Drawing.Size(112, 28);
+            this.btnSettings.TabIndex = 40;
+            this.btnSettings.Text = "Settings";
+            this.toolTip1.SetToolTip(this.btnSettings, "Not working yet");
+            this.btnSettings.UseVisualStyleBackColor = true;
+            this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
             // 
             // WoolichFileDecoderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1284, 586);
+            this.Controls.Add(this.btnSettings);
             this.Controls.Add(this.lblDirName);
             this.Controls.Add(this.label19);
             this.Controls.Add(this.label3);
@@ -668,26 +655,25 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox idleRPM;
+        private System.Windows.Forms.TextBox minRPM;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TextBox maxRPM;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Label label14;
-        private System.Windows.Forms.Label label15;
         private System.Windows.Forms.ProgressBar progressBar;
         private System.Windows.Forms.Label progressLabel;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.TextBox textBox4;
+        private System.Windows.Forms.TextBox CRCsize;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.Label lblDirName;
+        private System.Windows.Forms.Button btnSettings;
     }
 }
 
