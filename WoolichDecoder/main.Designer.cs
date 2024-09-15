@@ -56,6 +56,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.btnSettings = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.idleRPM = new System.Windows.Forms.TextBox();
@@ -73,7 +74,6 @@
             this.label17 = new System.Windows.Forms.Label();
             this.label19 = new System.Windows.Forms.Label();
             this.lblDirName = new System.Windows.Forms.Label();
-            this.btnSettings = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -83,6 +83,7 @@
             // 
             this.txtLogging.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtLogging.Enabled = false;
             this.txtLogging.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.txtLogging.Location = new System.Drawing.Point(876, 58);
             this.txtLogging.Margin = new System.Windows.Forms.Padding(2);
@@ -125,6 +126,7 @@
             this.txtFeedback.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtFeedback.Enabled = false;
             this.txtFeedback.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.txtFeedback.Location = new System.Drawing.Point(471, 59);
             this.txtFeedback.Margin = new System.Windows.Forms.Padding(2);
@@ -139,6 +141,7 @@
             this.lblExportPacketsCount.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lblExportPacketsCount.BackColor = System.Drawing.SystemColors.Window;
             this.lblExportPacketsCount.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblExportPacketsCount.Enabled = false;
             this.lblExportPacketsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.lblExportPacketsCount.Location = new System.Drawing.Point(368, 43);
             this.lblExportPacketsCount.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
@@ -163,6 +166,7 @@
             // 
             // btnExportCSV
             // 
+            this.btnExportCSV.Enabled = false;
             this.btnExportCSV.Location = new System.Drawing.Point(349, 428);
             this.btnExportCSV.Margin = new System.Windows.Forms.Padding(2);
             this.btnExportCSV.Name = "btnExportCSV";
@@ -176,6 +180,7 @@
             // cmbExportType
             // 
             this.cmbExportType.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.cmbExportType.Enabled = false;
             this.cmbExportType.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.cmbExportType.FormattingEnabled = true;
             this.cmbExportType.Items.AddRange(new object[] {
@@ -191,6 +196,7 @@
             // 
             this.btnAutoTuneExport.BackColor = System.Drawing.Color.DarkSeaGreen;
             this.btnAutoTuneExport.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.btnAutoTuneExport.Enabled = false;
             this.btnAutoTuneExport.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAutoTuneExport.Location = new System.Drawing.Point(351, 108);
             this.btnAutoTuneExport.Margin = new System.Windows.Forms.Padding(2);
@@ -244,6 +250,7 @@
             // 
             // CRCsize
             // 
+            this.CRCsize.Enabled = false;
             this.CRCsize.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.CRCsize.Location = new System.Drawing.Point(368, 75);
             this.CRCsize.Margin = new System.Windows.Forms.Padding(2);
@@ -266,6 +273,7 @@
             // 
             // btnExportCRCHack
             // 
+            this.btnExportCRCHack.Enabled = false;
             this.btnExportCRCHack.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.btnExportCRCHack.Location = new System.Drawing.Point(13, 71);
             this.btnExportCRCHack.Margin = new System.Windows.Forms.Padding(2);
@@ -278,6 +286,7 @@
             // 
             // btnExportTargetColumn
             // 
+            this.btnExportTargetColumn.Enabled = false;
             this.btnExportTargetColumn.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.btnExportTargetColumn.Location = new System.Drawing.Point(13, 39);
             this.btnExportTargetColumn.Margin = new System.Windows.Forms.Padding(2);
@@ -301,6 +310,7 @@
             // 
             // txtBreakOnChange
             // 
+            this.txtBreakOnChange.Enabled = false;
             this.txtBreakOnChange.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.txtBreakOnChange.Location = new System.Drawing.Point(368, 12);
             this.txtBreakOnChange.Margin = new System.Windows.Forms.Padding(2);
@@ -312,6 +322,7 @@
             // 
             // btnAnalyse
             // 
+            this.btnAnalyse.Enabled = false;
             this.btnAnalyse.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.btnAnalyse.Location = new System.Drawing.Point(13, 7);
             this.btnAnalyse.Margin = new System.Windows.Forms.Padding(2);
@@ -335,6 +346,7 @@
             // 
             // aTFCheckedListBox
             // 
+            this.aTFCheckedListBox.Enabled = false;
             this.aTFCheckedListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.aTFCheckedListBox.FormattingEnabled = true;
             this.aTFCheckedListBox.Location = new System.Drawing.Point(10, 108);
@@ -382,6 +394,18 @@
             // 
             this.toolTip1.Tag = "";
             // 
+            // btnSettings
+            // 
+            this.btnSettings.Location = new System.Drawing.Point(126, 53);
+            this.btnSettings.Margin = new System.Windows.Forms.Padding(2);
+            this.btnSettings.Name = "btnSettings";
+            this.btnSettings.Size = new System.Drawing.Size(112, 28);
+            this.btnSettings.TabIndex = 40;
+            this.btnSettings.Text = "Settings";
+            this.toolTip1.SetToolTip(this.btnSettings, "Not working yet");
+            this.btnSettings.UseVisualStyleBackColor = true;
+            this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
+            // 
             // label7
             // 
             this.label7.AutoSize = true;
@@ -406,6 +430,7 @@
             // 
             // idleRPM
             // 
+            this.idleRPM.Enabled = false;
             this.idleRPM.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.idleRPM.Location = new System.Drawing.Point(150, 3);
             this.idleRPM.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -418,6 +443,7 @@
             // 
             // minRPM
             // 
+            this.minRPM.Enabled = false;
             this.minRPM.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.minRPM.Location = new System.Drawing.Point(150, 7);
             this.minRPM.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -440,6 +466,7 @@
             // 
             // maxRPM
             // 
+            this.maxRPM.Enabled = false;
             this.maxRPM.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.maxRPM.Location = new System.Drawing.Point(150, 33);
             this.maxRPM.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -570,18 +597,6 @@
             this.lblDirName.Size = new System.Drawing.Size(41, 13);
             this.lblDirName.TabIndex = 39;
             this.lblDirName.Text = "Current";
-            // 
-            // btnSettings
-            // 
-            this.btnSettings.Location = new System.Drawing.Point(126, 53);
-            this.btnSettings.Margin = new System.Windows.Forms.Padding(2);
-            this.btnSettings.Name = "btnSettings";
-            this.btnSettings.Size = new System.Drawing.Size(112, 28);
-            this.btnSettings.TabIndex = 40;
-            this.btnSettings.Text = "Settings";
-            this.toolTip1.SetToolTip(this.btnSettings, "Not working yet");
-            this.btnSettings.UseVisualStyleBackColor = true;
-            this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
             // 
             // WoolichFileDecoderForm
             // 

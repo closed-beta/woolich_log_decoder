@@ -197,6 +197,7 @@ namespace WoolichDecoder
             OpenFileName = filename;
             // clear any existing data
             logs.ClearPackets();
+            UpdateButtonStates();
             Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
             Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
 
@@ -342,7 +343,7 @@ namespace WoolichDecoder
                 {
                     // Display a message if the column number is empty and log it
                     MessageBox.Show("Column number is empty. Please enter a valid column number.");
-                    //log($"{LogPrefix.Prefix}Analysis cancelled due to empty column number.");
+                    DisplayLegend();
                     return;
                 }
 
@@ -506,7 +507,7 @@ namespace WoolichDecoder
          private void DisplayLegend()
         {
             StringBuilder legend = new StringBuilder();
-            legend.AppendLine("Wrong column number. Available:");
+            legend.AppendLine("Available column numbers:");
             legend.AppendLine("10: RPM");
             legend.AppendLine("12: True TPS");
             legend.AppendLine("15: Woolich TPS");
@@ -1046,5 +1047,28 @@ namespace WoolichDecoder
 
             settingsForm.ShowDialog();
         }
+
+        private void UpdateButtonStates()
+        {
+            bool isFileLoaded = IsFileLoaded();
+            btnAnalyse.Enabled = isFileLoaded;
+            btnAutoTuneExport.Enabled = isFileLoaded;
+            btnExportCRCHack.Enabled = isFileLoaded;
+            btnExportCSV.Enabled = isFileLoaded;
+            btnExportTargetColumn.Enabled = isFileLoaded;
+            cmbExportType.Enabled = isFileLoaded;
+            aTFCheckedListBox.Enabled = isFileLoaded;
+            idleRPM.Enabled = isFileLoaded;
+            minRPM.Enabled = isFileLoaded;
+            maxRPM.Enabled = isFileLoaded;
+            lblExportPacketsCount.Enabled = isFileLoaded;
+            txtBreakOnChange.Enabled = isFileLoaded;
+            CRCsize.Enabled = isFileLoaded;
+            txtFeedback.Enabled = isFileLoaded;
+            txtLogging.Enabled = isFileLoaded;
+        }
+
+
+
     }
 }
