@@ -42,6 +42,7 @@
             this.btnAutoTuneExport = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.btnMulti = new System.Windows.Forms.Button();
             this.label18 = new System.Windows.Forms.Label();
             this.CRCsize = new System.Windows.Forms.TextBox();
             this.label16 = new System.Windows.Forms.Label();
@@ -83,7 +84,6 @@
             // 
             this.txtLogging.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtLogging.Enabled = false;
             this.txtLogging.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.txtLogging.Location = new System.Drawing.Point(876, 58);
             this.txtLogging.Margin = new System.Windows.Forms.Padding(2);
@@ -126,7 +126,6 @@
             this.txtFeedback.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtFeedback.Enabled = false;
             this.txtFeedback.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.txtFeedback.Location = new System.Drawing.Point(471, 59);
             this.txtFeedback.Margin = new System.Windows.Forms.Padding(2);
@@ -143,10 +142,10 @@
             this.lblExportPacketsCount.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblExportPacketsCount.Enabled = false;
             this.lblExportPacketsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblExportPacketsCount.Location = new System.Drawing.Point(368, 43);
+            this.lblExportPacketsCount.Location = new System.Drawing.Point(360, 43);
             this.lblExportPacketsCount.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblExportPacketsCount.Name = "lblExportPacketsCount";
-            this.lblExportPacketsCount.Size = new System.Drawing.Size(48, 20);
+            this.lblExportPacketsCount.Size = new System.Drawing.Size(78, 20);
             this.lblExportPacketsCount.TabIndex = 9;
             this.lblExportPacketsCount.Text = "0";
             this.lblExportPacketsCount.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -222,6 +221,7 @@
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.ControlLight;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.btnMulti);
             this.panel1.Controls.Add(this.label18);
             this.panel1.Controls.Add(this.CRCsize);
             this.panel1.Controls.Add(this.label16);
@@ -237,11 +237,24 @@
             this.panel1.Size = new System.Drawing.Size(455, 105);
             this.panel1.TabIndex = 16;
             // 
+            // btnMulti
+            // 
+            this.btnMulti.Enabled = false;
+            this.btnMulti.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.btnMulti.Location = new System.Drawing.Point(254, 7);
+            this.btnMulti.Margin = new System.Windows.Forms.Padding(2);
+            this.btnMulti.Name = "btnMulti";
+            this.btnMulti.Size = new System.Drawing.Size(27, 28);
+            this.btnMulti.TabIndex = 39;
+            this.btnMulti.Text = "M";
+            this.btnMulti.UseVisualStyleBackColor = true;
+            this.btnMulti.Click += new System.EventHandler(this.btnMultiAnalyse_Click);
+            // 
             // label18
             // 
             this.label18.AutoSize = true;
             this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label18.Location = new System.Drawing.Point(265, 76);
+            this.label18.Location = new System.Drawing.Point(287, 76);
             this.label18.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(60, 15);
@@ -252,7 +265,7 @@
             // 
             this.CRCsize.Enabled = false;
             this.CRCsize.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.CRCsize.Location = new System.Drawing.Point(368, 75);
+            this.CRCsize.Location = new System.Drawing.Point(390, 75);
             this.CRCsize.Margin = new System.Windows.Forms.Padding(2);
             this.CRCsize.Name = "CRCsize";
             this.CRCsize.Size = new System.Drawing.Size(48, 20);
@@ -264,7 +277,7 @@
             // 
             this.label16.AutoSize = true;
             this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label16.Location = new System.Drawing.Point(265, 45);
+            this.label16.Location = new System.Drawing.Point(287, 45);
             this.label16.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(53, 15);
@@ -301,7 +314,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label1.Location = new System.Drawing.Point(263, 15);
+            this.label1.Location = new System.Drawing.Point(285, 15);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(86, 13);
@@ -312,13 +325,13 @@
             // 
             this.txtBreakOnChange.Enabled = false;
             this.txtBreakOnChange.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.txtBreakOnChange.Location = new System.Drawing.Point(368, 12);
+            this.txtBreakOnChange.Location = new System.Drawing.Point(390, 12);
             this.txtBreakOnChange.Margin = new System.Windows.Forms.Padding(2);
             this.txtBreakOnChange.Name = "txtBreakOnChange";
             this.txtBreakOnChange.Size = new System.Drawing.Size(48, 20);
             this.txtBreakOnChange.TabIndex = 16;
+            this.txtBreakOnChange.Text = "35";
             this.txtBreakOnChange.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            txtBreakOnChange.TextChanged += TxtBreakOnChange_TextChanged;
             // 
             // btnAnalyse
             // 
@@ -594,9 +607,9 @@
             this.lblDirName.Location = new System.Drawing.Point(119, 11);
             this.lblDirName.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblDirName.Name = "lblDirName";
-            this.lblDirName.Size = new System.Drawing.Size(41, 13);
+            this.lblDirName.Size = new System.Drawing.Size(33, 13);
             this.lblDirName.TabIndex = 39;
-            this.lblDirName.Text = "Current";
+            this.lblDirName.Text = "None";
             // 
             // WoolichFileDecoderForm
             // 
@@ -692,6 +705,7 @@
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.Label lblDirName;
         private System.Windows.Forms.Button btnSettings;
+        private System.Windows.Forms.Button btnMulti;
     }
 }
 

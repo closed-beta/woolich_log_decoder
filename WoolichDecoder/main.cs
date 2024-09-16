@@ -504,7 +504,7 @@ namespace WoolichDecoder
                 progressLabel.Visible = false; // Hide progress UI elements
             }
 
-         private void DisplayLegend()
+        private void DisplayLegend()
         {
             StringBuilder legend = new StringBuilder();
             legend.AppendLine("Available column numbers:");
@@ -1066,7 +1066,272 @@ namespace WoolichDecoder
             CRCsize.Enabled = isFileLoaded;
             txtFeedback.Enabled = isFileLoaded;
             txtLogging.Enabled = isFileLoaded;
+            btnMulti.Enabled = isFileLoaded;
         }
+
+        private void ConvertWRLToBIN(string wrlFileName, string binFileName)
+        {
+            try
+            {
+                using (var fileStream = new FileStream(wrlFileName, FileMode.Open, FileAccess.Read))
+                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
+                using (var binFileStream = new FileStream(binFileName, FileMode.Create))
+                using (var binWriter = new BinaryWriter(binFileStream))
+                {
+                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
+
+                    // Search for the byte sequence 01 02 5D 01
+                    byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
+                    long position = FindPatternInFile(wrlFileName, searchPattern);
+
+                    if (position >= 0)
+                    {
+                        log($"{LogPrefix.Prefix}Header marker was found at position {position} bytes.");
+
+                        if (position != logs.PrimaryHeaderLength + 1)
+                        {
+                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                        }
+                    }
+                    else
+                    {
+                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                    }
+
+                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
+
+                    while (true)
+                    {
+                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
+                        if (packetPrefixBytes.Length < logs.PacketPrefixLength)
+                            break;
+
+                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
+                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
+
+                        if (packetBytes.Length < remainingPacketBytes)
+                            break;
+
+                        int totalPacketLength = packetPrefixBytes[3] + 3;
+                        byte[] packet = packetPrefixBytes.Concat(packetBytes).ToArray();
+
+                        binWriter.Write(packet);
+                    }
+
+                    //log($"{LogPrefix.Prefix}BIN file created and saved as: {binFileName}");
+
+                    var directoryInfo = new DirectoryInfo(Path.GetDirectoryName(binFileName));
+  
+                    string lastTwoDirs = directoryInfo.Parent != null
+                                         ? Path.Combine(directoryInfo.Parent.Name, directoryInfo.Name)
+                                         : directoryInfo.Name; 
+
+                    string formattedPath = Path.Combine(lastTwoDirs, Path.GetFileName(binFileName));
+                  
+                    log($"{LogPrefix.Prefix}BIN file saved: {formattedPath}");
+
+                }
+            }
+            catch (Exception ex)
+            {
+                feedback($"Error converting file {wrlFileName} to BIN: {ex.Message}");
+            }
+        }
+  
+        private async void btnMultiAnalyse_Click(object sender, EventArgs e)
+        {
+            // Check if the textbox contains a valid column number
+            if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
+            {
+                feedback("Column number is empty. Please enter a valid column number.");
+                return;
+            }
+
+            int columnNumber;
+            try
+            {
+                // Try to parse the textbox input as an integer
+                columnNumber = int.Parse(txtBreakOnChange.Text);
+            }
+            catch (Exception ex)
+            {
+                feedback($"Invalid column number. Please enter a valid number. Error: {ex.Message}");
+                return;
+            }
+
+            // Mapping of column numbers to corresponding analysis functions and column names
+            var columnFunctions = new Dictionary<int, (Func<byte[], double>, string)>()
+    {
+        { 10, (packet => WoolichConversions.getRPM(packet), "RPM") },    // RPM
+        { 12, (packet => WoolichConversions.getTrueTPS(packet), "True TPS") }, // True TPS
+        { 15, (packet => WoolichConversions.getWoolichTPS(packet), "Woolich TPS") }, // Woolich TPS
+        { 18, (packet => WoolichConversions.getCorrectETV(packet), "Correct ETV") }, // Correct ETV
+        { 21, (packet => WoolichConversions.getIAP(packet), "IAP") }, // IAP
+        { 23, (packet => WoolichConversions.getATMPressure(packet), "ATM Pressure") }, // ATM Pressure
+        { 24, (packet => WoolichConversions.getGear(packet), "Gear") }, // Gear
+        { 26, (packet => WoolichConversions.getEngineTemperature(packet), "Engine Temperature") }, // Engine Temperature
+        { 27, (packet => WoolichConversions.getInletTemperature(packet), "Inlet Temperature") }, // Inlet Temperature
+        { 28, (packet => WoolichConversions.getInjectorDuration(packet), "Injector Duration") }, // Injector Duration
+        { 29, (packet => WoolichConversions.getIgnitionOffset(packet), "Ignition Offset") }, // Ignition Offset
+        { 31, (packet => WoolichConversions.getSpeedo(packet), "Speedo") }, // Speedo
+        { 33, (packet => WoolichConversions.getFrontWheelSpeed(packet), "Front Wheel Speed") }, // Front Wheel Speed
+        { 35, (packet => WoolichConversions.getRearWheelSpeed(packet), "Rear Wheel Speed") }, // Rear Wheel Speed
+        { 41, (packet => WoolichConversions.getBatteryVoltage(packet), "Battery Voltage") }, // Battery Voltage
+        { 42, (packet => WoolichConversions.getAFR(packet), "AFR") } // AFR
+    };
+
+            // Check if the column number is supported in the analysis
+            if (!columnFunctions.ContainsKey(columnNumber))
+            {
+                feedback("Unsupported column number. Please enter a valid column number.");
+                return;
+            }
+
+            // Open folder dialog
+            using (var folderDialog = new FolderBrowserDialog())
+            {
+                if (folderDialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                string folderPath = folderDialog.SelectedPath;
+
+                // Update lblDirName with the selected folder path
+                lblDirName.Text = folderPath;
+
+                // Get WRL files and prepare BIN files list
+                var wrlFiles = Directory.GetFiles(folderPath, "*.wrl", SearchOption.AllDirectories);
+                var binFiles = new List<string>();
+
+                // Convert WRL to BIN files
+                foreach (var wrlFile in wrlFiles)
+                {
+                    string binFile = Path.Combine(Path.GetDirectoryName(wrlFile), Path.GetFileNameWithoutExtension(wrlFile) + ".bin");
+                    ConvertWRLToBIN(wrlFile, binFile);
+                    binFiles.Add(binFile);
+                }
+
+                // Check if any BIN files are found
+                if (binFiles.Count == 0)
+                {
+                    feedback("No BIN files found in the selected folder.");
+                    return;
+                }
+
+                // Prepare for analysis
+                var results = new List<(string FileName, double MaxValue)>();
+                var (conversionFunction, columnName) = columnFunctions[columnNumber];
+
+                // Initialize progress variables
+                int totalFiles = binFiles.Count;
+                int processedFiles = 0;
+
+                // Show the progress bar and initialize it
+                progressBar.Visible = true;
+                progressLabel.Visible = true;
+                progressBar.Value = 0;
+                UpdateProgressLabel("Starting analysis...");
+
+                // Run the analysis in a separate task to avoid blocking the UI
+                await Task.Run(() =>
+                {
+                    foreach (var binFile in binFiles)
+                    {
+                        double? maxValue = null;
+
+                        try
+                        {
+                            using (var fileStream = new FileStream(binFile, FileMode.Open, FileAccess.Read))
+                            using (var binReader = new BinaryReader(fileStream))
+                            {
+                                while (fileStream.Position < fileStream.Length)
+                                {
+                                    byte[] packet = binReader.ReadBytes(logs.PacketLength);
+                                    if (packet.Length == logs.PacketLength)
+                                    {
+                                        double currentValue = conversionFunction(packet);
+
+                                        // Update max value as the analysis proceeds
+                                        if (maxValue == null || currentValue > maxValue)
+                                        {
+                                            maxValue = currentValue;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Collect the result for this file
+                            if (maxValue.HasValue)
+                            {
+                                var directoryInfo = new DirectoryInfo(Path.GetDirectoryName(binFile));
+                                var lastTwoDirs = Path.Combine(directoryInfo.Parent.Name, directoryInfo.Name);
+                                results.Add((Path.Combine(lastTwoDirs, Path.GetFileName(binFile)), maxValue.Value));
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // Optionally handle errors per file
+                            feedback($"Error processing file {binFile}: {ex.Message}");
+                        }
+
+                        // Update the progress of the analysis
+                        processedFiles++;
+                        int progressPercentage = (processedFiles * 100) / totalFiles;
+
+                        // Update progress bar and label in the UI
+                        this.Invoke(new Action(() =>
+                        {
+                            progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum);
+                            UpdateProgressLabel($"Analyzing... {progressPercentage}% completed");
+                        }));
+
+                        // Allow the UI to update during the analysis loop
+                        Application.DoEvents();
+                    }
+                });
+
+                // Sort the results from max to min
+                var sortedResults = results.OrderByDescending(r => r.MaxValue).ToList();
+
+                // Once analysis is completed, output results in the desired format
+                if (sortedResults.Count > 0)
+                {
+                    var resultText = $"{Environment.NewLine}Found max {columnName}:{Environment.NewLine}" +
+                                     string.Join(Environment.NewLine, sortedResults.Select(r => $"{r.FileName.Replace('\\', '/')} - {r.MaxValue}"));
+                    feedback(resultText);
+                }
+                else
+                {
+                    feedback("No results found.");
+                }
+
+                // Finalize and log completion of the analysis
+                UpdateProgressLabel("Analysis finished.");
+                System.Threading.Thread.Sleep(3000); // Allow time for user to see completion status
+                progressBar.Visible = false;
+                progressLabel.Visible = false; // Hide progress UI elements
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
