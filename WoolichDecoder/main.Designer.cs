@@ -332,6 +332,7 @@
             this.txtBreakOnChange.TabIndex = 16;
             this.txtBreakOnChange.Text = "35";
             this.txtBreakOnChange.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtBreakOnChange.TextChanged += new System.EventHandler(this.TxtBreakOnChange_TextChanged);
             // 
             // btnAnalyse
             // 
