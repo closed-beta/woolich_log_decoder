@@ -38,6 +38,9 @@ namespace WoolichDecoder.Models
 
         Dictionary<string, byte[]> logData = new Dictionary<string, byte[]>();
 
+
+
+
         public int AddPacket(byte[] packet, int totalPacketLength, int packetFormat)
         {
             this.PacketLength = totalPacketLength;
@@ -96,6 +99,8 @@ namespace WoolichDecoder.Models
             Array.Clear(PrimaryHeaderData, 0, PrimaryHeaderData.Length);
             Array.Clear(SecondaryHeaderData, 0, SecondaryHeaderData.Length);
         }
+
+
 
         public string GetHeader(List<StaticPacketColumn> staticPacketColumns, List<int> combinedCols)
         {

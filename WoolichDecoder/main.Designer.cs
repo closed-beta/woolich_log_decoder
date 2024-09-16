@@ -415,10 +415,10 @@
             this.btnSettings.Name = "btnSettings";
             this.btnSettings.Size = new System.Drawing.Size(112, 28);
             this.btnSettings.TabIndex = 40;
-            this.btnSettings.Text = "Settings";
+            this.btnSettings.Text = "Repair";
             this.toolTip1.SetToolTip(this.btnSettings, "Not working yet");
             this.btnSettings.UseVisualStyleBackColor = true;
-            this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
+            this.btnSettings.Click += new System.EventHandler(this.btnRepairWRLFile_Click);
             // 
             // label7
             // 
