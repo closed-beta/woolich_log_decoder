@@ -57,7 +57,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.btnSettings = new System.Windows.Forms.Button();
+            this.btnRepair = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.idleRPM = new System.Windows.Forms.TextBox();
@@ -247,6 +247,7 @@
             this.btnMulti.Size = new System.Drawing.Size(27, 28);
             this.btnMulti.TabIndex = 39;
             this.btnMulti.Text = "M";
+            this.toolTip1.SetToolTip(this.btnMulti, "Find Max values in column for all WRL in folder");
             this.btnMulti.UseVisualStyleBackColor = true;
             this.btnMulti.Click += new System.EventHandler(this.btnMultiAnalyse_Click);
             // 
@@ -408,17 +409,17 @@
             // 
             this.toolTip1.Tag = "";
             // 
-            // btnSettings
+            // btnRepair
             // 
-            this.btnSettings.Location = new System.Drawing.Point(126, 53);
-            this.btnSettings.Margin = new System.Windows.Forms.Padding(2);
-            this.btnSettings.Name = "btnSettings";
-            this.btnSettings.Size = new System.Drawing.Size(112, 28);
-            this.btnSettings.TabIndex = 40;
-            this.btnSettings.Text = "Repair";
-            this.toolTip1.SetToolTip(this.btnSettings, "Not working yet");
-            this.btnSettings.UseVisualStyleBackColor = true;
-            this.btnSettings.Click += new System.EventHandler(this.btnRepairWRLFile_Click);
+            this.btnRepair.Location = new System.Drawing.Point(126, 53);
+            this.btnRepair.Margin = new System.Windows.Forms.Padding(2);
+            this.btnRepair.Name = "btnRepair";
+            this.btnRepair.Size = new System.Drawing.Size(112, 28);
+            this.btnRepair.TabIndex = 40;
+            this.btnRepair.Text = "Repair";
+            this.toolTip1.SetToolTip(this.btnRepair, "Repair corrupted WRL ");
+            this.btnRepair.UseVisualStyleBackColor = true;
+            this.btnRepair.Click += new System.EventHandler(this.btnRepairWRLFile_Click);
             // 
             // label7
             // 
@@ -617,7 +618,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1284, 586);
-            this.Controls.Add(this.btnSettings);
+            this.Controls.Add(this.btnRepair);
             this.Controls.Add(this.lblDirName);
             this.Controls.Add(this.label19);
             this.Controls.Add(this.label3);
@@ -705,7 +706,7 @@
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.Label lblDirName;
-        private System.Windows.Forms.Button btnSettings;
+        private System.Windows.Forms.Button btnRepair;
         private System.Windows.Forms.Button btnMulti;
     }
 }
