@@ -75,6 +75,8 @@
             this.label17 = new System.Windows.Forms.Label();
             this.label19 = new System.Windows.Forms.Label();
             this.lblDirName = new System.Windows.Forms.Label();
+            this.lblLogsLocation = new System.Windows.Forms.Label();
+            this.cmbLogsLocation = new System.Windows.Forms.ComboBox();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -185,10 +187,10 @@
             this.cmbExportType.Items.AddRange(new object[] {
             "Export Full File",
             "Export Analysis Only"});
-            this.cmbExportType.Location = new System.Drawing.Point(10, 428);
+            this.cmbExportType.Location = new System.Drawing.Point(178, 428);
             this.cmbExportType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cmbExportType.Name = "cmbExportType";
-            this.cmbExportType.Size = new System.Drawing.Size(333, 21);
+            this.cmbExportType.Size = new System.Drawing.Size(165, 21);
             this.cmbExportType.TabIndex = 12;
             // 
             // btnAutoTuneExport
@@ -210,12 +212,13 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 412);
+            this.label2.Location = new System.Drawing.Point(176, 412);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(79, 13);
             this.label2.TabIndex = 15;
             this.label2.Text = "Export Type:";
+            this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // panel1
             // 
@@ -613,11 +616,39 @@
             this.lblDirName.TabIndex = 39;
             this.lblDirName.Text = "None";
             // 
+            // lblLogsLocation
+            // 
+            this.lblLogsLocation.AutoSize = true;
+            this.lblLogsLocation.Location = new System.Drawing.Point(9, 412);
+            this.lblLogsLocation.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblLogsLocation.Name = "lblLogsLocation";
+            this.lblLogsLocation.Size = new System.Drawing.Size(87, 13);
+            this.lblLogsLocation.TabIndex = 41;
+            this.lblLogsLocation.Text = "Logs location:";
+            // 
+            // cmbLogsLocation
+            // 
+            this.cmbLogsLocation.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.cmbLogsLocation.Enabled = false;
+            this.cmbLogsLocation.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.cmbLogsLocation.FormattingEnabled = true;
+            this.cmbLogsLocation.Items.AddRange(new object[] {
+            "Current",
+            "Work Directory"});
+            this.cmbLogsLocation.Location = new System.Drawing.Point(10, 428);
+            this.cmbLogsLocation.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.cmbLogsLocation.Name = "cmbLogsLocation";
+            this.cmbLogsLocation.Size = new System.Drawing.Size(166, 21);
+            this.cmbLogsLocation.TabIndex = 42;
+            this.cmbLogsLocation.SelectedIndex = 0;
+            // 
             // WoolichFileDecoderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1284, 586);
+            this.Controls.Add(this.cmbLogsLocation);
+            this.Controls.Add(this.lblLogsLocation);
             this.Controls.Add(this.btnRepair);
             this.Controls.Add(this.lblDirName);
             this.Controls.Add(this.label19);
@@ -708,6 +739,8 @@
         private System.Windows.Forms.Label lblDirName;
         private System.Windows.Forms.Button btnRepair;
         private System.Windows.Forms.Button btnMulti;
+        private System.Windows.Forms.Label lblLogsLocation;
+        private System.Windows.Forms.ComboBox cmbLogsLocation;
     }
 }
 

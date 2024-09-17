@@ -667,17 +667,117 @@ namespace WoolichDecoder
             feedback(legend.ToString());
         }
 
+        //private void feedback(string fbData)
+        //{
+        //    // Ensure lblDirName.Text is not null and not empty
+        //    string directoryPath = !string.IsNullOrEmpty(lblDirName.Text)
+        //                            ? lblDirName.Text
+        //                            : AppDomain.CurrentDomain.BaseDirectory;
+
+        //    // Ensure directory path exists
+        //    if (!Directory.Exists(directoryPath))
+        //    {
+        //        // Try to create the directory if it doesn't exist
+        //        try
+        //        {
+        //            Directory.CreateDirectory(directoryPath);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            MessageBox.Show($"An error occurred while creating the directory: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            return; // Exit the function if directory creation fails
+        //        }
+        //    }
+
+        //    // Append the feedback data to the TextBox
+        //    txtFeedback.AppendText(fbData + Environment.NewLine);
+
+        //    // Define the path to the feedback file
+        //    string feedbackFilePath = Path.Combine(directoryPath, "feedback.txt");
+
+        //    try
+        //    {
+        //        // Write the feedback data to the file
+        //        File.AppendAllText(feedbackFilePath, $"{fbData}{Environment.NewLine}");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Display an error message if there is a problem writing to the file
+        //        MessageBox.Show($"An error occurred while saving the feedback: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //    }
+        //}
+        //private void log(string logData)
+        //{
+        //    // Ensure lblDirName.Text is not null and not empty
+        //    string directoryPath = !string.IsNullOrEmpty(lblDirName.Text)
+        //                            ? lblDirName.Text
+        //                            : AppDomain.CurrentDomain.BaseDirectory;
+
+        //    // Ensure directory path exists
+        //    if (!Directory.Exists(directoryPath))
+        //    {
+        //        // Try to create the directory if it doesn't exist
+        //        try
+        //        {
+        //            Directory.CreateDirectory(directoryPath);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            MessageBox.Show($"An error occurred while creating the directory: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            return; // Exit the function if directory creation fails
+        //        }
+        //    }
+
+        //    // Append the log data to the TextBox
+        //    txtLogging.AppendText(logData + Environment.NewLine);
+
+        //    // Define the path to the log file
+        //    string logFilePath = Path.Combine(directoryPath, "log.txt");
+
+        //    try
+        //    {
+        //        // Write the log data to the file with a timestamp
+        //        File.AppendAllText(logFilePath, $"{logData}{Environment.NewLine}");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Display an error message if there is a problem writing to the file
+        //        MessageBox.Show($"An error occurred while saving the log: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //    }
+        //}
+
+        private string GetDirectoryPath()
+        {
+            // Check if cmbLogsLocation has a valid selection
+            if (cmbLogsLocation.SelectedIndex == 0) // Assuming 0 is the application's directory
+            {
+                return AppDomain.CurrentDomain.BaseDirectory;
+            }
+            else if (cmbLogsLocation.SelectedIndex == 1) // Assuming 1 is the open file directory
+            {
+                return lblDirName.Text; // Use the directory of the open file
+            }
+            else
+            {
+                // Default to application's directory if no valid selection is made
+                return AppDomain.CurrentDomain.BaseDirectory;
+            }
+        }
+
         private void feedback(string fbData)
         {
-            // Ensure lblDirName.Text is not null and not empty
-            string directoryPath = !string.IsNullOrEmpty(lblDirName.Text)
-                                    ? lblDirName.Text
-                                    : AppDomain.CurrentDomain.BaseDirectory;
+            // Get the directory path
+            string directoryPath = GetDirectoryPath();
 
-            // Ensure directory path exists
+            // Ensure the directory path is valid
+            if (string.IsNullOrEmpty(directoryPath))
+            {
+                return; // Exit the function if the directory path is invalid
+            }
+
+            // Ensure the directory exists or try to create it
             if (!Directory.Exists(directoryPath))
             {
-                // Try to create the directory if it doesn't exist
                 try
                 {
                     Directory.CreateDirectory(directoryPath);
@@ -706,17 +806,21 @@ namespace WoolichDecoder
                 MessageBox.Show($"An error occurred while saving the feedback: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
         private void log(string logData)
         {
-            // Ensure lblDirName.Text is not null and not empty
-            string directoryPath = !string.IsNullOrEmpty(lblDirName.Text)
-                                    ? lblDirName.Text
-                                    : AppDomain.CurrentDomain.BaseDirectory;
+            // Get the directory path
+            string directoryPath = GetDirectoryPath();
 
-            // Ensure directory path exists
+            // Ensure the directory path is valid
+            if (string.IsNullOrEmpty(directoryPath))
+            {
+                return; // Exit the function if the directory path is invalid
+            }
+
+            // Ensure the directory exists or try to create it
             if (!Directory.Exists(directoryPath))
             {
-                // Try to create the directory if it doesn't exist
                 try
                 {
                     Directory.CreateDirectory(directoryPath);
@@ -736,7 +840,7 @@ namespace WoolichDecoder
 
             try
             {
-                // Write the log data to the file with a timestamp
+                // Write the log data to the file
                 File.AppendAllText(logFilePath, $"{logData}{Environment.NewLine}");
             }
             catch (Exception ex)
@@ -745,6 +849,7 @@ namespace WoolichDecoder
                 MessageBox.Show($"An error occurred while saving the log: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
 
         void clearLog()
         {
@@ -1011,7 +1116,7 @@ namespace WoolichDecoder
                     }
 
                     // Log success and update UI
-                    Invoke(new Action(() => log($"{LogPrefix.Prefix}File in CSV format saved as: " + Path.GetFileName(csvFileName))));
+                    Invoke(new Action(() => log($"{LogPrefix.Prefix}Data exported to CSV format: " + Path.GetFileName(csvFileName))));
                     Invoke(new Action(() => UpdateProgressLabel("Export completed successfully.")));
                 }
                 catch (Exception ex)
@@ -1237,6 +1342,7 @@ namespace WoolichDecoder
             txtFeedback.Enabled = isFileLoaded;
             txtLogging.Enabled = isFileLoaded;
             btnMulti.Enabled = isFileLoaded;
+            cmbLogsLocation.Enabled = isFileLoaded;
         }
 
         private void ConvertWRLToBIN(string wrlFileName, string binFileName, List<string> successfulConversions, List<string> failedConversions)
@@ -1484,30 +1590,9 @@ namespace WoolichDecoder
             }
         }
 
+        private void label2_Click(object sender, EventArgs e)
+        {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        }
     }
 }
