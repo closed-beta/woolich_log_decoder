@@ -178,115 +178,6 @@ namespace WoolichDecoder
 
         }
 
-        //private void btnOpenFile_Click(object sender, EventArgs e)
-        //{
-        //    openWRLFileDialog.Title = "Select WRL file to inspect";
-        //    openWRLFileDialog.InitialDirectory = string.IsNullOrWhiteSpace(openWRLFileDialog.InitialDirectory)
-        //        ? logFolder ?? Directory.GetCurrentDirectory()
-        //        : openWRLFileDialog.InitialDirectory;
-
-        //    openWRLFileDialog.Multiselect = false;
-        //    openWRLFileDialog.Filter = "WRL files (*.wrl)|*.wrl|BIN files (*.bin)|*.bin|All files (*.*)|*.*";
-
-        //    if (openWRLFileDialog.ShowDialog() != DialogResult.OK)
-
-        //        return;
-
-        //    ClearBoxAndPackets();
-        //    var filename = openWRLFileDialog.FileNames.FirstOrDefault();
-        //    OpenFileName = filename;
-        //    // clear any existing data
-        //    logs.ClearPackets();
-        //    UpdateButtonStates();
-        //    Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
-        //    Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
-
-        //    if (!File.Exists(filename))
-        //    {
-        //        lblFileName.Text = "Error: File Not Found";
-        //        return;
-        //    }
-
-        //    logFolder = Path.GetDirectoryName(filename);
-        //    openWRLFileDialog.InitialDirectory = logFolder;
-
-        //    string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(filename) + ".bin");
-        //    lblFileName.Text = Path.GetFileName(filename);
-        //    lblDirName.Text = Path.GetDirectoryName(filename);
-
-        //    using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
-        //    using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
-        //    {
-        //        logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
-
-        //        // Search for the byte sequence 01 02 5D 01
-        //        byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
-        //        long position = FindPatternInFile(filename, searchPattern);
-
-        //        if (position >= 0)
-        //        {
-        //            // Append information to txtLogging
-        //            log($"{LogPrefix.Prefix}Header marker was found at position {position} bytes.");
-
-        //            // If the pattern is found at a distance of logs.PrimaryHeaderLength + 1 bytes, skip reading the secondary header
-        //            if (position != logs.PrimaryHeaderLength + 1)
-        //            {
-        //                // Read the secondary header only if the sequence is not at position logs.PrimaryHeaderLength + 1
-        //                logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-        //                exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-        //            }
-        //        }
-        //        else
-        //        {
-        //            // If the pattern is not found, read the secondary header as usual
-        //            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-        //            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-        //        }
-
-        //        exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
-
-        //        while (true)
-        //        {
-        //            byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
-        //            if (packetPrefixBytes.Length < 5)
-        //                break;
-
-        //            // It's wierd that I have to do - 2 but it works... I hope.
-        //            int remainingPacketBytes = packetPrefixBytes[3] - 2;
-        //            byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
-
-        //            if (packetBytes.Length < remainingPacketBytes)
-        //                break;
-
-        //            int totalPacketLength = packetPrefixBytes[3] + 3;
-        //            logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, packetPrefixBytes[4]);
-        //        }
-
-        //        log($"{LogPrefix.Prefix}Data Loaded and {logs.GetPacketCount()} packets found.");
-        //    }
-
-        //    using (var fileStream = new FileStream(binOutputFileName, FileMode.Create))
-        //    using (var binWriter = new BinaryWriter(fileStream))
-        //    {
-        //        foreach (var packet in logs.GetPackets())
-        //        {
-        //            binWriter.Write(packet.Value);
-        //        }
-        //    }
-
-        //    string fileName = Path.GetFileName(binOutputFileName);
-        //    log($"{LogPrefix.Prefix}BIN file created and saved as: {fileName}");
-        //}
-
-
-
-
-
-
-
-
-
-
         private void btnOpenFile_Click(object sender, EventArgs e)
         {
             try
@@ -399,18 +290,6 @@ namespace WoolichDecoder
                 MessageBox.Show("An unexpected error occurred.\n\n Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
 
         private void btnRepairWRLFile_Click(object sender, EventArgs e)
         {
@@ -570,13 +449,6 @@ namespace WoolichDecoder
             }
             return -1; // Pattern not found
         }
-
-        /// <summary>
-        /// This is intended to analyse a specific column and filter the changes down to just where that single field changes.
-        /// It's basically redundant now but may serve a purpose in the future.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
 
         private void ClearBoxAndPackets()
         {
@@ -1367,7 +1239,7 @@ namespace WoolichDecoder
             btnMulti.Enabled = isFileLoaded;
         }
 
-        private void ConvertWRLToBIN(string wrlFileName, string binFileName)
+        private void ConvertWRLToBIN(string wrlFileName, string binFileName, List<string> successfulConversions, List<string> failedConversions)
         {
             try
             {
@@ -1378,13 +1250,12 @@ namespace WoolichDecoder
                 {
                     logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
 
-                    // Search for the byte sequence 01 02 5D 01
                     byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
                     long position = FindPatternInFile(wrlFileName, searchPattern);
 
                     if (position >= 0)
                     {
-                        log($"{LogPrefix.Prefix}Header marker was found at position {position} bytes.");
+                        //feedback($"Header marker was found at position {position} bytes.");
 
                         if (position != logs.PrimaryHeaderLength + 1)
                         {
@@ -1418,29 +1289,30 @@ namespace WoolichDecoder
                         binWriter.Write(packet);
                     }
 
-                    //log($"{LogPrefix.Prefix}BIN file created and saved as: {binFileName}");
-
                     var directoryInfo = new DirectoryInfo(Path.GetDirectoryName(binFileName));
-  
+
                     string lastTwoDirs = directoryInfo.Parent != null
                                          ? Path.Combine(directoryInfo.Parent.Name, directoryInfo.Name)
-                                         : directoryInfo.Name; 
+                                         : directoryInfo.Name;
 
                     string formattedPath = Path.Combine(lastTwoDirs, Path.GetFileName(binFileName));
-                  
-                    log($"{LogPrefix.Prefix}BIN file saved: {formattedPath}");
 
+                    feedback($"{Path.GetFileName(wrlFileName)} converted to bin.");
+
+                    // Add to successful conversions
+                    successfulConversions.Add(binFileName);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                feedback($"Error converting file {wrlFileName} to BIN: {ex.Message}");
+                feedback($"Error converting file: {Path.GetFileName(wrlFileName)}");
+                // Add to failed conversions
+                failedConversions.Add(wrlFileName);
             }
         }
-  
+
         private async void btnMultiAnalyse_Click(object sender, EventArgs e)
         {
-            // Check if the textbox contains a valid column number
             if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
             {
                 feedback("Column number is empty. Please enter a valid column number.");
@@ -1450,7 +1322,6 @@ namespace WoolichDecoder
             int columnNumber;
             try
             {
-                // Try to parse the textbox input as an integer
                 columnNumber = int.Parse(txtBreakOnChange.Text);
             }
             catch (Exception ex)
@@ -1459,35 +1330,32 @@ namespace WoolichDecoder
                 return;
             }
 
-            // Mapping of column numbers to corresponding analysis functions and column names
             var columnFunctions = new Dictionary<int, (Func<byte[], double>, string)>()
     {
-        { 10, (packet => WoolichConversions.getRPM(packet), "RPM") },    // RPM
-        { 12, (packet => WoolichConversions.getTrueTPS(packet), "True TPS") }, // True TPS
-        { 15, (packet => WoolichConversions.getWoolichTPS(packet), "Woolich TPS") }, // Woolich TPS
-        { 18, (packet => WoolichConversions.getCorrectETV(packet), "Correct ETV") }, // Correct ETV
-        { 21, (packet => WoolichConversions.getIAP(packet), "IAP") }, // IAP
-        { 23, (packet => WoolichConversions.getATMPressure(packet), "ATM Pressure") }, // ATM Pressure
-        { 24, (packet => WoolichConversions.getGear(packet), "Gear") }, // Gear
-        { 26, (packet => WoolichConversions.getEngineTemperature(packet), "Engine Temperature") }, // Engine Temperature
-        { 27, (packet => WoolichConversions.getInletTemperature(packet), "Inlet Temperature") }, // Inlet Temperature
-        { 28, (packet => WoolichConversions.getInjectorDuration(packet), "Injector Duration") }, // Injector Duration
-        { 29, (packet => WoolichConversions.getIgnitionOffset(packet), "Ignition Offset") }, // Ignition Offset
-        { 31, (packet => WoolichConversions.getSpeedo(packet), "Speedo") }, // Speedo
-        { 33, (packet => WoolichConversions.getFrontWheelSpeed(packet), "Front Wheel Speed") }, // Front Wheel Speed
-        { 35, (packet => WoolichConversions.getRearWheelSpeed(packet), "Rear Wheel Speed") }, // Rear Wheel Speed
-        { 41, (packet => WoolichConversions.getBatteryVoltage(packet), "Battery Voltage") }, // Battery Voltage
-        { 42, (packet => WoolichConversions.getAFR(packet), "AFR") } // AFR
+        { 10, (packet => WoolichConversions.getRPM(packet), "RPM") },
+        { 12, (packet => WoolichConversions.getTrueTPS(packet), "True TPS") },
+        { 15, (packet => WoolichConversions.getWoolichTPS(packet), "Woolich TPS") },
+        { 18, (packet => WoolichConversions.getCorrectETV(packet), "Correct ETV") },
+        { 21, (packet => WoolichConversions.getIAP(packet), "IAP") },
+        { 23, (packet => WoolichConversions.getATMPressure(packet), "ATM Pressure") },
+        { 24, (packet => WoolichConversions.getGear(packet), "Gear") },
+        { 26, (packet => WoolichConversions.getEngineTemperature(packet), "Engine Temperature") },
+        { 27, (packet => WoolichConversions.getInletTemperature(packet), "Inlet Temperature") },
+        { 28, (packet => WoolichConversions.getInjectorDuration(packet), "Injector Duration") },
+        { 29, (packet => WoolichConversions.getIgnitionOffset(packet), "Ignition Offset") },
+        { 31, (packet => WoolichConversions.getSpeedo(packet), "Speedo") },
+        { 33, (packet => WoolichConversions.getFrontWheelSpeed(packet), "Front Wheel Speed") },
+        { 35, (packet => WoolichConversions.getRearWheelSpeed(packet), "Rear Wheel Speed") },
+        { 41, (packet => WoolichConversions.getBatteryVoltage(packet), "Battery Voltage") },
+        { 42, (packet => WoolichConversions.getAFR(packet), "AFR") }
     };
 
-            // Check if the column number is supported in the analysis
             if (!columnFunctions.ContainsKey(columnNumber))
             {
                 feedback("Unsupported column number. Please enter a valid column number.");
                 return;
             }
 
-            // Open folder dialog
             using (var folderDialog = new FolderBrowserDialog())
             {
                 if (folderDialog.ShowDialog() != DialogResult.OK)
@@ -1495,46 +1363,47 @@ namespace WoolichDecoder
 
                 string folderPath = folderDialog.SelectedPath;
 
-                // Update lblDirName with the selected folder path
                 lblDirName.Text = folderPath;
 
-                // Get WRL files and prepare BIN files list
                 var wrlFiles = Directory.GetFiles(folderPath, "*.wrl", SearchOption.AllDirectories);
-                var binFiles = new List<string>();
+                var successfulConversions = new List<string>();
+                var failedConversions = new List<string>();
 
-                // Convert WRL to BIN files
+                DateTime startTime = DateTime.Now;
+                log($"{LogPrefix.Prefix}Starting Multi File Analyse...");
+
                 foreach (var wrlFile in wrlFiles)
                 {
                     string binFile = Path.Combine(Path.GetDirectoryName(wrlFile), Path.GetFileNameWithoutExtension(wrlFile) + ".bin");
-                    ConvertWRLToBIN(wrlFile, binFile);
-                    binFiles.Add(binFile);
+                    ConvertWRLToBIN(wrlFile, binFile, successfulConversions, failedConversions);
                 }
 
-                // Check if any BIN files are found
-                if (binFiles.Count == 0)
+                // Log summary information
+                int totalFiles = wrlFiles.Length;
+                int processedFiles = successfulConversions.Count + failedConversions.Count;
+                int damagedFiles = failedConversions.Count;
+
+                log($"{LogPrefix.Prefix}Total files found: {totalFiles}");
+                log($"{LogPrefix.Prefix}Files processed: {processedFiles}");
+                log($"{LogPrefix.Prefix}Damaged or failed files: {damagedFiles}");
+
+                if (successfulConversions.Count == 0)
                 {
-                    feedback("No BIN files found in the selected folder.");
+                    feedback("No successful BIN files found in the selected folder.");
                     return;
                 }
 
-                // Prepare for analysis
                 var results = new List<(string FileName, double MaxValue)>();
                 var (conversionFunction, columnName) = columnFunctions[columnNumber];
 
-                // Initialize progress variables
-                int totalFiles = binFiles.Count;
-                int processedFiles = 0;
-
-                // Show the progress bar and initialize it
                 progressBar.Visible = true;
                 progressLabel.Visible = true;
                 progressBar.Value = 0;
                 UpdateProgressLabel("Starting analysis...");
 
-                // Run the analysis in a separate task to avoid blocking the UI
                 await Task.Run(() =>
                 {
-                    foreach (var binFile in binFiles)
+                    foreach (var binFile in successfulConversions)
                     {
                         double? maxValue = null;
 
@@ -1550,7 +1419,6 @@ namespace WoolichDecoder
                                     {
                                         double currentValue = conversionFunction(packet);
 
-                                        // Update max value as the analysis proceeds
                                         if (maxValue == null || currentValue > maxValue)
                                         {
                                             maxValue = currentValue;
@@ -1559,7 +1427,6 @@ namespace WoolichDecoder
                                 }
                             }
 
-                            // Collect the result for this file
                             if (maxValue.HasValue)
                             {
                                 var directoryInfo = new DirectoryInfo(Path.GetDirectoryName(binFile));
@@ -1569,30 +1436,29 @@ namespace WoolichDecoder
                         }
                         catch (Exception ex)
                         {
-                            // Optionally handle errors per file
                             feedback($"Error processing file {binFile}: {ex.Message}");
                         }
 
-                        // Update the progress of the analysis
                         processedFiles++;
                         int progressPercentage = (processedFiles * 100) / totalFiles;
 
-                        // Update progress bar and label in the UI
                         this.Invoke(new Action(() =>
                         {
                             progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum);
                             UpdateProgressLabel($"Analyzing... {progressPercentage}% completed");
                         }));
 
-                        // Allow the UI to update during the analysis loop
                         Application.DoEvents();
                     }
                 });
 
-                // Sort the results from max to min
                 var sortedResults = results.OrderByDescending(r => r.MaxValue).ToList();
 
-                // Once analysis is completed, output results in the desired format
+                DateTime endTime = DateTime.Now;
+                TimeSpan duration = endTime - startTime;
+                string durationFormatted = duration.ToString(@"mm\:ss\.ff");
+                log($"{LogPrefix.Prefix}Analysis completed in {durationFormatted}.");
+
                 if (sortedResults.Count > 0)
                 {
                     var resultText = $"{Environment.NewLine}Found max {columnName}:{Environment.NewLine}" +
@@ -1604,13 +1470,23 @@ namespace WoolichDecoder
                     feedback("No results found.");
                 }
 
-                // Finalize and log completion of the analysis
+                if (failedConversions.Count > 0)
+                {
+                    var failedFilesText = $"{Environment.NewLine}Files that could not be converted:{Environment.NewLine}" +
+                                          string.Join(Environment.NewLine, failedConversions.Select(f => f.Replace('\\', '/')));
+                    feedback(failedFilesText);
+                }
+
                 UpdateProgressLabel("Analysis finished.");
-                System.Threading.Thread.Sleep(3000); // Allow time for user to see completion status
+                System.Threading.Thread.Sleep(3000);
                 progressBar.Visible = false;
-                progressLabel.Visible = false; // Hide progress UI elements
+                progressLabel.Visible = false;
             }
         }
+
+
+
+
 
 
 
