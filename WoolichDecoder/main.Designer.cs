@@ -151,6 +151,7 @@
             this.lblExportPacketsCount.TabIndex = 9;
             this.lblExportPacketsCount.Text = "0";
             this.lblExportPacketsCount.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.toolTip1.SetToolTip(this.lblExportPacketsCount, "Found packets.");
             this.lblExportPacketsCount.UseMnemonic = false;
             // 
             // lblExportFilename
@@ -275,6 +276,7 @@
             this.CRCsize.TabIndex = 37;
             this.CRCsize.Text = "100";
             this.CRCsize.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.toolTip1.SetToolTip(this.CRCsize, "HOw many packets to export");
             // 
             // label16
             // 
@@ -297,6 +299,7 @@
             this.btnExportCRCHack.Size = new System.Drawing.Size(237, 26);
             this.btnExportCRCHack.TabIndex = 19;
             this.btnExportCRCHack.Text = "Export CRC to WRL";
+            this.toolTip1.SetToolTip(this.btnExportCRCHack, "Export packets specified by CRC size box.");
             this.btnExportCRCHack.UseVisualStyleBackColor = true;
             this.btnExportCRCHack.Click += new System.EventHandler(this.btnExportCRCHack_Click);
             // 
@@ -310,6 +313,7 @@
             this.btnExportTargetColumn.Size = new System.Drawing.Size(237, 28);
             this.btnExportTargetColumn.TabIndex = 18;
             this.btnExportTargetColumn.Text = "Export Analysis to WRL";
+            this.toolTip1.SetToolTip(this.btnExportTargetColumn, "Export Analysed data to WRL file");
             this.btnExportTargetColumn.UseVisualStyleBackColor = true;
             this.btnExportTargetColumn.Click += new System.EventHandler(this.btnExportTargetColumn_Click);
             // 
@@ -335,6 +339,7 @@
             this.txtBreakOnChange.TabIndex = 16;
             this.txtBreakOnChange.Text = "35";
             this.txtBreakOnChange.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.toolTip1.SetToolTip(this.txtBreakOnChange, "Which column to analyse.");
             this.txtBreakOnChange.TextChanged += new System.EventHandler(this.TxtBreakOnChange_TextChanged);
             // 
             // btnAnalyse
@@ -347,6 +352,7 @@
             this.btnAnalyse.Size = new System.Drawing.Size(237, 28);
             this.btnAnalyse.TabIndex = 15;
             this.btnAnalyse.Text = "Analyse";
+            this.toolTip1.SetToolTip(this.btnAnalyse, "Analyse data in open WRL file");
             this.btnAnalyse.UseVisualStyleBackColor = true;
             this.btnAnalyse.Click += new System.EventHandler(this.btnAnalyse_Click);
             // 
@@ -639,6 +645,7 @@
             this.cmbLogsLocation.Name = "cmbLogsLocation";
             this.cmbLogsLocation.Size = new System.Drawing.Size(166, 21);
             this.cmbLogsLocation.TabIndex = 42;
+            this.toolTip1.SetToolTip(this.cmbLogsLocation, "Current set is for application directory.");
             // 
             // WoolichFileDecoderForm
             // 
