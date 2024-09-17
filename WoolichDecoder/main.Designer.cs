@@ -168,10 +168,10 @@
             // btnExportCSV
             // 
             this.btnExportCSV.Enabled = false;
-            this.btnExportCSV.Location = new System.Drawing.Point(349, 428);
+            this.btnExportCSV.Location = new System.Drawing.Point(351, 426);
             this.btnExportCSV.Margin = new System.Windows.Forms.Padding(2);
             this.btnExportCSV.Name = "btnExportCSV";
-            this.btnExportCSV.Size = new System.Drawing.Size(117, 21);
+            this.btnExportCSV.Size = new System.Drawing.Size(114, 23);
             this.btnExportCSV.TabIndex = 11;
             this.btnExportCSV.Text = "Export CSV";
             this.toolTip1.SetToolTip(this.btnExportCSV, "Export and save file in CSV format");
@@ -187,10 +187,10 @@
             this.cmbExportType.Items.AddRange(new object[] {
             "Export Full File",
             "Export Analysis Only"});
-            this.cmbExportType.Location = new System.Drawing.Point(178, 428);
+            this.cmbExportType.Location = new System.Drawing.Point(179, 428);
             this.cmbExportType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cmbExportType.Name = "cmbExportType";
-            this.cmbExportType.Size = new System.Drawing.Size(165, 21);
+            this.cmbExportType.Size = new System.Drawing.Size(166, 21);
             this.cmbExportType.TabIndex = 12;
             // 
             // btnAutoTuneExport
@@ -218,7 +218,6 @@
             this.label2.Size = new System.Drawing.Size(79, 13);
             this.label2.TabIndex = 15;
             this.label2.Text = "Export Type:";
-            this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // panel1
             // 
@@ -401,12 +400,13 @@
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label6.Location = new System.Drawing.Point(7, 25);
+            this.label6.Location = new System.Drawing.Point(76, 24);
             this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(87, 15);
+            this.label6.Size = new System.Drawing.Size(35, 15);
             this.label6.TabIndex = 20;
-            this.label6.Text = "Loaded File:";
+            this.label6.Text = "File:";
+            this.label6.Click += new System.EventHandler(this.label6_Click);
             // 
             // toolTip1
             // 
@@ -640,7 +640,6 @@
             this.cmbLogsLocation.Name = "cmbLogsLocation";
             this.cmbLogsLocation.Size = new System.Drawing.Size(166, 21);
             this.cmbLogsLocation.TabIndex = 42;
-            this.cmbLogsLocation.SelectedIndex = 0;
             // 
             // WoolichFileDecoderForm
             // 
