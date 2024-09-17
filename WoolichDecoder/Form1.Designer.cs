@@ -56,7 +56,6 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.btnSettings = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.idleRPM = new System.Windows.Forms.TextBox();
@@ -318,7 +317,6 @@
             this.txtBreakOnChange.Size = new System.Drawing.Size(48, 20);
             this.txtBreakOnChange.TabIndex = 16;
             this.txtBreakOnChange.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            txtBreakOnChange.TextChanged += TxtBreakOnChange_TextChanged;
             // 
             // btnAnalyse
             // 
@@ -393,18 +391,6 @@
             // toolTip1
             // 
             this.toolTip1.Tag = "";
-            // 
-            // btnSettings
-            // 
-            this.btnSettings.Location = new System.Drawing.Point(126, 53);
-            this.btnSettings.Margin = new System.Windows.Forms.Padding(2);
-            this.btnSettings.Name = "btnSettings";
-            this.btnSettings.Size = new System.Drawing.Size(112, 28);
-            this.btnSettings.TabIndex = 40;
-            this.btnSettings.Text = "Settings";
-            this.toolTip1.SetToolTip(this.btnSettings, "Not working yet");
-            this.btnSettings.UseVisualStyleBackColor = true;
-            this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
             // 
             // label7
             // 
@@ -603,7 +589,6 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1284, 586);
-            this.Controls.Add(this.btnSettings);
             this.Controls.Add(this.lblDirName);
             this.Controls.Add(this.label19);
             this.Controls.Add(this.label3);
@@ -691,7 +676,6 @@
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.Label lblDirName;
-        private System.Windows.Forms.Button btnSettings;
     }
 }
 

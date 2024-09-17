@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WoolichDecoder.Models
 {
@@ -209,7 +206,7 @@ namespace WoolichDecoder.Models
             outputString += $"{((packet[86] << 8) + packet[85])},";
 
             int wtf = ((packet[125] << 16) + (packet[124] << 8) + packet[123]);
-            outputString += $"{Convert.ToString(wtf,2)} b,";
+            outputString += $"{Convert.ToString(wtf, 2)} b,";
 
 
 
