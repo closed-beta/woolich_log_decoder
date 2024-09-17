@@ -406,7 +406,6 @@
             this.label6.Size = new System.Drawing.Size(35, 15);
             this.label6.TabIndex = 20;
             this.label6.Text = "File:";
-            this.label6.Click += new System.EventHandler(this.label6_Click);
             // 
             // toolTip1
             // 

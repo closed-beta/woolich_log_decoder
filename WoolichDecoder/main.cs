@@ -1091,13 +1091,6 @@ namespace WoolichDecoder
             // save the user settings.
             userSettings.Save();
         }
-        private void btnSettings_Click(object sender, EventArgs e)
-        {
-
-            WoolichDecoder.AppSettings settingsForm = new WoolichDecoder.AppSettings();
-
-            settingsForm.ShowDialog();
-        }
         private void UpdateButtonStates()
         {
             bool isFileLoaded = IsFileLoaded();
@@ -1475,9 +1468,5 @@ namespace WoolichDecoder
             }
         }
 
-        private void label6_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }
