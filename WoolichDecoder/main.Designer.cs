@@ -242,7 +242,6 @@
             // 
             // btnMulti
             // 
-            this.btnMulti.Enabled = false;
             this.btnMulti.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.btnMulti.Location = new System.Drawing.Point(254, 7);
             this.btnMulti.Margin = new System.Windows.Forms.Padding(2);
@@ -330,7 +329,6 @@
             // 
             // txtBreakOnChange
             // 
-            this.txtBreakOnChange.Enabled = false;
             this.txtBreakOnChange.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.txtBreakOnChange.Location = new System.Drawing.Point(390, 12);
             this.txtBreakOnChange.Margin = new System.Windows.Forms.Padding(2);

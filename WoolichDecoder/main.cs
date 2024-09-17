@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using WoolichDecoder.Models;
 using WoolichDecoder.Settings;
+using static System.Resources.ResXFileRef;
 
 namespace WoolichDecoder
 {
@@ -1282,7 +1283,7 @@ namespace WoolichDecoder
 
                     string formattedPath = Path.Combine(lastTwoDirs, Path.GetFileName(binFileName));
 
-                    feedback($"{Path.GetFileName(wrlFileName)} converted to bin.");
+                    feedback($"Converted file: {Path.GetFileName(wrlFileName)}.");
 
                     // Add to successful conversions
                     successfulConversions.Add(binFileName);
@@ -1290,7 +1291,7 @@ namespace WoolichDecoder
             }
             catch (Exception)
             {
-                feedback($"Error converting file: {Path.GetFileName(wrlFileName)}");
+                feedback($"ERROR converting file: {Path.GetFileName(wrlFileName)}");
                 // Add to failed conversions
                 failedConversions.Add(wrlFileName);
             }
@@ -1346,31 +1347,52 @@ namespace WoolichDecoder
                     return;
 
                 string folderPath = folderDialog.SelectedPath;
-
                 lblDirName.Text = folderPath;
 
+                // Step 1: Find WRL files and inform the user
                 var wrlFiles = Directory.GetFiles(folderPath, "*.wrl", SearchOption.AllDirectories);
+                log($"{LogPrefix.Prefix}Total WRL files found: {wrlFiles.Length}");
+
+                // Step 2: Convert WRL files to BIN and inform the user about the conversion progress
                 var successfulConversions = new List<string>();
                 var failedConversions = new List<string>();
 
                 DateTime startTime = DateTime.Now;
-                log($"{LogPrefix.Prefix}Starting Multi File Analyse...");
+                log($"{LogPrefix.Prefix}Starting Multi File Conversion...");
+
+                // Initialize progress bar
+                progressBar.Visible = true;
+                progressLabel.Visible = true;
+                progressBar.Maximum = wrlFiles.Length; // Set maximum value for progress bar
+                progressBar.Value = 0;
+                UpdateProgressLabel("Converting files...");
 
                 foreach (var wrlFile in wrlFiles)
                 {
                     string binFile = Path.Combine(Path.GetDirectoryName(wrlFile), Path.GetFileNameWithoutExtension(wrlFile) + ".bin");
                     ConvertWRLToBIN(wrlFile, binFile, successfulConversions, failedConversions);
+
+                    // Update progress bar
+                    this.Invoke(new Action(() =>
+                    {
+                        progressBar.Value++;
+                        UpdateProgressLabel($"Converting files... {progressBar.Value}/{progressBar.Maximum} files processed");
+                    }));
+
+                    Application.DoEvents(); // Ensure the UI updates
                 }
 
-                // Log summary information
                 int totalFiles = wrlFiles.Length;
-                int processedFiles = successfulConversions.Count + failedConversions.Count;
-                int damagedFiles = failedConversions.Count;
+                int convertedFiles = successfulConversions.Count;
+                int failedFiles = failedConversions.Count;
 
-                log($"{LogPrefix.Prefix}Total files found: {totalFiles}");
-                log($"{LogPrefix.Prefix}Files processed: {processedFiles}");
-                log($"{LogPrefix.Prefix}Damaged or failed files: {damagedFiles}");
+                log($"{LogPrefix.Prefix}Conversion completed.");
+                log($"{LogPrefix.Prefix}Successfully converted {convertedFiles} files.");
+                log($"{LogPrefix.Prefix}{failedFiles} files failed.");
 
+
+
+                // Step 3: Analyze converted files
                 if (successfulConversions.Count == 0)
                 {
                     feedback("No successful BIN files found in the selected folder.");
@@ -1380,13 +1402,13 @@ namespace WoolichDecoder
                 var results = new List<(string FileName, double MaxValue)>();
                 var (conversionFunction, columnName) = columnFunctions[columnNumber];
 
-                progressBar.Visible = true;
-                progressLabel.Visible = true;
-                progressBar.Value = 0;
+                log($"{LogPrefix.Prefix}Starting Analysis...");
                 UpdateProgressLabel("Starting analysis...");
 
                 await Task.Run(() =>
                 {
+                    int processedFilesCount = 0; // Counter for processed files
+
                     foreach (var binFile in successfulConversions)
                     {
                         double? maxValue = null;
@@ -1398,24 +1420,51 @@ namespace WoolichDecoder
                             {
                                 while (fileStream.Position < fileStream.Length)
                                 {
-                                    byte[] packet = binReader.ReadBytes(logs.PacketLength);
-                                    if (packet.Length == logs.PacketLength)
+                                    if (fileStream.Length - fileStream.Position < logs.PacketPrefixLength)
                                     {
-                                        double currentValue = conversionFunction(packet);
+                                        feedback($"File {binFile} does not have enough data for packet prefix.");
+                                        break;
+                                    }
 
-                                        if (maxValue == null || currentValue > maxValue)
-                                        {
-                                            maxValue = currentValue;
-                                        }
+                                    byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
+                                    if (packetPrefixBytes.Length != logs.PacketPrefixLength)
+                                    {
+                                        feedback($"Incomplete packet prefix in {binFile}. Skipping.");
+                                        break;
+                                    }
+
+                                    int remainingPacketBytes = packetPrefixBytes[3] - 2;
+
+                                    if (fileStream.Length - fileStream.Position < remainingPacketBytes)
+                                    {
+                                        feedback($"File {binFile} does not have enough data for full packet. Skipping.");
+                                        break;
+                                    }
+
+                                    byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
+
+                                    if (packetBytes.Length != remainingPacketBytes)
+                                    {
+                                        feedback($"Incomplete packet data in {binFile}. Skipping.");
+                                        break;
+                                    }
+
+                                    byte[] fullPacket = packetPrefixBytes.Concat(packetBytes).ToArray();
+
+                                    double currentValue = conversionFunction(fullPacket);
+
+                                    if (maxValue == null || currentValue > maxValue)
+                                    {
+                                        maxValue = currentValue;
                                     }
                                 }
-                            }
 
-                            if (maxValue.HasValue)
-                            {
-                                var directoryInfo = new DirectoryInfo(Path.GetDirectoryName(binFile));
-                                var lastTwoDirs = Path.Combine(directoryInfo.Parent.Name, directoryInfo.Name);
-                                results.Add((Path.Combine(lastTwoDirs, Path.GetFileName(binFile)), maxValue.Value));
+                                if (maxValue.HasValue)
+                                {
+                                    var directoryInfo = new DirectoryInfo(Path.GetDirectoryName(binFile));
+                                    var lastTwoDirs = Path.Combine(directoryInfo.Parent.Name, directoryInfo.Name);
+                                    results.Add((Path.Combine(lastTwoDirs, Path.GetFileName(binFile)), maxValue.Value));
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -1423,12 +1472,13 @@ namespace WoolichDecoder
                             feedback($"Error processing file {binFile}: {ex.Message}");
                         }
 
-                        processedFiles++;
-                        int progressPercentage = (processedFiles * 100) / totalFiles;
+                        processedFilesCount++;
+                        int progressPercentage = (int)((double)processedFilesCount / successfulConversions.Count * 100);
 
+                        // Update the progress bar only if the percentage has changed
                         this.Invoke(new Action(() =>
                         {
-                            progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum);
+                            progressBar.Value = Math.Min(processedFilesCount, progressBar.Maximum);
                             UpdateProgressLabel($"Analyzing... {progressPercentage}% completed");
                         }));
 
@@ -1443,6 +1493,7 @@ namespace WoolichDecoder
                 string durationFormatted = duration.ToString(@"mm\:ss\.ff");
                 log($"{LogPrefix.Prefix}Analysis completed in {durationFormatted}.");
 
+                // Provide final feedback and results
                 if (sortedResults.Count > 0)
                 {
                     var resultText = $"{Environment.NewLine}Found max {columnName}:{Environment.NewLine}" +
@@ -1467,6 +1518,10 @@ namespace WoolichDecoder
                 progressLabel.Visible = false;
             }
         }
+
+
+
+
 
     }
 }
