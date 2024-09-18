@@ -1225,77 +1225,6 @@ namespace WoolichDecoder
                 MessageBox.Show("An unexpected error occurred.\n\n Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private void ConvertWRLToBIN(string wrlFileName, string binFileName, List<string> successfulConversions, List<string> failedConversions)
-        {
-            try
-            {
-                using (var fileStream = new FileStream(wrlFileName, FileMode.Open, FileAccess.Read))
-                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
-                using (var binFileStream = new FileStream(binFileName, FileMode.Create))
-                using (var binWriter = new BinaryWriter(binFileStream))
-                {
-                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
-
-                    byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
-                    long position = FindPatternInFile(wrlFileName, searchPattern);
-
-                    if (position >= 0)
-                    {
-                        //feedback($"Header marker was found at position {position} bytes.");
-
-                        if (position != logs.PrimaryHeaderLength + 1)
-                        {
-                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                        }
-                    }
-                    else
-                    {
-                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                    }
-
-                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
-
-                    while (true)
-                    {
-                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
-                        if (packetPrefixBytes.Length < logs.PacketPrefixLength)
-                            break;
-
-                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
-                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
-
-                        if (packetBytes.Length < remainingPacketBytes)
-                            break;
-
-                        int totalPacketLength = packetPrefixBytes[3] + 3;
-                        byte[] packet = packetPrefixBytes.Concat(packetBytes).ToArray();
-
-                        binWriter.Write(packet);
-                    }
-
-                    var directoryInfo = new DirectoryInfo(Path.GetDirectoryName(binFileName));
-
-                    string lastTwoDirs = directoryInfo.Parent != null
-                                         ? Path.Combine(directoryInfo.Parent.Name, directoryInfo.Name)
-                                         : directoryInfo.Name;
-
-                    string formattedPath = Path.Combine(lastTwoDirs, Path.GetFileName(binFileName));
-
-                    feedback($"Converted file: {Path.GetFileName(wrlFileName)}.");
-
-                    // Add to successful conversions
-                    successfulConversions.Add(binFileName);
-                }
-            }
-            catch (Exception)
-            {
-                feedback($"ERROR converting file: {Path.GetFileName(wrlFileName)}");
-                // Add to failed conversions
-                failedConversions.Add(wrlFileName);
-            }
-        }
         private async void btnMultiAnalyse_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
@@ -1518,8 +1447,87 @@ namespace WoolichDecoder
                 progressLabel.Visible = false;
             }
         }
+        private void ConvertWRLToBIN(string wrlFileName, string binFileName, List<string> successfulConversions, List<string> failedConversions)
+        {
+            bool conversionSuccessful = false;
 
+            try
+            {
+                using (var fileStream = new FileStream(wrlFileName, FileMode.Open, FileAccess.Read))
+                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
+                using (var binFileStream = new FileStream(binFileName, FileMode.Create))
+                using (var binWriter = new BinaryWriter(binFileStream))
+                {
+                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
 
+                    byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
+                    long position = FindPatternInFile(wrlFileName, searchPattern);
+
+                    if (position >= 0)
+                    {
+                        //feedback($"Header marker was found at position {position} bytes.");
+
+                        if (position != logs.PrimaryHeaderLength + 1)
+                        {
+                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                        }
+                    }
+                    else
+                    {
+                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                    }
+
+                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
+
+                    while (true)
+                    {
+                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
+                        if (packetPrefixBytes.Length < logs.PacketPrefixLength)
+                            break;
+
+                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
+                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
+
+                        if (packetBytes.Length < remainingPacketBytes)
+                            break;
+
+                        byte[] packet = packetPrefixBytes.Concat(packetBytes).ToArray();
+                        binWriter.Write(packet);
+                    }
+
+                    conversionSuccessful = true; // Set the flag to true if no exceptions were thrown
+                }
+
+                if (conversionSuccessful)
+                {
+                    feedback($"Converted file: {Path.GetFileName(wrlFileName)}.");
+                    // Add to successful conversions
+                    successfulConversions.Add(binFileName);
+                }
+            }
+            catch (Exception)
+            {
+                feedback($"ERROR converting file: {Path.GetFileName(wrlFileName)}");
+                // Add to failed conversions
+                failedConversions.Add(wrlFileName);
+
+                // If the BIN file was created before the error occurred, attempt to delete it
+                if (File.Exists(binFileName))
+                {
+                    try
+                    {
+                        File.Delete(binFileName);
+                        feedback($"Deleted corrupted BIN file: {Path.GetFileName(binFileName)}");
+                    }
+                    catch (Exception deleteEx)
+                    {
+                        feedback($"Failed to delete corrupted BIN file {binFileName}: {deleteEx.Message}");
+                    }
+                }
+            }
+        }
 
 
 
