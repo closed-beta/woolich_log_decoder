@@ -58,6 +58,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.btnRepair = new System.Windows.Forms.Button();
+            this.cmbLogsLocation = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.idleRPM = new System.Windows.Forms.TextBox();
@@ -76,7 +77,6 @@
             this.label19 = new System.Windows.Forms.Label();
             this.lblDirName = new System.Windows.Forms.Label();
             this.lblLogsLocation = new System.Windows.Forms.Label();
-            this.cmbLogsLocation = new System.Windows.Forms.ComboBox();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -427,6 +427,22 @@
             this.btnRepair.UseVisualStyleBackColor = true;
             this.btnRepair.Click += new System.EventHandler(this.btnRepairWRLFile_Click);
             // 
+            // cmbLogsLocation
+            // 
+            this.cmbLogsLocation.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.cmbLogsLocation.Enabled = false;
+            this.cmbLogsLocation.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.cmbLogsLocation.FormattingEnabled = true;
+            this.cmbLogsLocation.Items.AddRange(new object[] {
+            "Current",
+            "Work Directory"});
+            this.cmbLogsLocation.Location = new System.Drawing.Point(10, 428);
+            this.cmbLogsLocation.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.cmbLogsLocation.Name = "cmbLogsLocation";
+            this.cmbLogsLocation.Size = new System.Drawing.Size(166, 21);
+            this.cmbLogsLocation.TabIndex = 42;
+            this.toolTip1.SetToolTip(this.cmbLogsLocation, "Current set is for application directory.");
+            // 
             // label7
             // 
             this.label7.AutoSize = true;
@@ -628,22 +644,6 @@
             this.lblLogsLocation.Size = new System.Drawing.Size(87, 13);
             this.lblLogsLocation.TabIndex = 41;
             this.lblLogsLocation.Text = "Logs location:";
-            // 
-            // cmbLogsLocation
-            // 
-            this.cmbLogsLocation.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.cmbLogsLocation.Enabled = false;
-            this.cmbLogsLocation.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.cmbLogsLocation.FormattingEnabled = true;
-            this.cmbLogsLocation.Items.AddRange(new object[] {
-            "Current",
-            "Work Directory"});
-            this.cmbLogsLocation.Location = new System.Drawing.Point(10, 428);
-            this.cmbLogsLocation.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.cmbLogsLocation.Name = "cmbLogsLocation";
-            this.cmbLogsLocation.Size = new System.Drawing.Size(166, 21);
-            this.cmbLogsLocation.TabIndex = 42;
-            this.toolTip1.SetToolTip(this.cmbLogsLocation, "Current set is for application directory.");
             // 
             // WoolichFileDecoderForm
             // 

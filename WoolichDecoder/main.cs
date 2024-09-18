@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WoolichDecoder.Models;
@@ -169,58 +170,6 @@ namespace WoolichDecoder
             }
 
         }
-        private void btnRepairWRLFile_Click(object sender, EventArgs e)
-        {
-            // Create and configure an OpenFileDialog to allow the user to select a WRL file
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
-            {
-                openFileDialog.Filter = "WRL files (*.WRL)|*.WRL|All files (*.*)|*.*"; // Filter for WRL files and all files
-                openFileDialog.Title = "Select a WRL File"; // Title of the dialog
-
-                // Show the dialog and check if the user selected a file
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    // Get the selected file's name
-                    string inputFileName = openFileDialog.FileName;
-
-                    // Get the directory of the selected file
-                    string directory = Path.GetDirectoryName(inputFileName);
-
-                    // Define the output file name by appending "_fixed" to the original file name
-                    string outputFileName = Path.Combine(directory, Path.GetFileNameWithoutExtension(inputFileName) + "_fixed.WRL");
-
-                    // Read all bytes from the selected file
-                    byte[] data = File.ReadAllBytes(inputFileName);
-                    log($"{LogPrefix.Prefix}Read data from file. Size: {data.Length} bytes."); // Log the size of the read data
-
-                    // Define the prefix to search for in the data
-                    byte[] prefix = { 0x01, 0x02, 0x5D, 0x01 };
-                    int prefixLength = prefix.Length; // Length of the prefix
-                    int interval = 96; // Define an interval for processing
-
-                    // Find the offsets of the specified prefix in the data
-                    List<int> offsets = FindPrefixes(data, prefix);
-                    log($"{LogPrefix.Prefix}Total number of prefixes found: {offsets.Count}."); // Log the number of prefixes found
-
-                    // Process the data packets using the found offsets and prefix information
-                    bool needsRepair;
-                    byte[] recoveredData = ProcessPackets(data, offsets, prefixLength, interval, out needsRepair);
-
-                    if (needsRepair)
-                    {
-                        // Write the processed data to the new file in the same directory as the input file
-                        File.WriteAllBytes(outputFileName, recoveredData);
-                        log($"{LogPrefix.Prefix}File repaired and saved to:{Environment.NewLine}{outputFileName}."); // Log completion and file save information
-                    }
-                    else
-                    {
-                        // Inform the user that the file is already valid
-                        log($"{LogPrefix.Prefix}No repair needed to file: {Path.GetFileName(inputFileName)}.");
-
-                    }
-                }
-            }
-        }
         private List<int> FindPrefixes(byte[] data, byte[] prefix)
         {
             List<int> offsets = new List<int>();
@@ -338,7 +287,6 @@ namespace WoolichDecoder
             // Optionally, clear the export file name label
             lblExportFilename.Text = string.Empty;
 
-            //feedback($"{LogPrefix.Prefix}Cleared all packets and reset text box.");
         }
         private async void btnAnalyse_Click(object sender, EventArgs e)
         {
@@ -1113,118 +1061,6 @@ namespace WoolichDecoder
             btnMulti.Enabled = isFileLoaded;
             cmbLogsLocation.Enabled = isFileLoaded;
         }
-        private void btnOpenFile_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                openWRLFileDialog.Title = "Select WRL file to inspect";
-                openWRLFileDialog.InitialDirectory = string.IsNullOrWhiteSpace(openWRLFileDialog.InitialDirectory)
-                    ? logFolder ?? Directory.GetCurrentDirectory()
-                    : openWRLFileDialog.InitialDirectory;
-
-                openWRLFileDialog.Multiselect = false;
-                openWRLFileDialog.Filter = "WRL files (*.wrl)|*.wrl|BIN files (*.bin)|*.bin|All files (*.*)|*.*";
-
-                if (openWRLFileDialog.ShowDialog() != DialogResult.OK)
-                    return;
-
-                ClearBoxAndPackets();
-                var filename = openWRLFileDialog.FileNames.FirstOrDefault();
-                OpenFileName = filename;
-
-                // Clear any existing data
-                logs.ClearPackets();
-                UpdateButtonStates();
-                Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
-                Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
-
-                if (!File.Exists(filename))
-                {
-                    lblFileName.Text = "Error: File Not Found";
-                    return;
-                }
-
-                logFolder = Path.GetDirectoryName(filename);
-                openWRLFileDialog.InitialDirectory = logFolder;
-
-                string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(filename) + ".bin");
-                lblFileName.Text = Path.GetFileName(filename);
-                lblDirName.Text = Path.GetDirectoryName(filename);
-
-                using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
-                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
-                {
-                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
-
-                    // Search for the byte sequence 01 02 5D 01
-                    byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
-                    long position = FindPatternInFile(filename, searchPattern);
-
-                    if (position >= 0)
-                    {
-                        // Append information to txtLogging
-                        log($"{LogPrefix.Prefix}Header marker was found at position {position} bytes.");
-
-                        // If the pattern is found at a distance of logs.PrimaryHeaderLength + 1 bytes, skip reading the secondary header
-                        if (position != logs.PrimaryHeaderLength + 1)
-                        {
-                            // Read the secondary header only if the sequence is not at position logs.PrimaryHeaderLength + 1
-                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                        }
-                    }
-                    else
-                    {
-                        // If the pattern is not found, read the secondary header as usual
-                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                    }
-
-                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
-
-                    while (true)
-                    {
-                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
-                        if (packetPrefixBytes.Length < 5)
-                            break;
-
-                        // It's weird that I have to do - 2 but it works... I hope.
-                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
-                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
-
-                        if (packetBytes.Length < remainingPacketBytes)
-                            break;
-
-                        int totalPacketLength = packetPrefixBytes[3] + 3;
-                        logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, packetPrefixBytes[4]);
-                    }
-
-                    log($"{LogPrefix.Prefix}Data Loaded and {logs.GetPacketCount()} packets found.");
-                }
-
-                using (var fileStream = new FileStream(binOutputFileName, FileMode.Create))
-                using (var binWriter = new BinaryWriter(fileStream))
-                {
-                    foreach (var packet in logs.GetPackets())
-                    {
-                        binWriter.Write(packet.Value);
-                    }
-                }
-
-                string fileName = Path.GetFileName(binOutputFileName);
-                log($"{LogPrefix.Prefix}BIN file created and saved as: {fileName}");
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                // Show a message box to inform the user that the file is corrupted
-                MessageBox.Show("The file is corrupted or has an invalid format.\n\n Please try repair option.", "File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            catch (Exception)
-            {
-                // Show a generic error message if an unexpected error occurs
-                MessageBox.Show("An unexpected error occurred.\n\n Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
         private async void btnMultiAnalyse_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
@@ -1528,8 +1364,274 @@ namespace WoolichDecoder
                 }
             }
         }
+        private void RepairWRLFile(string inputFileName)
+        {
+            // Get the directory of the selected file
+            string directory = Path.GetDirectoryName(inputFileName);
+
+            // Define the output file name by appending "_fixed" to the original file name
+            string outputFileName = Path.Combine(directory, Path.GetFileNameWithoutExtension(inputFileName) + "_fixed.WRL");
+
+            try
+            {
+                // Read all bytes from the selected file
+                byte[] data = File.ReadAllBytes(inputFileName);
+                log($"{LogPrefix.Prefix}Read data from file. Size: {data.Length} bytes."); // Log the size of the read data
+
+                // Define the prefix to search for in the data
+                byte[] prefix = { 0x01, 0x02, 0x5D, 0x01 };
+                int prefixLength = prefix.Length; // Length of the prefix
+                int interval = 96; // Define an interval for processing
+
+                // Find the offsets of the specified prefix in the data
+                List<int> offsets = FindPrefixes(data, prefix);
+                log($"{LogPrefix.Prefix}Total number of prefixes found: {offsets.Count}."); // Log the number of prefixes found
+
+                // Process the data packets using the found offsets and prefix information
+                bool needsRepair;
+                byte[] recoveredData = ProcessPackets(data, offsets, prefixLength, interval, out needsRepair);
+
+                if (needsRepair)
+                {
+                    // Write the processed data to the new file in the same directory as the input file
+                    File.WriteAllBytes(outputFileName, recoveredData);
+                    log($"{LogPrefix.Prefix}File repaired and saved to:{Environment.NewLine}{outputFileName}."); // Log completion and file save information
+                }
+                else
+                {
+                    // Inform the user that the file is already valid
+                    log($"{LogPrefix.Prefix}No repair needed for file: {Path.GetFileName(inputFileName)}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred during repair: {ex.Message}", "Repair Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        private void btnRepairWRLFile_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "WRL files (*.WRL)|*.WRL|All files (*.*)|*.*"; // Filter for WRL files and all files
+                openFileDialog.Title = "Select a WRL File"; // Title of the dialog
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // Get the selected file's name
+                    string inputFileName = openFileDialog.FileName;
+
+                    // Call the repair function with the selected file
+                    RepairWRLFile(inputFileName);
+                }
+            }
+        }
+        private void btnOpenFile_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                openWRLFileDialog.Title = "Select WRL file to inspect";
+                openWRLFileDialog.InitialDirectory = string.IsNullOrWhiteSpace(openWRLFileDialog.InitialDirectory)
+                    ? logFolder ?? Directory.GetCurrentDirectory()
+                    : openWRLFileDialog.InitialDirectory;
+
+                openWRLFileDialog.Multiselect = false;
+                openWRLFileDialog.Filter = "WRL files (*.wrl)|*.wrl|BIN files (*.bin)|*.bin|All files (*.*)|*.*";
+
+                if (openWRLFileDialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                ClearBoxAndPackets();
+                var filename = openWRLFileDialog.FileNames.FirstOrDefault();
+                OpenFileName = filename;
+
+                // Clear any existing data
+                logs.ClearPackets();
+                UpdateButtonStates();
+                Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
+                Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
+
+                if (!File.Exists(filename))
+                {
+                    lblFileName.Text = "Error: File Not Found";
+                    return;
+                }
+
+                logFolder = Path.GetDirectoryName(filename);
+                openWRLFileDialog.InitialDirectory = logFolder;
+
+                string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(filename) + ".bin");
+                lblFileName.Text = Path.GetFileName(filename);
+                lblDirName.Text = Path.GetDirectoryName(filename);
+
+                using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
+                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
+                {
+                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
+
+                    // Search for the byte sequence 01 02 5D 01
+                    byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
+                    long position = FindPatternInFile(filename, searchPattern);
+
+                    if (position >= 0)
+                    {
+                        log($"{LogPrefix.Prefix}Header marker was found at position {position} bytes.");
+
+                        if (position != logs.PrimaryHeaderLength + 1)
+                        {
+                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                        }
+                    }
+                    else
+                    {
+                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                    }
+
+                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
+
+                    while (true)
+                    {
+                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
+                        if (packetPrefixBytes.Length < 5)
+                            break;
+
+                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
+                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
+
+                        if (packetBytes.Length < remainingPacketBytes)
+                            break;
+
+                        int totalPacketLength = packetPrefixBytes[3] + 3;
+                        logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, packetPrefixBytes[4]);
+                    }
+
+                    log($"{LogPrefix.Prefix}Data Loaded and {logs.GetPacketCount()} packets found.");
+                }
+
+                using (var fileStream = new FileStream(binOutputFileName, FileMode.Create))
+                using (var binWriter = new BinaryWriter(fileStream))
+                {
+                    foreach (var packet in logs.GetPackets())
+                    {
+                        binWriter.Write(packet.Value);
+                    }
+                }
+
+                string fileName = Path.GetFileName(binOutputFileName);
+                log($"{LogPrefix.Prefix}BIN file created and saved as: {fileName}");
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                // Inform the user that the file is corrupted
+                DialogResult result = MessageBox.Show("The file is corrupted or has an invalid format.\n\nWould you like to attempt repair?", "File Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+
+                // If user chooses to repair the file
+                if (result == DialogResult.Yes)
+                {
+                    // Call the repair function and pass the file name
+                    RepairWRLFile(OpenFileName);
+
+                    // After attempting repair, automatically open the repaired file without re-opening the dialog
+                    string repairedFile = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(OpenFileName) + "_fixed.WRL");
+                    if (File.Exists(repairedFile))
+                    {
+                        
+                        logs.ClearPackets();
+                        Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
+                        Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
+                        OpenFileName = repairedFile; // Set the repaired file as the new file to open
+ 
+                        // Load the repaired file
+                        ClearBoxAndPackets();
+
+                        logFolder = Path.GetDirectoryName(repairedFile);
+                        lblFileName.Text = Path.GetFileName(repairedFile);
+                        lblDirName.Text = Path.GetDirectoryName(repairedFile);
+
+                        string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(repairedFile) + ".bin");
+
+                        using (var fileStream = new FileStream(repairedFile, FileMode.Open, FileAccess.Read))
+                        using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
+                        {
+                            logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
+
+                            // Search for the byte sequence 01 02 5D 01
+                            byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
+                            long position = FindPatternInFile(repairedFile, searchPattern);
+
+                            if (position >= 0)
+                            {
+                                log($"{LogPrefix.Prefix}Header marker was found at position {position} bytes.");
+
+                                if (position != logs.PrimaryHeaderLength + 1)
+                                {
+                                    logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                                    exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                                }
+                            }
+                            else
+                            {
+                                logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                                exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                            }
+
+                            exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
+
+                            while (true)
+                            {
+                                byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
+                                if (packetPrefixBytes.Length < 5)
+                                    break;
+
+                                int remainingPacketBytes = packetPrefixBytes[3] - 2;
+                                byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
+
+                                if (packetBytes.Length < remainingPacketBytes)
+                                    break;
+
+                                int totalPacketLength = packetPrefixBytes[3] + 3;
+                                logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, packetPrefixBytes[4]);
+                            }
+
+                            log($"{LogPrefix.Prefix}Data Loaded and {logs.GetPacketCount()} packets found.");
+                        }
+
+                        using (var fileStream = new FileStream(binOutputFileName, FileMode.Create))
+                        using (var binWriter = new BinaryWriter(fileStream))
+                        {
+                            foreach (var packet in logs.GetPackets())
+                            {
+                                binWriter.Write(packet.Value);
+                            }
+                        }
+
+                        string fileName = Path.GetFileName(binOutputFileName);
+                        log($"{LogPrefix.Prefix}Repaired BIN file created and saved as: {fileName}");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Repair operation failed or was not needed. The file could not be opened.", "Repair Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Show a generic error message if an unexpected error occurs
+                MessageBox.Show($"An unexpected error occurred: {ex.Message}\n\n Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
+
+        
 
 
 
     }
 }
+
+
+        
+
+
