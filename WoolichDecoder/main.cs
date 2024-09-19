@@ -69,7 +69,17 @@ namespace WoolichDecoder
         List<StaticPacketColumn> presumedStaticColumns = new List<StaticPacketColumn> { };
 
         List<int> analysisColumn = new List<int> { };
- 
+
+        public WoolichFileDecoderForm()
+        {
+            InitializeComponent();
+            cmbExportType.SelectedIndex = 0;
+            cmbExportFormat.SelectedIndex = 0;
+            cmbLogsLocation.SelectedIndex = 0;
+            cmbExportMode.SelectedIndex = 0;
+            cmbExportType.SelectedIndexChanged += cmbExportType_SelectedIndexChanged;
+        }
+
         private bool IsFileLoaded()
         {
             if (string.IsNullOrEmpty(OpenFileName))
@@ -78,12 +88,38 @@ namespace WoolichDecoder
             }
             return true;
         }
-        public WoolichFileDecoderForm()
-        {
-            InitializeComponent();
-            cmbExportType.SelectedIndex = 0;
 
+        private void cmbExportType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Update cmbExportFormat options based on the selected value in cmbExportType
+            UpdateExportFormatOptions();
         }
+
+        private void UpdateExportFormatOptions()
+        {
+            // Define the options to display based on the selected index
+            string[][] options = new string[][]
+            {
+        new string[] { "csv", "tsv" },   // For "Full File"
+        new string[] { "csv", "tsv", "wrl" }, // For "Analysis Only"
+        new string[] { "wrl" }          // For "CRC"
+            };
+
+            // Clear existing items in cmbExportFormat
+            cmbExportFormat.Items.Clear();
+
+            // Set items based on the selected index
+            int selectedIndex = cmbExportType.SelectedIndex;
+            if (selectedIndex >= 0 && selectedIndex < options.Length)
+            {
+                cmbExportFormat.Items.AddRange(options[selectedIndex]);
+                cmbExportFormat.SelectedIndex = 0; // Default to the first option
+
+                // Disable the ComboBox if "CRC" is selected
+                cmbExportFormat.Enabled = (selectedIndex != 2);
+            }
+        }
+
         public void SetMT09_StaticColumns()
         {
             decodedColumns = new List<int> {
@@ -300,7 +336,8 @@ namespace WoolichDecoder
             if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
             {
                 // Display a message if the column number is empty and log it
-                MessageBox.Show("Column number is empty. Please enter a valid column number.");
+                txtFeedback.Clear();
+                MessageBox.Show("Column number is empty. Please enter a valid column number." + Environment.NewLine);
                 DisplayLegend();
                 return;
             }
@@ -311,11 +348,12 @@ namespace WoolichDecoder
                 // Try to parse the textbox input as an integer
                 columnNumber = int.Parse(txtBreakOnChange.Text);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // If parsing fails, display an error message and log the exception
                 MessageBox.Show("Invalid column number. Please enter a valid number.");
-                log($"{LogPrefix.Prefix}Error parsing column number: {ex.Message}");
+                txtFeedback.Clear();
+                //log($"{LogPrefix.Prefix}Error parsing column number." + Environment.NewLine);
                 ClearBoxAndPackets();   // Clear text box and packets
                 DisplayLegend();        // Show legend for valid columns
                 return;
@@ -348,6 +386,7 @@ namespace WoolichDecoder
                 // If not supported, display a message, log it, and clear data
                 MessageBox.Show("Unsupported column number. Please enter a valid column number.");
                 //log($"{LogPrefix.Prefix}Column not supported for analysis.");
+                txtFeedback.Clear();
                 ClearBoxAndPackets();  // Clear text box and packets
                 DisplayLegend();        // Show legend for valid columns
                 return;
@@ -482,8 +521,6 @@ namespace WoolichDecoder
             legend.AppendLine("41: Battery Voltage");
             legend.AppendLine("42: AFR");
 
-
-            txtFeedback.Clear();
             feedback(legend.ToString());
         }
         private string GetDirectoryPath()
@@ -1060,12 +1097,16 @@ namespace WoolichDecoder
             txtLogging.Enabled = isFileLoaded;
             btnMulti.Enabled = isFileLoaded;
             cmbLogsLocation.Enabled = isFileLoaded;
+            cmbExportFormat.Enabled = isFileLoaded;
         }
         private async void btnMultiAnalyse_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
             {
-                feedback("Column number is empty. Please enter a valid column number.");
+                txtFeedback.Clear();
+                MessageBox.Show("Column number is empty. Please enter a valid column number." + Environment.NewLine);
+                DisplayLegend();
+ 
                 return;
             }
 
@@ -1074,9 +1115,11 @@ namespace WoolichDecoder
             {
                 columnNumber = int.Parse(txtBreakOnChange.Text);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                feedback($"Invalid column number. Please enter a valid number. Error: {ex.Message}");
+                txtFeedback.Clear();
+                MessageBox.Show($"Invalid column number. Please enter a valid number." + Environment.NewLine);
+                DisplayLegend();
                 return;
             }
 
@@ -1102,7 +1145,11 @@ namespace WoolichDecoder
 
             if (!columnFunctions.ContainsKey(columnNumber))
             {
-                feedback("Unsupported column number. Please enter a valid column number.");
+                txtFeedback.Clear();
+                MessageBox.Show("Unsupported column number. Please enter a valid column number." + Environment.NewLine);
+                DisplayLegend();
+                
+                
                 return;
             }
 
@@ -1622,12 +1669,15 @@ namespace WoolichDecoder
             }
         }
 
+        private void lblExportType_Click(object sender, EventArgs e)
+        {
 
+        }
 
-        
+        private void lblExportFormat_Click(object sender, EventArgs e)
+        {
 
-
-
+        }
     }
 }
 
