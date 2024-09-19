@@ -42,22 +42,22 @@
             this.btnAutoTuneExport = new System.Windows.Forms.Button();
             this.lblExportType = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.btnMulti = new System.Windows.Forms.Button();
             this.lblCRCsize = new System.Windows.Forms.Label();
             this.CRCsize = new System.Windows.Forms.TextBox();
             this.lblPackets = new System.Windows.Forms.Label();
-            this.btnExportCRCHack = new System.Windows.Forms.Button();
-            this.btnExportTargetColumn = new System.Windows.Forms.Button();
             this.lblAnalysisCol = new System.Windows.Forms.Label();
             this.txtBreakOnChange = new System.Windows.Forms.TextBox();
             this.btnAnalyse = new System.Windows.Forms.Button();
+            this.btnRepair = new System.Windows.Forms.Button();
+            this.btnMulti = new System.Windows.Forms.Button();
+            this.btnExportCRCHack = new System.Windows.Forms.Button();
+            this.btnExportTargetColumn = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.aTFCheckedListBox = new System.Windows.Forms.CheckedListBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.btnRepair = new System.Windows.Forms.Button();
             this.cmbLogsLocation = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
@@ -224,13 +224,11 @@
             this.lblExportType.Size = new System.Drawing.Size(79, 13);
             this.lblExportType.TabIndex = 15;
             this.lblExportType.Text = "Export Type:";
-            this.lblExportType.Click += new System.EventHandler(this.lblExportType_Click);
             // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.ControlLight;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel1.Controls.Add(this.btnMulti);
             this.panel1.Controls.Add(this.lblCRCsize);
             this.panel1.Controls.Add(this.CRCsize);
             this.panel1.Controls.Add(this.lblPackets);
@@ -244,19 +242,6 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(455, 105);
             this.panel1.TabIndex = 16;
-            // 
-            // btnMulti
-            // 
-            this.btnMulti.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnMulti.Location = new System.Drawing.Point(14, 39);
-            this.btnMulti.Margin = new System.Windows.Forms.Padding(2);
-            this.btnMulti.Name = "btnMulti";
-            this.btnMulti.Size = new System.Drawing.Size(236, 28);
-            this.btnMulti.TabIndex = 39;
-            this.btnMulti.Text = "Analyse Directory";
-            this.toolTip1.SetToolTip(this.btnMulti, "Find Max values in column for all WRL in folder");
-            this.btnMulti.UseVisualStyleBackColor = true;
-            this.btnMulti.Click += new System.EventHandler(this.btnMultiAnalyse_Click);
             // 
             // lblCRCsize
             // 
@@ -293,6 +278,70 @@
             this.lblPackets.TabIndex = 36;
             this.lblPackets.Text = "Packets:";
             // 
+            // lblAnalysisCol
+            // 
+            this.lblAnalysisCol.AutoSize = true;
+            this.lblAnalysisCol.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.lblAnalysisCol.Location = new System.Drawing.Point(285, 15);
+            this.lblAnalysisCol.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblAnalysisCol.Name = "lblAnalysisCol";
+            this.lblAnalysisCol.Size = new System.Drawing.Size(86, 13);
+            this.lblAnalysisCol.TabIndex = 17;
+            this.lblAnalysisCol.Text = "Analysis Column:";
+            // 
+            // txtBreakOnChange
+            // 
+            this.txtBreakOnChange.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.txtBreakOnChange.Location = new System.Drawing.Point(390, 12);
+            this.txtBreakOnChange.Margin = new System.Windows.Forms.Padding(2);
+            this.txtBreakOnChange.Name = "txtBreakOnChange";
+            this.txtBreakOnChange.Size = new System.Drawing.Size(48, 20);
+            this.txtBreakOnChange.TabIndex = 16;
+            this.txtBreakOnChange.Text = "35";
+            this.txtBreakOnChange.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.toolTip1.SetToolTip(this.txtBreakOnChange, "Which column to analyse.");
+            this.txtBreakOnChange.TextChanged += new System.EventHandler(this.TxtBreakOnChange_TextChanged);
+            // 
+            // btnAnalyse
+            // 
+            this.btnAnalyse.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.btnAnalyse.Location = new System.Drawing.Point(13, 7);
+            this.btnAnalyse.Margin = new System.Windows.Forms.Padding(2);
+            this.btnAnalyse.Name = "btnAnalyse";
+            this.btnAnalyse.Size = new System.Drawing.Size(237, 28);
+            this.btnAnalyse.TabIndex = 15;
+            this.btnAnalyse.Text = "Analyse";
+            this.toolTip1.SetToolTip(this.btnAnalyse, "Analyse data in open WRL file");
+            this.btnAnalyse.UseVisualStyleBackColor = true;
+            this.btnAnalyse.Click += new System.EventHandler(this.btnAnalyse_Click);
+            // 
+            // btnRepair
+            // 
+            this.btnRepair.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.btnRepair.Location = new System.Drawing.Point(14, 71);
+            this.btnRepair.Margin = new System.Windows.Forms.Padding(2);
+            this.btnRepair.Name = "btnRepair";
+            this.btnRepair.Size = new System.Drawing.Size(236, 28);
+            this.btnRepair.TabIndex = 40;
+            this.btnRepair.Text = "Repair";
+            this.toolTip1.SetToolTip(this.btnRepair, "Repair corrupted WRL ");
+            this.btnRepair.UseVisualStyleBackColor = true;
+            this.btnRepair.Click += new System.EventHandler(this.btnRepairWRLFile_Click);
+            // 
+            // btnMulti
+            // 
+            this.btnMulti.Enabled = false;
+            this.btnMulti.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.btnMulti.Location = new System.Drawing.Point(490, 470);
+            this.btnMulti.Margin = new System.Windows.Forms.Padding(2);
+            this.btnMulti.Name = "btnMulti";
+            this.btnMulti.Size = new System.Drawing.Size(236, 28);
+            this.btnMulti.TabIndex = 39;
+            this.btnMulti.Text = "Analyse Directory";
+            this.toolTip1.SetToolTip(this.btnMulti, "Find Max values in column for all WRL in folder");
+            this.btnMulti.UseVisualStyleBackColor = true;
+            this.btnMulti.Visible = false;
+            // 
             // btnExportCRCHack
             // 
             this.btnExportCRCHack.Enabled = false;
@@ -322,44 +371,6 @@
             this.btnExportTargetColumn.UseVisualStyleBackColor = true;
             this.btnExportTargetColumn.Visible = false;
             this.btnExportTargetColumn.Click += new System.EventHandler(this.btnExportTargetColumn_Click);
-            // 
-            // lblAnalysisCol
-            // 
-            this.lblAnalysisCol.AutoSize = true;
-            this.lblAnalysisCol.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblAnalysisCol.Location = new System.Drawing.Point(285, 15);
-            this.lblAnalysisCol.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblAnalysisCol.Name = "lblAnalysisCol";
-            this.lblAnalysisCol.Size = new System.Drawing.Size(86, 13);
-            this.lblAnalysisCol.TabIndex = 17;
-            this.lblAnalysisCol.Text = "Analysis Column:";
-            // 
-            // txtBreakOnChange
-            // 
-            this.txtBreakOnChange.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.txtBreakOnChange.Location = new System.Drawing.Point(390, 12);
-            this.txtBreakOnChange.Margin = new System.Windows.Forms.Padding(2);
-            this.txtBreakOnChange.Name = "txtBreakOnChange";
-            this.txtBreakOnChange.Size = new System.Drawing.Size(48, 20);
-            this.txtBreakOnChange.TabIndex = 16;
-            this.txtBreakOnChange.Text = "35";
-            this.txtBreakOnChange.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.toolTip1.SetToolTip(this.txtBreakOnChange, "Which column to analyse.");
-            this.txtBreakOnChange.TextChanged += new System.EventHandler(this.TxtBreakOnChange_TextChanged);
-            // 
-            // btnAnalyse
-            // 
-            this.btnAnalyse.Enabled = false;
-            this.btnAnalyse.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnAnalyse.Location = new System.Drawing.Point(13, 7);
-            this.btnAnalyse.Margin = new System.Windows.Forms.Padding(2);
-            this.btnAnalyse.Name = "btnAnalyse";
-            this.btnAnalyse.Size = new System.Drawing.Size(237, 28);
-            this.btnAnalyse.TabIndex = 15;
-            this.btnAnalyse.Text = "Analyse File";
-            this.toolTip1.SetToolTip(this.btnAnalyse, "Analyse data in open WRL file");
-            this.btnAnalyse.UseVisualStyleBackColor = true;
-            this.btnAnalyse.Click += new System.EventHandler(this.btnAnalyse_Click);
             // 
             // label3
             // 
@@ -421,19 +432,6 @@
             // toolTip1
             // 
             this.toolTip1.Tag = "";
-            // 
-            // btnRepair
-            // 
-            this.btnRepair.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnRepair.Location = new System.Drawing.Point(14, 71);
-            this.btnRepair.Margin = new System.Windows.Forms.Padding(2);
-            this.btnRepair.Name = "btnRepair";
-            this.btnRepair.Size = new System.Drawing.Size(236, 28);
-            this.btnRepair.TabIndex = 40;
-            this.btnRepair.Text = "Repair";
-            this.toolTip1.SetToolTip(this.btnRepair, "Repair corrupted WRL ");
-            this.btnRepair.UseVisualStyleBackColor = true;
-            this.btnRepair.Click += new System.EventHandler(this.btnRepairWRLFile_Click);
             // 
             // cmbLogsLocation
             // 
@@ -680,7 +678,6 @@
             this.lblExportFormat.Size = new System.Drawing.Size(49, 13);
             this.lblExportFormat.TabIndex = 44;
             this.lblExportFormat.Text = "Format:";
-            this.lblExportFormat.Click += new System.EventHandler(this.lblExportFormat_Click);
             // 
             // lblExportMode
             // 
@@ -695,7 +692,6 @@
             // cmbExportMode
             // 
             this.cmbExportMode.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.cmbExportMode.Enabled = false;
             this.cmbExportMode.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.cmbExportMode.FormattingEnabled = true;
             this.cmbExportMode.Items.AddRange(new object[] {
@@ -712,6 +708,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1284, 586);
+            this.Controls.Add(this.btnMulti);
             this.Controls.Add(this.lblExportMode);
             this.Controls.Add(this.cmbExportMode);
             this.Controls.Add(this.lblExportFormat);

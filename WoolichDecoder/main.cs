@@ -84,6 +84,7 @@ namespace WoolichDecoder
         {
             if (string.IsNullOrEmpty(OpenFileName))
             {
+                MessageBox.Show("Please open a file before proceeding.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return false;
             }
             return true;
@@ -323,182 +324,6 @@ namespace WoolichDecoder
             // Optionally, clear the export file name label
             lblExportFilename.Text = string.Empty;
 
-        }
-        private async void btnAnalyse_Click(object sender, EventArgs e)
-        {
-            // Check if a file is loaded
-            if (!IsFileLoaded())
-            {
-                return;
-            }
-
-            // Check if the textbox contains a valid column number
-            if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
-            {
-                // Display a message if the column number is empty and log it
-                txtFeedback.Clear();
-                MessageBox.Show("Column number is empty. Please enter a valid column number." + Environment.NewLine);
-                DisplayLegend();
-                return;
-            }
-
-            int columnNumber;
-            try
-            {
-                // Try to parse the textbox input as an integer
-                columnNumber = int.Parse(txtBreakOnChange.Text);
-            }
-            catch (Exception)
-            {
-                // If parsing fails, display an error message and log the exception
-                MessageBox.Show("Invalid column number. Please enter a valid number.");
-                txtFeedback.Clear();
-                //log($"{LogPrefix.Prefix}Error parsing column number." + Environment.NewLine);
-                ClearBoxAndPackets();   // Clear text box and packets
-                DisplayLegend();        // Show legend for valid columns
-                return;
-            }
-
-            // Mapping of column numbers to corresponding analysis functions
-            var columnFunctions = new Dictionary<int, Func<byte[], double>>()
-        {
-            { 10, packet => WoolichConversions.getRPM(packet) },    // RPM
-            { 12, packet => WoolichConversions.getTrueTPS(packet) }, // True TPS
-            { 15, packet => WoolichConversions.getWoolichTPS(packet) }, // Woolich TPS
-            { 18, packet => WoolichConversions.getCorrectETV(packet) }, // Correct ETV
-            { 21, packet => WoolichConversions.getIAP(packet) }, // IAP
-            { 23, packet => WoolichConversions.getATMPressure(packet) }, // ATM Pressure
-            { 24, packet => WoolichConversions.getGear(packet) }, // Gear
-            { 26, packet => WoolichConversions.getEngineTemperature(packet) }, // Engine Temperature
-            { 27, packet => WoolichConversions.getInletTemperature(packet) }, // Inlet Temperature
-            { 28, packet => WoolichConversions.getInjectorDuration(packet) }, // Injector Duration
-            { 29, packet => WoolichConversions.getIgnitionOffset(packet) }, // Ignition Offset
-            { 31, packet => WoolichConversions.getSpeedo(packet) }, // Speedo
-            { 33, packet => WoolichConversions.getFrontWheelSpeed(packet) }, // Front Wheel Speed
-            { 35, packet => WoolichConversions.getRearWheelSpeed(packet) }, // Rear Wheel Speed
-            { 41, packet => WoolichConversions.getBatteryVoltage(packet) }, // Battery Voltage
-            { 42, packet => WoolichConversions.getAFR(packet) } // AFR
-        };
-
-            // Check if the column number is supported in the analysis
-            if (!columnFunctions.ContainsKey(columnNumber))
-            {
-                // If not supported, display a message, log it, and clear data
-                MessageBox.Show("Unsupported column number. Please enter a valid column number.");
-                //log($"{LogPrefix.Prefix}Column not supported for analysis.");
-                txtFeedback.Clear();
-                ClearBoxAndPackets();  // Clear text box and packets
-                DisplayLegend();        // Show legend for valid columns
-                return;
-            }
-
-            // Proceed with analysis if column number is valid
-            feedback($"{LogPrefix.Prefix}Monitoring changes on column: {columnNumber}");
-            analysisColumn.Add(columnNumber);
-
-            // Begin analysis for the specific column
-            feedback($"{LogPrefix.Prefix}Analysing column {columnNumber}...");
-            lblExportPacketsCount.Text = string.Empty;
-            exportLogs.ClearPackets(); // Clear the export log
-            DateTime startTime = DateTime.Now;
-            log($"{LogPrefix.Prefix}Start Analysing...");
-
-            StringBuilder feedbackBuffer = new StringBuilder();
-            Func<byte[], double> conversionFunction = columnFunctions[columnNumber];
-
-            double? previousValue = null;
-            double? minValue = null;
-            double? maxValue = null;
-
-            // Get all packets from the logs for analysis
-            var packets = logs.GetPackets();
-            int totalPackets = packets.Count;
-            int processedPackets = 0;
-
-            // Show the progress bar and initialize it
-            progressBar.Visible = true;
-            progressLabel.Visible = true;
-            progressBar.Value = 0;
-            UpdateProgressLabel("Starting analysis...");
-
-            // Run the analysis in a separate task to avoid blocking the UI
-            await Task.Run(() =>
-            {
-                foreach (KeyValuePair<string, byte[]> packet in packets)
-                {
-                    try
-                    {
-                        // Perform conversion and get the current value for the column
-                        double currentValue = conversionFunction(packet.Value);
-
-                        // Initialize min and max values on the first packet
-                        if (previousValue == null)
-                        {
-                            minValue = currentValue;
-                            maxValue = currentValue;
-                            previousValue = currentValue;
-                            feedbackBuffer.AppendLine($"Initial value in column {columnNumber}: {currentValue}");
-                            continue;
-                        }
-
-                        // Update min and max values as the analysis proceeds
-                        if (currentValue > maxValue) maxValue = currentValue;
-                        if (currentValue < minValue) minValue = currentValue;
-
-                        // If the value changes, log the change and add packet to export
-                        if (currentValue != previousValue)
-                        {
-                            feedbackBuffer.AppendLine($"Column {columnNumber} changed from {previousValue} to {currentValue}");
-                            previousValue = currentValue;
-
-                            // Export the packet if the column is being monitored
-                            if (analysisColumn.Contains(columnNumber))
-                            {
-                                exportLogs.AddPacket(packet.Value, logs.PacketLength, logs.PacketFormat);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // Log any errors encountered during analysis
-                        feedbackBuffer.AppendLine($"Error processing column {columnNumber}: {ex.Message}");
-                    }
-
-                    // Update the progress of the analysis
-                    processedPackets++;
-                    int progressPercentage = (processedPackets * 100) / totalPackets;
-
-                    // Update progress bar and label in the UI
-                    this.Invoke(new Action(() =>
-                    {
-                        progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum);
-                        UpdateProgressLabel($"Analyzing... {progressPercentage}% completed");
-                    }));
-
-                    // Allow the UI to update during the analysis loop
-                    Application.DoEvents();
-                }
-            });
-
-            // Once analysis is completed, log min and max values
-            feedbackBuffer.AppendLine($"Column {columnNumber} min value: {minValue}, max value: {maxValue}");
-            feedback(feedbackBuffer.ToString());
-
-            // Continue with further operations, such as exporting the results
-            feedback($"{LogPrefix.Prefix}Exporting packets...");
-            lblExportPacketsCount.Text = $"{exportLogs.GetPacketCount()}";
-
-            // Finalize and log completion of the analysis
-            //log($"{LogPrefix.Prefix}Analysis completed.");
-
-            DateTime endTime = DateTime.Now;
-            TimeSpan duration = endTime - startTime;
-            string durationFormatted = duration.ToString(@"mm\:ss\.ff");
-            log($"{LogPrefix.Prefix}Analysis completed in {durationFormatted}.");
-            UpdateProgressLabel("Analysis finished.");
-            System.Threading.Thread.Sleep(3000); // Allow time for user to see completion status
-            progressBar.Visible = false;
-            progressLabel.Visible = false; // Hide progress UI elements
         }
         private void DisplayLegend()
         {
@@ -1099,7 +924,195 @@ namespace WoolichDecoder
             cmbLogsLocation.Enabled = isFileLoaded;
             cmbExportFormat.Enabled = isFileLoaded;
         }
-        private async void btnMultiAnalyse_Click(object sender, EventArgs e)
+        private void btnAnalyse_Click(object sender, EventArgs e)
+        {
+            // Get the selected index from the ComboBox (cmbExportMode)
+            int selectedIndex = cmbExportMode.SelectedIndex;
+
+            // Check the index and call the corresponding function
+            if (selectedIndex == 0)
+            {
+                if (!IsFileLoaded())
+                    return;
+                Analyse();  // Call Analyse function if index is 0
+            }
+            else if (selectedIndex == 1)
+            {
+                MultiAnalyse();  // Call MultiAnalyse function if index is 1
+            }
+        }
+        private async void Analyse()
+        {
+            // Check if the textbox contains a valid column number
+            if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
+            {
+                // Display a message if the column number is empty and log it
+                txtFeedback.Clear();
+                MessageBox.Show("Column number is empty. Please enter a valid column number." + Environment.NewLine);
+                DisplayLegend();
+                return;
+            }
+
+            int columnNumber;
+            try
+            {
+                // Try to parse the textbox input as an integer
+                columnNumber = int.Parse(txtBreakOnChange.Text);
+            }
+            catch (Exception)
+            {
+                // If parsing fails, display an error message and log the exception
+                MessageBox.Show("Invalid column number. Please enter a valid number.");
+                txtFeedback.Clear();
+                //log($"{LogPrefix.Prefix}Error parsing column number." + Environment.NewLine);
+                ClearBoxAndPackets();   // Clear text box and packets
+                DisplayLegend();        // Show legend for valid columns
+                return;
+            }
+
+            // Mapping of column numbers to corresponding analysis functions
+            var columnFunctions = new Dictionary<int, Func<byte[], double>>()
+        {
+            { 10, packet => WoolichConversions.getRPM(packet) },    // RPM
+            { 12, packet => WoolichConversions.getTrueTPS(packet) }, // True TPS
+            { 15, packet => WoolichConversions.getWoolichTPS(packet) }, // Woolich TPS
+            { 18, packet => WoolichConversions.getCorrectETV(packet) }, // Correct ETV
+            { 21, packet => WoolichConversions.getIAP(packet) }, // IAP
+            { 23, packet => WoolichConversions.getATMPressure(packet) }, // ATM Pressure
+            { 24, packet => WoolichConversions.getGear(packet) }, // Gear
+            { 26, packet => WoolichConversions.getEngineTemperature(packet) }, // Engine Temperature
+            { 27, packet => WoolichConversions.getInletTemperature(packet) }, // Inlet Temperature
+            { 28, packet => WoolichConversions.getInjectorDuration(packet) }, // Injector Duration
+            { 29, packet => WoolichConversions.getIgnitionOffset(packet) }, // Ignition Offset
+            { 31, packet => WoolichConversions.getSpeedo(packet) }, // Speedo
+            { 33, packet => WoolichConversions.getFrontWheelSpeed(packet) }, // Front Wheel Speed
+            { 35, packet => WoolichConversions.getRearWheelSpeed(packet) }, // Rear Wheel Speed
+            { 41, packet => WoolichConversions.getBatteryVoltage(packet) }, // Battery Voltage
+            { 42, packet => WoolichConversions.getAFR(packet) } // AFR
+        };
+
+            // Check if the column number is supported in the analysis
+            if (!columnFunctions.ContainsKey(columnNumber))
+            {
+                // If not supported, display a message, log it, and clear data
+                MessageBox.Show("Unsupported column number. Please enter a valid column number.");
+                //log($"{LogPrefix.Prefix}Column not supported for analysis.");
+                txtFeedback.Clear();
+                ClearBoxAndPackets();  // Clear text box and packets
+                DisplayLegend();        // Show legend for valid columns
+                return;
+            }
+
+            // Proceed with analysis if column number is valid
+            feedback($"{LogPrefix.Prefix}Monitoring changes on column: {columnNumber}");
+            analysisColumn.Add(columnNumber);
+
+            // Begin analysis for the specific column
+            feedback($"{LogPrefix.Prefix}Analysing column {columnNumber}...");
+            lblExportPacketsCount.Text = string.Empty;
+            exportLogs.ClearPackets(); // Clear the export log
+            DateTime startTime = DateTime.Now;
+            log($"{LogPrefix.Prefix}Start Analysing...");
+
+            StringBuilder feedbackBuffer = new StringBuilder();
+            Func<byte[], double> conversionFunction = columnFunctions[columnNumber];
+
+            double? previousValue = null;
+            double? minValue = null;
+            double? maxValue = null;
+
+            // Get all packets from the logs for analysis
+            var packets = logs.GetPackets();
+            int totalPackets = packets.Count;
+            int processedPackets = 0;
+
+            // Show the progress bar and initialize it
+            progressBar.Visible = true;
+            progressLabel.Visible = true;
+            progressBar.Value = 0;
+            UpdateProgressLabel("Starting analysis...");
+
+            // Run the analysis in a separate task to avoid blocking the UI
+            await Task.Run(() =>
+            {
+                foreach (KeyValuePair<string, byte[]> packet in packets)
+                {
+                    try
+                    {
+                        // Perform conversion and get the current value for the column
+                        double currentValue = conversionFunction(packet.Value);
+
+                        // Initialize min and max values on the first packet
+                        if (previousValue == null)
+                        {
+                            minValue = currentValue;
+                            maxValue = currentValue;
+                            previousValue = currentValue;
+                            feedbackBuffer.AppendLine($"Initial value in column {columnNumber}: {currentValue}");
+                            continue;
+                        }
+
+                        // Update min and max values as the analysis proceeds
+                        if (currentValue > maxValue) maxValue = currentValue;
+                        if (currentValue < minValue) minValue = currentValue;
+
+                        // If the value changes, log the change and add packet to export
+                        if (currentValue != previousValue)
+                        {
+                            feedbackBuffer.AppendLine($"Column {columnNumber} changed from {previousValue} to {currentValue}");
+                            previousValue = currentValue;
+
+                            // Export the packet if the column is being monitored
+                            if (analysisColumn.Contains(columnNumber))
+                            {
+                                exportLogs.AddPacket(packet.Value, logs.PacketLength, logs.PacketFormat);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log any errors encountered during analysis
+                        feedbackBuffer.AppendLine($"Error processing column {columnNumber}: {ex.Message}");
+                    }
+
+                    // Update the progress of the analysis
+                    processedPackets++;
+                    int progressPercentage = (processedPackets * 100) / totalPackets;
+
+                    // Update progress bar and label in the UI
+                    this.Invoke(new Action(() =>
+                    {
+                        progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum);
+                        UpdateProgressLabel($"Analyzing... {progressPercentage}% completed");
+                    }));
+
+                    // Allow the UI to update during the analysis loop
+                    Application.DoEvents();
+                }
+            });
+
+            // Once analysis is completed, log min and max values
+            feedbackBuffer.AppendLine($"Column {columnNumber} min value: {minValue}, max value: {maxValue}");
+            feedback(feedbackBuffer.ToString());
+
+            // Continue with further operations, such as exporting the results
+            feedback($"{LogPrefix.Prefix}Exporting packets...");
+            lblExportPacketsCount.Text = $"{exportLogs.GetPacketCount()}";
+
+            // Finalize and log completion of the analysis
+            //log($"{LogPrefix.Prefix}Analysis completed.");
+
+            DateTime endTime = DateTime.Now;
+            TimeSpan duration = endTime - startTime;
+            string durationFormatted = duration.ToString(@"mm\:ss\.ff");
+            log($"{LogPrefix.Prefix}Analysis completed in {durationFormatted}.");
+            UpdateProgressLabel("Analysis finished.");
+            System.Threading.Thread.Sleep(3000); // Allow time for user to see completion status
+            progressBar.Visible = false;
+            progressLabel.Visible = false; // Hide progress UI elements
+        }
+        private async void MultiAnalyse()
+        //private async void btnMultiAnalyse_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
             {
@@ -1669,15 +1682,7 @@ namespace WoolichDecoder
             }
         }
 
-        private void lblExportType_Click(object sender, EventArgs e)
-        {
 
-        }
-
-        private void lblExportFormat_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }
 
