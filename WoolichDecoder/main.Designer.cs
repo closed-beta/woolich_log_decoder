@@ -39,7 +39,6 @@
             this.lblExportFilename = new System.Windows.Forms.Label();
             this.btnExport = new System.Windows.Forms.Button();
             this.cmbExportType = new System.Windows.Forms.ComboBox();
-            this.btnAutoTuneExport = new System.Windows.Forms.Button();
             this.lblExportType = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.lblCRCsize = new System.Windows.Forms.Label();
@@ -56,6 +55,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.cmbLogsLocation = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.idleRPM = new System.Windows.Forms.TextBox();
@@ -79,7 +79,6 @@
             this.lblExportMode = new System.Windows.Forms.Label();
             this.cmbExportMode = new System.Windows.Forms.ComboBox();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.label1 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -104,7 +103,7 @@
             this.btnOpenFile.Location = new System.Drawing.Point(10, 53);
             this.btnOpenFile.Margin = new System.Windows.Forms.Padding(2);
             this.btnOpenFile.Name = "btnOpenFile";
-            this.btnOpenFile.Size = new System.Drawing.Size(98, 28);
+            this.btnOpenFile.Size = new System.Drawing.Size(108, 28);
             this.btnOpenFile.TabIndex = 2;
             this.btnOpenFile.Text = "Open File";
             this.toolTip1.SetToolTip(this.btnOpenFile, "Open WRL File");
@@ -148,7 +147,7 @@
             this.lblExportPacketsCount.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblExportPacketsCount.Enabled = false;
             this.lblExportPacketsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblExportPacketsCount.Location = new System.Drawing.Point(360, 43);
+            this.lblExportPacketsCount.Location = new System.Drawing.Point(360, 40);
             this.lblExportPacketsCount.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblExportPacketsCount.Name = "lblExportPacketsCount";
             this.lblExportPacketsCount.Size = new System.Drawing.Size(78, 20);
@@ -173,14 +172,15 @@
             // btnExport
             // 
             this.btnExport.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.btnExport.Location = new System.Drawing.Point(330, 19);
+            this.btnExport.BackColor = System.Drawing.Color.DarkSeaGreen;
+            this.btnExport.Location = new System.Drawing.Point(330, 4);
             this.btnExport.Margin = new System.Windows.Forms.Padding(1, 1, 3, 1);
             this.btnExport.Name = "btnExport";
-            this.btnExport.Size = new System.Drawing.Size(121, 22);
+            this.btnExport.Size = new System.Drawing.Size(121, 37);
             this.btnExport.TabIndex = 11;
             this.btnExport.Text = "Apply";
             this.toolTip1.SetToolTip(this.btnExport, "Run Export or Conversion.");
-            this.btnExport.UseVisualStyleBackColor = true;
+            this.btnExport.UseVisualStyleBackColor = false;
             this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
             // 
             // cmbExportType
@@ -192,28 +192,13 @@
             this.cmbExportType.Items.AddRange(new object[] {
             "Full File",
             "Analysis Only",
-            "CRC"});
+            "CRC",
+            "Autotune"});
             this.cmbExportType.Location = new System.Drawing.Point(102, 19);
             this.cmbExportType.Margin = new System.Windows.Forms.Padding(1);
             this.cmbExportType.Name = "cmbExportType";
             this.cmbExportType.Size = new System.Drawing.Size(160, 21);
             this.cmbExportType.TabIndex = 12;
-            // 
-            // btnAutoTuneExport
-            // 
-            this.btnAutoTuneExport.BackColor = System.Drawing.Color.DarkSeaGreen;
-            this.btnAutoTuneExport.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnAutoTuneExport.Enabled = false;
-            this.btnAutoTuneExport.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAutoTuneExport.Location = new System.Drawing.Point(351, 108);
-            this.btnAutoTuneExport.Margin = new System.Windows.Forms.Padding(2);
-            this.btnAutoTuneExport.Name = "btnAutoTuneExport";
-            this.btnAutoTuneExport.Size = new System.Drawing.Size(115, 41);
-            this.btnAutoTuneExport.TabIndex = 13;
-            this.btnAutoTuneExport.Text = "Save";
-            this.toolTip1.SetToolTip(this.btnAutoTuneExport, "Save Filtered Data to WRL File");
-            this.btnAutoTuneExport.UseVisualStyleBackColor = false;
-            this.btnAutoTuneExport.Click += new System.EventHandler(this.btnAutoTuneExport_Click);
             // 
             // lblExportType
             // 
@@ -230,28 +215,25 @@
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.ControlLight;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel1.Controls.Add(this.lblCRCsize);
-            this.panel1.Controls.Add(this.CRCsize);
             this.panel1.Controls.Add(this.lblPackets);
             this.panel1.Controls.Add(this.lblAnalysisCol);
             this.panel1.Controls.Add(this.txtBreakOnChange);
             this.panel1.Controls.Add(this.btnAnalyse);
             this.panel1.Controls.Add(this.lblExportPacketsCount);
-            this.panel1.Controls.Add(this.btnRepair);
-            this.panel1.Location = new System.Drawing.Point(10, 469);
+            this.panel1.Location = new System.Drawing.Point(10, 504);
             this.panel1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(455, 105);
+            this.panel1.Size = new System.Drawing.Size(455, 70);
             this.panel1.TabIndex = 16;
             // 
             // lblCRCsize
             // 
             this.lblCRCsize.AutoSize = true;
-            this.lblCRCsize.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblCRCsize.Location = new System.Drawing.Point(287, 76);
+            this.lblCRCsize.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.lblCRCsize.Location = new System.Drawing.Point(5, 383);
             this.lblCRCsize.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblCRCsize.Name = "lblCRCsize";
-            this.lblCRCsize.Size = new System.Drawing.Size(60, 15);
+            this.lblCRCsize.Size = new System.Drawing.Size(69, 15);
             this.lblCRCsize.TabIndex = 38;
             this.lblCRCsize.Text = "CRC size:";
             // 
@@ -259,10 +241,10 @@
             // 
             this.CRCsize.Enabled = false;
             this.CRCsize.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.CRCsize.Location = new System.Drawing.Point(390, 75);
+            this.CRCsize.Location = new System.Drawing.Point(8, 400);
             this.CRCsize.Margin = new System.Windows.Forms.Padding(2);
             this.CRCsize.Name = "CRCsize";
-            this.CRCsize.Size = new System.Drawing.Size(48, 20);
+            this.CRCsize.Size = new System.Drawing.Size(66, 20);
             this.CRCsize.TabIndex = 37;
             this.CRCsize.Text = "100";
             this.CRCsize.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -319,11 +301,11 @@
             // 
             // btnRepair
             // 
-            this.btnRepair.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnRepair.Location = new System.Drawing.Point(14, 71);
+            this.btnRepair.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.btnRepair.Location = new System.Drawing.Point(122, 53);
             this.btnRepair.Margin = new System.Windows.Forms.Padding(2);
             this.btnRepair.Name = "btnRepair";
-            this.btnRepair.Size = new System.Drawing.Size(236, 28);
+            this.btnRepair.Size = new System.Drawing.Size(137, 28);
             this.btnRepair.TabIndex = 40;
             this.btnRepair.Text = "Repair";
             this.toolTip1.SetToolTip(this.btnRepair, "Repair corrupted WRL ");
@@ -334,7 +316,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label3.Location = new System.Drawing.Point(8, 452);
+            this.label3.Location = new System.Drawing.Point(10, 488);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(390, 13);
@@ -349,7 +331,7 @@
             this.aTFCheckedListBox.Location = new System.Drawing.Point(10, 108);
             this.aTFCheckedListBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.aTFCheckedListBox.Name = "aTFCheckedListBox";
-            this.aTFCheckedListBox.Size = new System.Drawing.Size(335, 79);
+            this.aTFCheckedListBox.Size = new System.Drawing.Size(249, 79);
             this.aTFCheckedListBox.TabIndex = 17;
             this.toolTip1.SetToolTip(this.aTFCheckedListBox, "Tick required settings. More information at: https://github.com/mt09sp/woolich_lo" +
         "g_decoder");
@@ -407,6 +389,17 @@
             this.cmbLogsLocation.Size = new System.Drawing.Size(101, 21);
             this.cmbLogsLocation.TabIndex = 42;
             this.toolTip1.SetToolTip(this.cmbLogsLocation, "Current set is for application directory.");
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(7, 422);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 3);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(120, 13);
+            this.label1.TabIndex = 43;
+            this.label1.Text = "Export and Convert:";
+            this.toolTip1.SetToolTip(this.label1, "Export to WRL and convert to CSV. Single and Massive conversion available.");
             // 
             // label7
             // 
@@ -673,28 +666,19 @@
             this.panel4.Controls.Add(this.cmbExportType);
             this.panel4.Controls.Add(this.cmbExportFormat);
             this.panel4.Controls.Add(this.lblExportType);
-            this.panel4.Location = new System.Drawing.Point(9, 404);
+            this.panel4.Location = new System.Drawing.Point(8, 438);
             this.panel4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(456, 45);
             this.panel4.TabIndex = 32;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(8, 388);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 3);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(120, 13);
-            this.label1.TabIndex = 43;
-            this.label1.Text = "Export and Convert:";
-            this.toolTip1.SetToolTip(this.label1, "Export to WRL and convert to CSV. Single and Massive conversion available.");
             // 
             // WoolichFileDecoderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1284, 586);
+            this.Controls.Add(this.lblCRCsize);
+            this.Controls.Add(this.CRCsize);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.cmbLogsLocation);
             this.Controls.Add(this.lblLogsLocation);
@@ -702,6 +686,7 @@
             this.Controls.Add(this.label19);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label17);
+            this.Controls.Add(this.btnRepair);
             this.Controls.Add(this.progressLabel);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.label14);
@@ -709,7 +694,6 @@
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.btnAutoTuneExport);
             this.Controls.Add(this.lblExportFilename);
             this.Controls.Add(this.txtFeedback);
             this.Controls.Add(this.lblFileName);
@@ -751,7 +735,6 @@
         private System.Windows.Forms.Label lblExportFilename;
         private System.Windows.Forms.Button btnExport;
         private System.Windows.Forms.ComboBox cmbExportType;
-        private System.Windows.Forms.Button btnAutoTuneExport;
         private System.Windows.Forms.Label lblExportType;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label lblAnalysisCol;

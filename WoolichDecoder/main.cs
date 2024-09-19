@@ -106,7 +106,8 @@ namespace WoolichDecoder
             {
         new string[] { "csv" },        // For "Full File" (index 0)
         new string[] { "csv", "wrl" }, // For "Analysis Only" (index 1)
-        new string[] { "wrl" }         // For "CRC" (index 2)
+        new string[] { "wrl" },        // For "CRC" (index 2)
+        new string[] { "csv", "wrl" }  // For type 3 (index 3)
             };
 
             // Clear existing items in cmbExportFormat
@@ -119,12 +120,11 @@ namespace WoolichDecoder
                 cmbExportFormat.Items.AddRange(options[selectedTypeIndex]);
                 cmbExportFormat.SelectedIndex = 0; // Default to the first option
 
-                // Check if the cmbExportMode should be enabled or disabled
+                // Enable or disable cmbExportMode based on the selected index
                 if (selectedTypeIndex == 0)
                 {
                     // Enable cmbExportMode if "Full File" is selected
                     cmbExportMode.Enabled = true;
-                    // Ensure cmbExportMode has a valid selection; set to default index 0 if no valid selection
                     if (cmbExportMode.SelectedIndex == -1)
                     {
                         cmbExportMode.SelectedIndex = 0;
@@ -132,14 +132,28 @@ namespace WoolichDecoder
                 }
                 else
                 {
-                    // Disable cmbExportMode if any other option is selected
+                    // Disable cmbExportMode for other options
                     cmbExportMode.Enabled = false;
-                    // Set cmbExportMode to default index 0
                     cmbExportMode.SelectedIndex = 0;
                 }
 
-                // Disable cmbExportFormat if "CRC" is selected
+                // Disable cmbExportFormat if "CRC" (index 2) is selected
                 cmbExportFormat.Enabled = (selectedTypeIndex != 2);
+            }
+
+            // Handle specific case for type 3
+            if (selectedTypeIndex == 3)
+            {
+                // Set cmbExportFormat to 1 and disable it (wyszarz)
+                if (cmbExportFormat.Items.Count > 1)
+                {
+                    cmbExportFormat.SelectedIndex = 1; // Set to index 1
+                }
+                cmbExportFormat.Enabled = false; // Wyszarz cmbExportFormat
+
+                // Automatically set mode to 0 and disable it (wyszarz cmbExportMode)
+                cmbExportMode.SelectedIndex = 0;
+                cmbExportMode.Enabled = false;
             }
 
             // Additional settings based on cmbExportMode
@@ -149,24 +163,24 @@ namespace WoolichDecoder
                 if (cmbExportType.Items.Count > 0)
                 {
                     cmbExportType.SelectedIndex = 0;
-                    cmbExportType.Enabled = false; // Disable cmbExportType
+                    cmbExportType.Enabled = false;
                 }
 
                 // Set cmbExportFormat to index 0 and disable it
                 if (cmbExportFormat.Items.Count > 0)
                 {
                     cmbExportFormat.SelectedIndex = 0;
-                    cmbExportFormat.Enabled = false; // Disable cmbExportFormat
+                    cmbExportFormat.Enabled = false;
                 }
             }
             else
             {
-                // Ensure cmbExportType and cmbExportFormat are enabled if cmbExportMode is not 1
+                // Ensure cmbExportType and cmbExportFormat are enabled for other conditions
                 cmbExportType.Enabled = true;
-                cmbExportFormat.Enabled = (selectedTypeIndex != 2);
+                cmbExportFormat.Enabled = (selectedTypeIndex != 2 && selectedTypeIndex != 3); // Format disabled only for index 2 or 3
             }
 
-            // Make btnExport active when mode is set to 1 or other valid conditions
+            // Enable btnExport if both mode and type have valid selections
             btnExport.Enabled = cmbExportMode.SelectedIndex != -1 && cmbExportType.SelectedIndex != -1;
         }
         public void SetMT09_StaticColumns()
@@ -508,7 +522,8 @@ namespace WoolichDecoder
                 progressLabel.Text = text;
             }
         }
-        private void btnAutoTuneExport_Click(object sender, EventArgs e)
+        private void AutoTuneExport()
+        //private void btnAutoTuneExport_Click(object sender, EventArgs e)
         {
             // Check if a file is loaded
             if (!IsFileLoaded())
@@ -640,6 +655,10 @@ namespace WoolichDecoder
             if (exportTypeIndex == 2)
             {
                 ExportCRCHack();  // Call ExportCRCHack if cmbExportType index is 2
+            }            
+            else if (exportTypeIndex == 3)
+            {
+                AutoTuneExport();
             }
             else if (exportTypeIndex == 0 && exportModeIndex == 1)
             {
@@ -986,7 +1005,6 @@ namespace WoolichDecoder
         {
             bool isFileLoaded = IsFileLoaded();
             btnAnalyse.Enabled = isFileLoaded;
-            btnAutoTuneExport.Enabled = isFileLoaded;
             btnExport.Enabled = isFileLoaded;
             cmbExportType.Enabled = isFileLoaded;
             aTFCheckedListBox.Enabled = isFileLoaded;
@@ -1173,11 +1191,8 @@ namespace WoolichDecoder
             feedback(feedbackBuffer.ToString());
 
             // Continue with further operations, such as exporting the results
-            feedback($"{LogPrefix.Prefix}Exporting packets...");
+            feedback($"{LogPrefix.Prefix}Exporting {exportLogs.GetPacketCount()}/{processedPackets} packets");
             lblExportPacketsCount.Text = $"{exportLogs.GetPacketCount()}";
-
-            // Finalize and log completion of the analysis
-            //log($"{LogPrefix.Prefix}Analysis completed.");
 
             DateTime endTime = DateTime.Now;
             TimeSpan duration = endTime - startTime;
@@ -1758,8 +1773,6 @@ namespace WoolichDecoder
                 MessageBox.Show($"An unexpected error occurred: {ex.Message}\n\n Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-
         private bool LoadFile(string filename)
         {
             try
@@ -1855,95 +1868,6 @@ namespace WoolichDecoder
                 return false;
             }
         }
-
-
-        //private async void ConvertAllWRLFilesToCSV()
-        //{
-
-
-        //    using (FolderBrowserDialog folderDialog = new FolderBrowserDialog())
-        //    {
-        //        folderDialog.Description = "Select the folder containing WRL files";
-        //        folderDialog.ShowNewFolderButton = false;
-
-        //        // Show dialog and check if user selected a folder
-        //        if (folderDialog.ShowDialog() == DialogResult.OK)
-        //        {
-        //            string rootFolderPath = folderDialog.SelectedPath;
-
-        //            // Find all WRL files in the selected directory and subdirectories
-        //            var wrlFiles = Directory.EnumerateFiles(rootFolderPath, "*.wrl", SearchOption.AllDirectories);
-
-        //            // Set up progress reporting
-        //            progressBar.Visible = true;
-        //            progressLabel.Visible = true;
-        //            UpdateProgressLabel("Starting conversion...");
-
-        //            int totalFiles = wrlFiles.Count();
-        //            int processedFiles = 0;
-
-        //            await Task.Run(() =>
-        //            {
-        //                foreach (var filePath in wrlFiles)
-        //                {
-        //                    try
-        //                    {
-        //                        // Load the WRL file
-        //                        bool fileLoaded = LoadFile(filePath);
-        //                        if (!fileLoaded)
-        //                        {
-        //                            // Log error and continue with next file
-        //                            Invoke(new Action(() => log($"{LogPrefix.Prefix}Skipping file {filePath}.")));
-        //                            continue;
-        //                        }
-
-        //                        // Prepare CSV file path
-        //                        string directoryPath = Path.GetDirectoryName(filePath);
-        //                        string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
-        //                        var csvFileName = Path.Combine(directoryPath, fileNameWithoutExtension + ".csv");
-
-        //                        // Export to CSV
-        //                        WoolichMT09Log exportItem = logs; // Assuming 'logs' is the loaded log item
-        //                        using (StreamWriter outputFile = new StreamWriter(csvFileName))
-        //                        {
-        //                            // Write the header
-        //                            string csvHeader = exportItem.GetHeader(this.presumedStaticColumns, new List<int>());
-        //                            outputFile.WriteLine(csvHeader);
-
-        //                            var packets = exportItem.GetPackets();
-        //                            foreach (var packet in packets)
-        //                            {
-        //                                var exportLine = WoolichMT09Log.getCSV(packet.Value, packet.Key, exportItem.PacketFormat, this.presumedStaticColumns, new List<int>());
-        //                                outputFile.WriteLine(exportLine);
-        //                            }
-        //                        }
-
-        //                        // Update progress bar and label
-        //                        processedFiles++;
-        //                        int progressPercentage = (processedFiles * 100) / totalFiles;
-        //                        Invoke(new Action(() => progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum)));
-        //                        Invoke(new Action(() => UpdateProgressLabel($"Converting... {progressPercentage}% completed")));
-        //                    }
-        //                    catch (Exception ex)
-        //                    {
-        //                        // Log error and continue processing other files
-        //                        Invoke(new Action(() => log($"{LogPrefix.Prefix}Failed to process file {filePath}: {ex.Message}")));
-        //                    }
-        //                }
-
-        //                // Log success and update UI
-        //                Invoke(new Action(() => log($"{LogPrefix.Prefix}Conversion completed for {processedFiles} files.")));
-        //                Invoke(new Action(() => UpdateProgressLabel("Conversion completed successfully.")));
-        //            });
-        //        }
-        //    }
-
-        //    // Hide progress bar and reset labels outside the Task.Run
-        //    progressBar.Visible = false;
-        //    progressLabel.Visible = false;
-        //    UpdateProgressLabel("Export finished.");
-        //}
-
         private async void ConvertAllWRLFilesToCSV()
         {
             using (FolderBrowserDialog folderDialog = new FolderBrowserDialog())
@@ -2028,7 +1952,6 @@ namespace WoolichDecoder
             progressLabel.Visible = false;
             UpdateProgressLabel("Export finished.");
         }
-
     }
 }
 
