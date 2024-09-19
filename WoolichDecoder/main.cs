@@ -78,8 +78,9 @@ namespace WoolichDecoder
             cmbLogsLocation.SelectedIndex = 0;
             cmbExportMode.SelectedIndex = 0;
             cmbExportType.SelectedIndexChanged += cmbExportType_SelectedIndexChanged;
+            cmbExportMode.SelectedIndexChanged += cmbExportMode_SelectedIndexChanged;
+            //cmbExportFormat.SelectedIndexChanged += cmbExportFormat_SelectedIndexChanged;
         }
-
         private bool IsFileLoaded()
         {
             if (string.IsNullOrEmpty(OpenFileName))
@@ -89,38 +90,85 @@ namespace WoolichDecoder
             }
             return true;
         }
-
         private void cmbExportType_SelectedIndexChanged(object sender, EventArgs e)
         {
             // Update cmbExportFormat options based on the selected value in cmbExportType
             UpdateExportFormatOptions();
         }
-
+        private void cmbExportMode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateExportFormatOptions();
+        }
         private void UpdateExportFormatOptions()
         {
             // Define the options to display based on the selected index
             string[][] options = new string[][]
             {
-        new string[] { "csv", "tsv" },   // For "Full File"
-        new string[] { "csv", "tsv", "wrl" }, // For "Analysis Only"
-        new string[] { "wrl" }          // For "CRC"
+        new string[] { "csv" },        // For "Full File" (index 0)
+        new string[] { "csv", "wrl" }, // For "Analysis Only" (index 1)
+        new string[] { "wrl" }         // For "CRC" (index 2)
             };
 
             // Clear existing items in cmbExportFormat
             cmbExportFormat.Items.Clear();
 
             // Set items based on the selected index
-            int selectedIndex = cmbExportType.SelectedIndex;
-            if (selectedIndex >= 0 && selectedIndex < options.Length)
+            int selectedTypeIndex = cmbExportType.SelectedIndex;
+            if (selectedTypeIndex >= 0 && selectedTypeIndex < options.Length)
             {
-                cmbExportFormat.Items.AddRange(options[selectedIndex]);
+                cmbExportFormat.Items.AddRange(options[selectedTypeIndex]);
                 cmbExportFormat.SelectedIndex = 0; // Default to the first option
 
-                // Disable the ComboBox if "CRC" is selected
-                cmbExportFormat.Enabled = (selectedIndex != 2);
-            }
-        }
+                // Check if the cmbExportMode should be enabled or disabled
+                if (selectedTypeIndex == 0)
+                {
+                    // Enable cmbExportMode if "Full File" is selected
+                    cmbExportMode.Enabled = true;
+                    // Ensure cmbExportMode has a valid selection; set to default index 0 if no valid selection
+                    if (cmbExportMode.SelectedIndex == -1)
+                    {
+                        cmbExportMode.SelectedIndex = 0;
+                    }
+                }
+                else
+                {
+                    // Disable cmbExportMode if any other option is selected
+                    cmbExportMode.Enabled = false;
+                    // Set cmbExportMode to default index 0
+                    cmbExportMode.SelectedIndex = 0;
+                }
 
+                // Disable cmbExportFormat if "CRC" is selected
+                cmbExportFormat.Enabled = (selectedTypeIndex != 2);
+            }
+
+            // Additional settings based on cmbExportMode
+            if (cmbExportMode.SelectedIndex == 1)
+            {
+                // Set cmbExportType to index 0 and disable it
+                if (cmbExportType.Items.Count > 0)
+                {
+                    cmbExportType.SelectedIndex = 0;
+                    cmbExportType.Enabled = false; // Disable cmbExportType
+                }
+
+                // Set cmbExportFormat to index 0 and disable it
+                if (cmbExportFormat.Items.Count > 0)
+                {
+                    cmbExportFormat.SelectedIndex = 0;
+                    cmbExportFormat.Enabled = false; // Disable cmbExportFormat
+                }
+            }
+            else
+            {
+                // Ensure cmbExportType and cmbExportFormat are enabled if cmbExportMode is not 1
+                cmbExportType.Enabled = true;
+                cmbExportFormat.Enabled = (selectedTypeIndex != 2);
+            }
+
+            // Make btnExport active when mode is set to 1 or other valid conditions
+            btnExport.Enabled = cmbExportMode.SelectedIndex != -1 && cmbExportType.SelectedIndex != -1;
+        }
         public void SetMT09_StaticColumns()
         {
             decodedColumns = new List<int> {
@@ -449,7 +497,218 @@ namespace WoolichDecoder
                 MessageBox.Show($"An error occurred while saving the log: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private void btnExportTargetColumn_Click(object sender, EventArgs e)
+        private void UpdateProgressLabel(string text)
+        {
+            if (progressLabel.InvokeRequired)
+            {
+                progressLabel.Invoke(new Action(() => progressLabel.Text = text));
+            }
+            else
+            {
+                progressLabel.Text = text;
+            }
+        }
+        private void btnAutoTuneExport_Click(object sender, EventArgs e)
+        {
+            // Check if a file is loaded
+            if (!IsFileLoaded())
+            {
+
+                return;
+            }
+
+            WoolichMT09Log exportItem = logs;
+
+            // Check if the packet format is supported
+            if (exportItem.PacketFormat != 0x01)
+            {
+                MessageBox.Show("This bikes file cannot be adjusted by this software yet.");
+                return;
+            }
+
+            // Define the filter options and their corresponding binary values
+            var filterOptionMap = new Dictionary<string, int>
+    {
+        { autoTuneFilterOptions[0], 0 }, // MT09 ETV correction
+        { autoTuneFilterOptions[1], 1 }, // Remove Gear 2 logs
+        { autoTuneFilterOptions[2], 2 }, // Exclude below 1200 rpm
+        { autoTuneFilterOptions[3], 3 }, // Remove Gear 1, 2 & 3 engine braking
+        { autoTuneFilterOptions[4], 4 }  // Remove non-launch gear 1
+    };
+
+            // Create a binary string based on selected filter options
+            char[] binaryArray = new char[5];
+            for (int i = 0; i < 5; i++)
+            {
+                string filterOption = autoTuneFilterOptions[i];
+                binaryArray[i] = this.aTFCheckedListBox.CheckedItems.Contains(filterOption) ? '1' : '0';
+            }
+
+            string binaryString = new string(binaryArray);
+
+            // Extract the base file name from lblFileName
+            string baseFileName = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
+            string directoryPath = lblDirName.Text.Trim();
+
+            // Create the output file name based on the extracted base file name and binary string
+            string outputFileNameWithExtension = Path.Combine(directoryPath, $"{baseFileName}_{binaryString}_AT.WRL");
+
+
+            try
+            {
+                // Write data to the output file
+                using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
+                {
+                    binWriter.Write(exportItem.PrimaryHeaderData);
+                    binWriter.Write(exportItem.SecondaryHeaderData);
+
+                    foreach (var packet in exportItem.GetPackets())
+                    {
+                        byte[] exportPackets = packet.Value.ToArray();
+                        int diff = 0;
+
+                        var outputGear = packet.Value.getGear();
+
+                        // Apply filters based on selected options
+                        if (outputGear == 2 && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[1]))
+                        {
+                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                            diff = diff + newOutputGearByte - outputGear;
+                            outputGear = newOutputGearByte;
+                            exportPackets[24] = newOutputGearByte;
+                        }
+
+                        int minRPM = int.Parse(this.minRPM.Text);  // Read and convert minimum RPM
+                        int maxRPM = int.Parse(this.maxRPM.Text);  // Read and convert maximum RPM
+
+                        if (outputGear == 1 && (packet.Value.getRPM() < minRPM || packet.Value.getRPM() > maxRPM) && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[4]))
+                        {
+                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                            diff = diff + newOutputGearByte - outputGear;
+                            outputGear = newOutputGearByte;
+                            exportPackets[24] = newOutputGearByte;
+                        }
+
+                        int rpmLimit = int.Parse(idleRPM.Text);  // Read and convert RPM limit
+
+                        if (outputGear != 1 && packet.Value.getRPM() <= rpmLimit && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[2]))
+                        {
+                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                            diff = diff + newOutputGearByte - outputGear;
+                            outputGear = newOutputGearByte;
+                            exportPackets[24] = newOutputGearByte;
+                        }
+
+                        if (packet.Value.getCorrectETV() <= 1.2 && outputGear < 4 && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[3]))
+                        {
+                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                            diff = diff + newOutputGearByte - outputGear;
+                            outputGear = newOutputGearByte;
+                            exportPackets[24] = newOutputGearByte;
+                        }
+
+                        if (this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[0]))
+                        {
+                            double correctETV = exportPackets.getCorrectETV();
+                            byte hackedETVbyte = (byte)((correctETV * 1.66) + 38);
+                            diff = diff + hackedETVbyte - exportPackets[18];
+                            exportPackets[18] = hackedETVbyte;
+                        }
+                        exportPackets[95] += (byte)diff;
+
+                        binWriter.Write(exportPackets);
+                    }
+                }
+
+                // Log success message
+                log($"{LogPrefix.Prefix}Autotune WRL File saved as: " + Path.GetFileName(outputFileNameWithExtension));
+            }
+            catch (Exception ex)
+            {
+                // Log any errors that occur during file saving
+                log($"{LogPrefix.Prefix}Autotune WRL File saving error: {ex.Message}");
+            }
+        }
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            // Get the selected indexes from the ComboBoxes
+            int exportTypeIndex = cmbExportType.SelectedIndex;
+            int exportFormatIndex = cmbExportFormat.SelectedIndex;
+            int exportModeIndex = cmbExportMode.SelectedIndex;
+
+            // Determine which function to call based on ComboBox selections
+            if (exportTypeIndex == 2)
+            {
+                ExportCRCHack();  // Call ExportCRCHack if cmbExportType index is 2
+            }
+            else if (exportTypeIndex == 0 && exportModeIndex == 1)
+            {
+                MessageBox.Show("Multi conversion to CSV format not supported yet");
+            }
+            else if (exportTypeIndex == 1 && exportFormatIndex == 0 && exportModeIndex == 0)
+            {
+                ExportCSV();
+            }
+            else if (exportTypeIndex == 1 && exportFormatIndex == 1 && exportModeIndex == 0)
+            {
+                ExportTargetColumn();  // Call ExportTargetColumn if cmbExportType index is 1 and cmbExportFormat index is 2
+            }
+            else if (exportTypeIndex == 0)
+            {
+                ExportCSV();  // Call ExportCSV if cmbExportType index is 0
+            }
+        }
+        private void ExportCRCHack()
+        //private void btnExportCRCHack_Click(object sender, EventArgs e)
+        {
+            if (!IsFileLoaded())
+                return;
+
+            try
+            {
+                // Get size from textBox
+                if (!int.TryParse(CRCsize.Text.Trim(), out int size))
+                {
+                    MessageBox.Show("Invalid size. Please enter a valid number.");
+                    return;
+                }
+
+                // Extract the base file name from lblFilename (excluding any file extension)
+                string baseFileName = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
+                string directoryPath = lblDirName.Text.Trim();
+
+
+                // Generate the file name based on the size
+                outputFileNameWithExtension = Path.Combine(directoryPath, $"{baseFileName}_CRC.{size}.WRL");
+
+
+                WoolichMT09Log exportItem = logs;
+
+                // Write data to a binary file
+                using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
+                {
+                    binWriter.Write(exportItem.PrimaryHeaderData);
+                    binWriter.Write(exportItem.SecondaryHeaderData);
+
+                    var packets = exportItem.GetPackets().Take(size);
+
+                    foreach (var packet in packets)
+                    {
+                        binWriter.Write(packet.Value);
+                    }
+                }
+
+                // Log information about the saved file
+                log($"{LogPrefix.Prefix}CRC saved as: " + Path.GetFileName(outputFileNameWithExtension));
+            }
+            catch (Exception ex)
+            {
+                // Log any error that occurs during the export process
+                log($"Error while exporting CRC: {ex.Message}");
+            }
+        }
+        private void ExportTargetColumn()
+        //private void btnExportTargetColumn_Click(object sender, EventArgs e)
         {
             if (!IsFileLoaded())
                 return;
@@ -539,18 +798,8 @@ namespace WoolichDecoder
             // Log the successful export
             log($"{LogPrefix.Prefix}Analysis WRL File saved as: " + Path.GetFileName(outputFileNameWithExtension));
         }
-        private void UpdateProgressLabel(string text)
-        {
-            if (progressLabel.InvokeRequired)
-            {
-                progressLabel.Invoke(new Action(() => progressLabel.Text = text));
-            }
-            else
-            {
-                progressLabel.Text = text;
-            }
-        }
-        private async void btnExportCSV_Click(object sender, EventArgs e)
+        private async void ExportCSV()
+        //private async void btnExportCSV_Click(object sender, EventArgs e)
         {
             // Check if a file is loaded
             if (!IsFileLoaded())
@@ -726,175 +975,6 @@ namespace WoolichDecoder
                 }
             });
         }
-        private void btnAutoTuneExport_Click(object sender, EventArgs e)
-        {
-            // Check if a file is loaded
-            if (!IsFileLoaded())
-            {
-
-                return;
-            }
-
-            WoolichMT09Log exportItem = logs;
-
-            // Check if the packet format is supported
-            if (exportItem.PacketFormat != 0x01)
-            {
-                MessageBox.Show("This bikes file cannot be adjusted by this software yet.");
-                return;
-            }
-
-            // Define the filter options and their corresponding binary values
-            var filterOptionMap = new Dictionary<string, int>
-    {
-        { autoTuneFilterOptions[0], 0 }, // MT09 ETV correction
-        { autoTuneFilterOptions[1], 1 }, // Remove Gear 2 logs
-        { autoTuneFilterOptions[2], 2 }, // Exclude below 1200 rpm
-        { autoTuneFilterOptions[3], 3 }, // Remove Gear 1, 2 & 3 engine braking
-        { autoTuneFilterOptions[4], 4 }  // Remove non-launch gear 1
-    };
-
-            // Create a binary string based on selected filter options
-            char[] binaryArray = new char[5];
-            for (int i = 0; i < 5; i++)
-            {
-                string filterOption = autoTuneFilterOptions[i];
-                binaryArray[i] = this.aTFCheckedListBox.CheckedItems.Contains(filterOption) ? '1' : '0';
-            }
-
-            string binaryString = new string(binaryArray);
-
-            // Extract the base file name from lblFileName
-            string baseFileName = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
-            string directoryPath = lblDirName.Text.Trim();
-
-            // Create the output file name based on the extracted base file name and binary string
-            string outputFileNameWithExtension = Path.Combine(directoryPath, $"{baseFileName}_{binaryString}_AT.WRL");
-
-
-            try
-            {
-                // Write data to the output file
-                using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
-                {
-                    binWriter.Write(exportItem.PrimaryHeaderData);
-                    binWriter.Write(exportItem.SecondaryHeaderData);
-
-                    foreach (var packet in exportItem.GetPackets())
-                    {
-                        byte[] exportPackets = packet.Value.ToArray();
-                        int diff = 0;
-
-                        var outputGear = packet.Value.getGear();
-
-                        // Apply filters based on selected options
-                        if (outputGear == 2 && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[1]))
-                        {
-                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                            diff = diff + newOutputGearByte - outputGear;
-                            outputGear = newOutputGearByte;
-                            exportPackets[24] = newOutputGearByte;
-                        }
-
-                        int minRPM = int.Parse(this.minRPM.Text);  // Read and convert minimum RPM
-                        int maxRPM = int.Parse(this.maxRPM.Text);  // Read and convert maximum RPM
-
-                        if (outputGear == 1 && (packet.Value.getRPM() < minRPM || packet.Value.getRPM() > maxRPM) && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[4]))
-                        {
-                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                            diff = diff + newOutputGearByte - outputGear;
-                            outputGear = newOutputGearByte;
-                            exportPackets[24] = newOutputGearByte;
-                        }
-
-                        int rpmLimit = int.Parse(idleRPM.Text);  // Read and convert RPM limit
-
-                        if (outputGear != 1 && packet.Value.getRPM() <= rpmLimit && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[2]))
-                        {
-                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                            diff = diff + newOutputGearByte - outputGear;
-                            outputGear = newOutputGearByte;
-                            exportPackets[24] = newOutputGearByte;
-                        }
-
-                        if (packet.Value.getCorrectETV() <= 1.2 && outputGear < 4 && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[3]))
-                        {
-                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                            diff = diff + newOutputGearByte - outputGear;
-                            outputGear = newOutputGearByte;
-                            exportPackets[24] = newOutputGearByte;
-                        }
-
-                        if (this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[0]))
-                        {
-                            double correctETV = exportPackets.getCorrectETV();
-                            byte hackedETVbyte = (byte)((correctETV * 1.66) + 38);
-                            diff = diff + hackedETVbyte - exportPackets[18];
-                            exportPackets[18] = hackedETVbyte;
-                        }
-                        exportPackets[95] += (byte)diff;
-
-                        binWriter.Write(exportPackets);
-                    }
-                }
-
-                // Log success message
-                log($"{LogPrefix.Prefix}Autotune WRL File saved as: " + Path.GetFileName(outputFileNameWithExtension));
-            }
-            catch (Exception ex)
-            {
-                // Log any errors that occur during file saving
-                log($"{LogPrefix.Prefix}Autotune WRL File saving error: {ex.Message}");
-            }
-        }
-        private void btnExportCRCHack_Click(object sender, EventArgs e)
-        {
-            if (!IsFileLoaded())
-                return;
-
-            try
-            {
-                // Get size from textBox
-                if (!int.TryParse(CRCsize.Text.Trim(), out int size))
-                {
-                    MessageBox.Show("Invalid size. Please enter a valid number.");
-                    return;
-                }
-
-                // Extract the base file name from lblFilename (excluding any file extension)
-                string baseFileName = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
-                string directoryPath = lblDirName.Text.Trim();
-
-
-                // Generate the file name based on the size
-                outputFileNameWithExtension = Path.Combine(directoryPath, $"{baseFileName}_CRC.{size}.WRL");
-
-
-                WoolichMT09Log exportItem = logs;
-
-                // Write data to a binary file
-                using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
-                {
-                    binWriter.Write(exportItem.PrimaryHeaderData);
-                    binWriter.Write(exportItem.SecondaryHeaderData);
-
-                    var packets = exportItem.GetPackets().Take(size);
-
-                    foreach (var packet in packets)
-                    {
-                        binWriter.Write(packet.Value);
-                    }
-                }
-
-                // Log information about the saved file
-                log($"{LogPrefix.Prefix}CRC saved as: " + Path.GetFileName(outputFileNameWithExtension));
-            }
-            catch (Exception ex)
-            {
-                // Log any error that occurs during the export process
-                log($"Error while exporting CRC: {ex.Message}");
-            }
-        }
         private void WoolichFileDecoderForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             userSettings.LogDirectory = this.logFolder;
@@ -907,9 +987,7 @@ namespace WoolichDecoder
             bool isFileLoaded = IsFileLoaded();
             btnAnalyse.Enabled = isFileLoaded;
             btnAutoTuneExport.Enabled = isFileLoaded;
-            btnExportCRCHack.Enabled = isFileLoaded;
-            btnExportCSV.Enabled = isFileLoaded;
-            btnExportTargetColumn.Enabled = isFileLoaded;
+            btnExport.Enabled = isFileLoaded;
             cmbExportType.Enabled = isFileLoaded;
             aTFCheckedListBox.Enabled = isFileLoaded;
             idleRPM.Enabled = isFileLoaded;
@@ -920,7 +998,6 @@ namespace WoolichDecoder
             CRCsize.Enabled = isFileLoaded;
             txtFeedback.Enabled = isFileLoaded;
             txtLogging.Enabled = isFileLoaded;
-            btnMulti.Enabled = isFileLoaded;
             cmbLogsLocation.Enabled = isFileLoaded;
             cmbExportFormat.Enabled = isFileLoaded;
         }

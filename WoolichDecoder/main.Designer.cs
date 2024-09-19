@@ -37,7 +37,7 @@
             this.txtFeedback = new System.Windows.Forms.TextBox();
             this.lblExportPacketsCount = new System.Windows.Forms.Label();
             this.lblExportFilename = new System.Windows.Forms.Label();
-            this.btnExportCSV = new System.Windows.Forms.Button();
+            this.btnExport = new System.Windows.Forms.Button();
             this.cmbExportType = new System.Windows.Forms.ComboBox();
             this.btnAutoTuneExport = new System.Windows.Forms.Button();
             this.lblExportType = new System.Windows.Forms.Label();
@@ -49,9 +49,6 @@
             this.txtBreakOnChange = new System.Windows.Forms.TextBox();
             this.btnAnalyse = new System.Windows.Forms.Button();
             this.btnRepair = new System.Windows.Forms.Button();
-            this.btnMulti = new System.Windows.Forms.Button();
-            this.btnExportCRCHack = new System.Windows.Forms.Button();
-            this.btnExportTargetColumn = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.aTFCheckedListBox = new System.Windows.Forms.CheckedListBox();
             this.label4 = new System.Windows.Forms.Label();
@@ -170,18 +167,17 @@
             this.lblExportFilename.Text = "Export Filename undefined";
             this.lblExportFilename.Visible = false;
             // 
-            // btnExportCSV
+            // btnExport
             // 
-            this.btnExportCSV.Enabled = false;
-            this.btnExportCSV.Location = new System.Drawing.Point(351, 428);
-            this.btnExportCSV.Margin = new System.Windows.Forms.Padding(2);
-            this.btnExportCSV.Name = "btnExportCSV";
-            this.btnExportCSV.Size = new System.Drawing.Size(114, 21);
-            this.btnExportCSV.TabIndex = 11;
-            this.btnExportCSV.Text = "Export";
-            this.toolTip1.SetToolTip(this.btnExportCSV, "Export and save file in CSV format");
-            this.btnExportCSV.UseVisualStyleBackColor = true;
-            this.btnExportCSV.Click += new System.EventHandler(this.btnExportCSV_Click);
+            this.btnExport.Location = new System.Drawing.Point(351, 428);
+            this.btnExport.Margin = new System.Windows.Forms.Padding(2);
+            this.btnExport.Name = "btnExport";
+            this.btnExport.Size = new System.Drawing.Size(114, 21);
+            this.btnExport.TabIndex = 11;
+            this.btnExport.Text = "Export";
+            this.toolTip1.SetToolTip(this.btnExport, "Export and save file.");
+            this.btnExport.UseVisualStyleBackColor = true;
+            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
             // 
             // cmbExportType
             // 
@@ -221,9 +217,9 @@
             this.lblExportType.Location = new System.Drawing.Point(114, 413);
             this.lblExportType.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblExportType.Name = "lblExportType";
-            this.lblExportType.Size = new System.Drawing.Size(79, 13);
+            this.lblExportType.Size = new System.Drawing.Size(39, 13);
             this.lblExportType.TabIndex = 15;
-            this.lblExportType.Text = "Export Type:";
+            this.lblExportType.Text = "Type:";
             // 
             // panel1
             // 
@@ -327,50 +323,6 @@
             this.toolTip1.SetToolTip(this.btnRepair, "Repair corrupted WRL ");
             this.btnRepair.UseVisualStyleBackColor = true;
             this.btnRepair.Click += new System.EventHandler(this.btnRepairWRLFile_Click);
-            // 
-            // btnMulti
-            // 
-            this.btnMulti.Enabled = false;
-            this.btnMulti.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnMulti.Location = new System.Drawing.Point(490, 470);
-            this.btnMulti.Margin = new System.Windows.Forms.Padding(2);
-            this.btnMulti.Name = "btnMulti";
-            this.btnMulti.Size = new System.Drawing.Size(236, 28);
-            this.btnMulti.TabIndex = 39;
-            this.btnMulti.Text = "Analyse Directory";
-            this.toolTip1.SetToolTip(this.btnMulti, "Find Max values in column for all WRL in folder");
-            this.btnMulti.UseVisualStyleBackColor = true;
-            this.btnMulti.Visible = false;
-            // 
-            // btnExportCRCHack
-            // 
-            this.btnExportCRCHack.Enabled = false;
-            this.btnExportCRCHack.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnExportCRCHack.Location = new System.Drawing.Point(489, 534);
-            this.btnExportCRCHack.Margin = new System.Windows.Forms.Padding(2);
-            this.btnExportCRCHack.Name = "btnExportCRCHack";
-            this.btnExportCRCHack.Size = new System.Drawing.Size(237, 26);
-            this.btnExportCRCHack.TabIndex = 19;
-            this.btnExportCRCHack.Text = "Export CRC to WRL";
-            this.toolTip1.SetToolTip(this.btnExportCRCHack, "Export packets specified by CRC size box.");
-            this.btnExportCRCHack.UseVisualStyleBackColor = true;
-            this.btnExportCRCHack.Visible = false;
-            this.btnExportCRCHack.Click += new System.EventHandler(this.btnExportCRCHack_Click);
-            // 
-            // btnExportTargetColumn
-            // 
-            this.btnExportTargetColumn.Enabled = false;
-            this.btnExportTargetColumn.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnExportTargetColumn.Location = new System.Drawing.Point(489, 502);
-            this.btnExportTargetColumn.Margin = new System.Windows.Forms.Padding(2);
-            this.btnExportTargetColumn.Name = "btnExportTargetColumn";
-            this.btnExportTargetColumn.Size = new System.Drawing.Size(237, 28);
-            this.btnExportTargetColumn.TabIndex = 18;
-            this.btnExportTargetColumn.Text = "Export Analysis to WRL";
-            this.toolTip1.SetToolTip(this.btnExportTargetColumn, "Export Analysed data to WRL file");
-            this.btnExportTargetColumn.UseVisualStyleBackColor = true;
-            this.btnExportTargetColumn.Visible = false;
-            this.btnExportTargetColumn.Click += new System.EventHandler(this.btnExportTargetColumn_Click);
             // 
             // label3
             // 
@@ -660,7 +612,6 @@
             this.cmbExportFormat.FormattingEnabled = true;
             this.cmbExportFormat.Items.AddRange(new object[] {
             "csv",
-            "tsv",
             "wrl"});
             this.cmbExportFormat.Location = new System.Drawing.Point(283, 429);
             this.cmbExportFormat.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -708,14 +659,11 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1284, 586);
-            this.Controls.Add(this.btnMulti);
             this.Controls.Add(this.lblExportMode);
             this.Controls.Add(this.cmbExportMode);
             this.Controls.Add(this.lblExportFormat);
             this.Controls.Add(this.cmbExportFormat);
-            this.Controls.Add(this.btnExportCRCHack);
             this.Controls.Add(this.cmbLogsLocation);
-            this.Controls.Add(this.btnExportTargetColumn);
             this.Controls.Add(this.lblLogsLocation);
             this.Controls.Add(this.lblDirName);
             this.Controls.Add(this.label19);
@@ -731,7 +679,7 @@
             this.Controls.Add(this.lblExportType);
             this.Controls.Add(this.btnAutoTuneExport);
             this.Controls.Add(this.cmbExportType);
-            this.Controls.Add(this.btnExportCSV);
+            this.Controls.Add(this.btnExport);
             this.Controls.Add(this.lblExportFilename);
             this.Controls.Add(this.txtFeedback);
             this.Controls.Add(this.lblFileName);
@@ -768,13 +716,11 @@
         private System.Windows.Forms.TextBox txtFeedback;
         private System.Windows.Forms.Label lblExportPacketsCount;
         private System.Windows.Forms.Label lblExportFilename;
-        private System.Windows.Forms.Button btnExportCSV;
+        private System.Windows.Forms.Button btnExport;
         private System.Windows.Forms.ComboBox cmbExportType;
         private System.Windows.Forms.Button btnAutoTuneExport;
         private System.Windows.Forms.Label lblExportType;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Button btnExportCRCHack;
-        private System.Windows.Forms.Button btnExportTargetColumn;
         private System.Windows.Forms.Label lblAnalysisCol;
         private System.Windows.Forms.TextBox txtBreakOnChange;
         private System.Windows.Forms.Button btnAnalyse;
@@ -805,7 +751,6 @@
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.Label lblDirName;
         private System.Windows.Forms.Button btnRepair;
-        private System.Windows.Forms.Button btnMulti;
         private System.Windows.Forms.Label lblLogsLocation;
         private System.Windows.Forms.ComboBox cmbLogsLocation;
         private System.Windows.Forms.ComboBox cmbExportFormat;
