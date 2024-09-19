@@ -643,7 +643,7 @@ namespace WoolichDecoder
             }
             else if (exportTypeIndex == 0 && exportModeIndex == 1)
             {
-                MessageBox.Show("Multi conversion to CSV format not supported yet");
+                ConvertAllWRLFilesToCSV();
             }
             else if (exportTypeIndex == 1 && exportFormatIndex == 0 && exportModeIndex == 0)
             {
@@ -1759,6 +1759,275 @@ namespace WoolichDecoder
             }
         }
 
+
+        private bool LoadFile(string filename)
+        {
+            try
+            {
+                // Clear any existing data
+                logs.ClearPackets();
+                //UpdateButtonStates();
+                Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
+                Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
+
+                if (!File.Exists(filename))
+                {
+                    lblFileName.Text = "Error: File Not Found";
+                    return false;
+                }
+
+                logFolder = Path.GetDirectoryName(filename);
+                openWRLFileDialog.InitialDirectory = logFolder;
+
+                string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(filename) + ".bin");
+                lblFileName.Text = Path.GetFileName(filename);
+                lblDirName.Text = Path.GetDirectoryName(filename);
+
+                using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
+                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
+                {
+                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
+
+                    // Search for the byte sequence 01 02 5D 01
+                    byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
+                    long position = FindPatternInFile(filename, searchPattern);
+
+                    if (position >= 0)
+                    {
+                        log($"{LogPrefix.Prefix}Header marker was found at position {position} bytes.");
+
+                        if (position != logs.PrimaryHeaderLength + 1)
+                        {
+                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                        }
+                    }
+                    else
+                    {
+                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                    }
+
+                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
+
+                    while (true)
+                    {
+                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
+                        if (packetPrefixBytes.Length < 5)
+                            break;
+
+                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
+                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
+
+                        if (packetBytes.Length < remainingPacketBytes)
+                            break;
+
+                        int totalPacketLength = packetPrefixBytes[3] + 3;
+                        logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, packetPrefixBytes[4]);
+                    }
+
+                    log($"{LogPrefix.Prefix}Data Loaded and {logs.GetPacketCount()} packets found.");
+                }
+
+                using (var fileStream = new FileStream(binOutputFileName, FileMode.Create))
+                using (var binWriter = new BinaryWriter(fileStream))
+                {
+                    foreach (var packet in logs.GetPackets())
+                    {
+                        binWriter.Write(packet.Value);
+                    }
+                }
+
+                string fileName = Path.GetFileName(binOutputFileName);
+                log($"{LogPrefix.Prefix}BIN file created and saved as: {fileName}");
+                return true;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                // Handle corrupted file scenario
+                log($"{LogPrefix.Prefix}File is corrupted or has an invalid format: {filename}.");
+                return false;
+            }
+            catch (Exception)
+            {
+                // Handle any unexpected errors
+                log($"{LogPrefix.Prefix}An unexpected error occurred with file {filename}.");
+                return false;
+            }
+        }
+
+
+        //private async void ConvertAllWRLFilesToCSV()
+        //{
+
+
+        //    using (FolderBrowserDialog folderDialog = new FolderBrowserDialog())
+        //    {
+        //        folderDialog.Description = "Select the folder containing WRL files";
+        //        folderDialog.ShowNewFolderButton = false;
+
+        //        // Show dialog and check if user selected a folder
+        //        if (folderDialog.ShowDialog() == DialogResult.OK)
+        //        {
+        //            string rootFolderPath = folderDialog.SelectedPath;
+
+        //            // Find all WRL files in the selected directory and subdirectories
+        //            var wrlFiles = Directory.EnumerateFiles(rootFolderPath, "*.wrl", SearchOption.AllDirectories);
+
+        //            // Set up progress reporting
+        //            progressBar.Visible = true;
+        //            progressLabel.Visible = true;
+        //            UpdateProgressLabel("Starting conversion...");
+
+        //            int totalFiles = wrlFiles.Count();
+        //            int processedFiles = 0;
+
+        //            await Task.Run(() =>
+        //            {
+        //                foreach (var filePath in wrlFiles)
+        //                {
+        //                    try
+        //                    {
+        //                        // Load the WRL file
+        //                        bool fileLoaded = LoadFile(filePath);
+        //                        if (!fileLoaded)
+        //                        {
+        //                            // Log error and continue with next file
+        //                            Invoke(new Action(() => log($"{LogPrefix.Prefix}Skipping file {filePath}.")));
+        //                            continue;
+        //                        }
+
+        //                        // Prepare CSV file path
+        //                        string directoryPath = Path.GetDirectoryName(filePath);
+        //                        string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
+        //                        var csvFileName = Path.Combine(directoryPath, fileNameWithoutExtension + ".csv");
+
+        //                        // Export to CSV
+        //                        WoolichMT09Log exportItem = logs; // Assuming 'logs' is the loaded log item
+        //                        using (StreamWriter outputFile = new StreamWriter(csvFileName))
+        //                        {
+        //                            // Write the header
+        //                            string csvHeader = exportItem.GetHeader(this.presumedStaticColumns, new List<int>());
+        //                            outputFile.WriteLine(csvHeader);
+
+        //                            var packets = exportItem.GetPackets();
+        //                            foreach (var packet in packets)
+        //                            {
+        //                                var exportLine = WoolichMT09Log.getCSV(packet.Value, packet.Key, exportItem.PacketFormat, this.presumedStaticColumns, new List<int>());
+        //                                outputFile.WriteLine(exportLine);
+        //                            }
+        //                        }
+
+        //                        // Update progress bar and label
+        //                        processedFiles++;
+        //                        int progressPercentage = (processedFiles * 100) / totalFiles;
+        //                        Invoke(new Action(() => progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum)));
+        //                        Invoke(new Action(() => UpdateProgressLabel($"Converting... {progressPercentage}% completed")));
+        //                    }
+        //                    catch (Exception ex)
+        //                    {
+        //                        // Log error and continue processing other files
+        //                        Invoke(new Action(() => log($"{LogPrefix.Prefix}Failed to process file {filePath}: {ex.Message}")));
+        //                    }
+        //                }
+
+        //                // Log success and update UI
+        //                Invoke(new Action(() => log($"{LogPrefix.Prefix}Conversion completed for {processedFiles} files.")));
+        //                Invoke(new Action(() => UpdateProgressLabel("Conversion completed successfully.")));
+        //            });
+        //        }
+        //    }
+
+        //    // Hide progress bar and reset labels outside the Task.Run
+        //    progressBar.Visible = false;
+        //    progressLabel.Visible = false;
+        //    UpdateProgressLabel("Export finished.");
+        //}
+
+        private async void ConvertAllWRLFilesToCSV()
+        {
+            using (FolderBrowserDialog folderDialog = new FolderBrowserDialog())
+            {
+                folderDialog.Description = "Select the folder containing WRL files";
+                folderDialog.ShowNewFolderButton = false;
+
+                // Show dialog and check if user selected a folder
+                if (folderDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string rootFolderPath = folderDialog.SelectedPath;
+
+                    // Find all WRL files in the selected directory and subdirectories
+                    var wrlFiles = Directory.EnumerateFiles(rootFolderPath, "*.wrl", SearchOption.AllDirectories);
+
+                    // Set up progress reporting
+                    progressBar.Visible = true;
+                    progressLabel.Visible = true;
+                    UpdateProgressLabel("Starting conversion...");
+
+                    int totalFiles = wrlFiles.Count();
+                    int processedFiles = 0;
+
+                    await Task.Run(() =>
+                    {
+                        foreach (var filePath in wrlFiles)
+                        {
+                            try
+                            {
+                                // Load the WRL file
+                                bool fileLoaded = LoadFile(filePath);
+                                if (!fileLoaded)
+                                {
+                                    // Log error and continue with next file
+                                    Invoke(new Action(() => log($"{LogPrefix.Prefix}Skipping file {filePath}.")));
+                                    continue;
+                                }
+
+                                // Prepare CSV file path
+                                string directoryPath = Path.GetDirectoryName(filePath);
+                                string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
+                                var csvFileName = Path.Combine(directoryPath, fileNameWithoutExtension + ".csv");
+
+                                // Export to CSV
+                                WoolichMT09Log exportItem = logs; // Assuming 'logs' is the loaded log item
+                                using (StreamWriter outputFile = new StreamWriter(csvFileName))
+                                {
+                                    // Write the header
+                                    string csvHeader = exportItem.GetHeader(this.presumedStaticColumns, new List<int>());
+                                    outputFile.WriteLine(csvHeader);
+
+                                    var packets = exportItem.GetPackets();
+                                    foreach (var packet in packets)
+                                    {
+                                        var exportLine = WoolichMT09Log.getCSV(packet.Value, packet.Key, exportItem.PacketFormat, this.presumedStaticColumns, new List<int>());
+                                        outputFile.WriteLine(exportLine);
+                                    }
+                                }
+
+                                // Update progress bar and label
+                                processedFiles++;
+                                Invoke(new Action(() => UpdateProgressLabel($"Processing file {processedFiles}/{totalFiles}")));
+                                int progressPercentage = (processedFiles * 100) / totalFiles;
+                                Invoke(new Action(() => progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum)));
+                            }
+                            catch (Exception ex)
+                            {
+                                // Log error and continue processing other files
+                                Invoke(new Action(() => log($"{LogPrefix.Prefix}Failed to process file {filePath}: {ex.Message}")));
+                            }
+                        }
+
+                        // Log success and update UI
+                        Invoke(new Action(() => log($"{LogPrefix.Prefix}Conversion completed for {processedFiles} files.")));
+                        Invoke(new Action(() => UpdateProgressLabel("Conversion completed successfully.")));
+                    });
+                }
+            }
+
+            // Hide progress bar and reset labels outside the Task.Run
+            progressBar.Visible = false;
+            progressLabel.Visible = false;
+            UpdateProgressLabel("Export finished.");
+        }
 
     }
 }
