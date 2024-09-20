@@ -186,7 +186,6 @@
             // cmbExportType
             // 
             this.cmbExportType.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.cmbExportType.Enabled = false;
             this.cmbExportType.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.cmbExportType.FormattingEnabled = true;
             this.cmbExportType.Items.AddRange(new object[] {
@@ -606,11 +605,11 @@
             // cmbExportFormat
             // 
             this.cmbExportFormat.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.cmbExportFormat.Enabled = false;
             this.cmbExportFormat.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.cmbExportFormat.FormattingEnabled = true;
             this.cmbExportFormat.Items.AddRange(new object[] {
             "csv",
+            "tsv",
             "wrl"});
             this.cmbExportFormat.Location = new System.Drawing.Point(266, 19);
             this.cmbExportFormat.Margin = new System.Windows.Forms.Padding(1);

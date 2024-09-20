@@ -69,7 +69,7 @@ namespace WoolichDecoder
         List<StaticPacketColumn> presumedStaticColumns = new List<StaticPacketColumn> { };
 
         List<int> analysisColumn = new List<int> { };
-
+ 
         public WoolichFileDecoderForm()
         {
             InitializeComponent();
@@ -79,7 +79,6 @@ namespace WoolichDecoder
             cmbExportMode.SelectedIndex = 0;
             cmbExportType.SelectedIndexChanged += cmbExportType_SelectedIndexChanged;
             cmbExportMode.SelectedIndexChanged += cmbExportMode_SelectedIndexChanged;
-            //cmbExportFormat.SelectedIndexChanged += cmbExportFormat_SelectedIndexChanged;
         }
         private bool IsFileLoaded()
         {
@@ -104,10 +103,10 @@ namespace WoolichDecoder
             // Define the options to display based on the selected index
             string[][] options = new string[][]
             {
-        new string[] { "csv" },        // For "Full File" (index 0)
-        new string[] { "csv", "wrl" }, // For "Analysis Only" (index 1)
+        new string[] { "csv", "tsv" },  // For "Full File" (index 0)
+        new string[] { "csv", "tsv", "wrl" }, // For "Analysis Only" (index 1)
         new string[] { "wrl" },        // For "CRC" (index 2)
-        new string[] { "csv", "wrl" }  // For type 3 (index 3)
+        new string[] { "wrl" }         // For "Autotune" (index 3)
             };
 
             // Clear existing items in cmbExportFormat
@@ -120,11 +119,12 @@ namespace WoolichDecoder
                 cmbExportFormat.Items.AddRange(options[selectedTypeIndex]);
                 cmbExportFormat.SelectedIndex = 0; // Default to the first option
 
-                // Enable or disable cmbExportMode based on the selected index
+                // Check if the cmbExportMode should be enabled or disabled
                 if (selectedTypeIndex == 0)
                 {
                     // Enable cmbExportMode if "Full File" is selected
                     cmbExportMode.Enabled = true;
+                    // Ensure cmbExportMode has a valid selection; set to default index 0 if no valid selection
                     if (cmbExportMode.SelectedIndex == -1)
                     {
                         cmbExportMode.SelectedIndex = 0;
@@ -132,55 +132,34 @@ namespace WoolichDecoder
                 }
                 else
                 {
-                    // Disable cmbExportMode for other options
+                    // Disable cmbExportMode if any other option is selected
                     cmbExportMode.Enabled = false;
+                    // Set cmbExportMode to default index 0
                     cmbExportMode.SelectedIndex = 0;
                 }
 
-                // Disable cmbExportFormat if "CRC" (index 2) is selected
-                cmbExportFormat.Enabled = (selectedTypeIndex != 2);
-            }
-
-            // Handle specific case for type 3
-            if (selectedTypeIndex == 3)
-            {
-                // Set cmbExportFormat to 1 and disable it (wyszarz)
-                if (cmbExportFormat.Items.Count > 1)
-                {
-                    cmbExportFormat.SelectedIndex = 1; // Set to index 1
-                }
-                cmbExportFormat.Enabled = false; // Wyszarz cmbExportFormat
-
-                // Automatically set mode to 0 and disable it (wyszarz cmbExportMode)
-                cmbExportMode.SelectedIndex = 0;
-                cmbExportMode.Enabled = false;
+                // Disable cmbExportFormat if "CRC" or "Autotune" is selected
+                cmbExportFormat.Enabled = (selectedTypeIndex < 2);
             }
 
             // Additional settings based on cmbExportMode
-            if (cmbExportMode.SelectedIndex == 1)
+            if (cmbExportMode.SelectedIndex == 1) // Directory mode
             {
-                // Set cmbExportType to index 0 and disable it
-                if (cmbExportType.Items.Count > 0)
-                {
-                    cmbExportType.SelectedIndex = 0;
-                    cmbExportType.Enabled = false;
-                }
-
-                // Set cmbExportFormat to index 0 and disable it
-                if (cmbExportFormat.Items.Count > 0)
-                {
-                    cmbExportFormat.SelectedIndex = 0;
-                    cmbExportFormat.Enabled = false;
-                }
-            }
-            else
-            {
-                // Ensure cmbExportType and cmbExportFormat are enabled for other conditions
-                cmbExportType.Enabled = true;
-                cmbExportFormat.Enabled = (selectedTypeIndex != 2 && selectedTypeIndex != 3); // Format disabled only for index 2 or 3
+                // Clear format options to avoid duplicates
+                cmbExportFormat.Items.Clear();
+                cmbExportFormat.Items.Add("csv");
+                cmbExportFormat.Items.Add("tsv");
+                cmbExportFormat.SelectedIndex = 0; // Default to the first option
             }
 
-            // Enable btnExport if both mode and type have valid selections
+            // Enable or disable the CRCsize textbox based on selected Type
+            CRCsize.Enabled = (selectedTypeIndex == 2); // Enable if CRC is selected
+
+            // Ensure cmbExportType and cmbExportFormat are enabled if cmbExportMode is not 1
+            cmbExportType.Enabled = true;
+            cmbExportFormat.Enabled = (selectedTypeIndex < 2);
+
+            // Make btnExport active when mode is set to 1 or other valid conditions
             btnExport.Enabled = cmbExportMode.SelectedIndex != -1 && cmbExportType.SelectedIndex != -1;
         }
         public void SetMT09_StaticColumns()
@@ -662,11 +641,11 @@ namespace WoolichDecoder
             }
             else if (exportTypeIndex == 0 && exportModeIndex == 1)
             {
-                ConvertAllWRLFilesToCSV();
+                ConvertWRLFileToText();
             }
             else if (exportTypeIndex == 1 && exportFormatIndex == 0 && exportModeIndex == 0)
             {
-                ExportCSV();
+                ExportToText();
             }
             else if (exportTypeIndex == 1 && exportFormatIndex == 1 && exportModeIndex == 0)
             {
@@ -674,7 +653,7 @@ namespace WoolichDecoder
             }
             else if (exportTypeIndex == 0)
             {
-                ExportCSV();  // Call ExportCSV if cmbExportType index is 0
+                ExportToText();  // Call ExportToText if cmbExportType index is 0
             }
         }
         private void ExportCRCHack()
@@ -817,8 +796,7 @@ namespace WoolichDecoder
             // Log the successful export
             log($"{LogPrefix.Prefix}Analysis WRL File saved as: " + Path.GetFileName(outputFileNameWithExtension));
         }
-        private async void ExportCSV()
-        //private async void btnExportCSV_Click(object sender, EventArgs e)
+        private async void ExportToText()
         {
             // Check if a file is loaded
             if (!IsFileLoaded())
@@ -848,8 +826,13 @@ namespace WoolichDecoder
                 return;
             }
 
-            // Set the CSV file name
-            var csvFileName = Path.Combine(directoryPath, fileNameWithoutExtension + ".csv");
+            // Check the export format: CSV or TSV
+            string exportFormat = cmbExportFormat.SelectedItem.ToString().ToLower();
+            string fileExtension = exportFormat == "tsv" ? ".tsv" : ".csv";
+            char delimiter = exportFormat == "tsv" ? '\t' : ',';
+
+            // Set the file name based on the chosen format
+            var exportFileName = Path.Combine(directoryPath, fileNameWithoutExtension + fileExtension);
 
             // "Export Full File" (Index 0) or "Export Analysis Only" (Index 1)
             if (cmbExportType.SelectedIndex == 0)
@@ -871,7 +854,7 @@ namespace WoolichDecoder
                         int columnNumber = int.Parse(txtBreakOnChange.Text.Trim());
 
                         // Modify the file name to include the column number for analysis
-                        csvFileName = Path.Combine(directoryPath, fileNameWithoutExtension + $"_C{columnNumber}.csv");
+                        exportFileName = Path.Combine(directoryPath, fileNameWithoutExtension + $"_C{columnNumber}" + fileExtension);
                     }
                     catch (Exception ex)
                     {
@@ -897,7 +880,7 @@ namespace WoolichDecoder
             }
 
             // Log the file name for debugging purposes
-            Console.WriteLine($"Exporting to file: {csvFileName}");
+            Console.WriteLine($"Exporting to file: {exportFileName}");
 
             // Check if the directory exists; if not, create it
             if (!Directory.Exists(directoryPath))
@@ -941,21 +924,21 @@ namespace WoolichDecoder
 
                 try
                 {
-                    using (StreamWriter outputFile = new StreamWriter(csvFileName))
+                    using (StreamWriter outputFile = new StreamWriter(exportFileName))
                     {
                         // Write the header
-                        string csvHeader = exportItem.GetHeader(this.presumedStaticColumns, combinedCols);
-                        outputFile.WriteLine(csvHeader);
+                        string exportHeader = exportItem.GetHeader(this.presumedStaticColumns, combinedCols);
+                        outputFile.WriteLine(string.Join(delimiter.ToString(), exportHeader.Split(','))); // Use the correct delimiter
 
                         var packets = exportItem.GetPackets();
                         int totalPackets = packets.Count;
                         int processedPackets = 0;
 
-                        // Write packet data to CSV
+                        // Write packet data to file
                         foreach (var packet in packets)
                         {
                             var exportLine = WoolichMT09Log.getCSV(packet.Value, packet.Key, exportItem.PacketFormat, this.presumedStaticColumns, combinedCols);
-                            outputFile.WriteLine(exportLine);
+                            outputFile.WriteLine(string.Join(delimiter.ToString(), exportLine.Split(','))); // Use the correct delimiter
                             outputFile.Flush();
 
                             // Update progress bar and label
@@ -974,8 +957,9 @@ namespace WoolichDecoder
                         }
                     }
 
+                    // Log
                     // Log success and update UI
-                    Invoke(new Action(() => log($"{LogPrefix.Prefix}Data exported to CSV format: " + Path.GetFileName(csvFileName))));
+                    Invoke(new Action(() => log($"{LogPrefix.Prefix}Data exported to {exportFormat.ToUpper()} format: " + Path.GetFileName(exportFileName))));
                     Invoke(new Action(() => UpdateProgressLabel("Export completed successfully.")));
                 }
                 catch (Exception ex)
@@ -1005,8 +989,6 @@ namespace WoolichDecoder
         {
             bool isFileLoaded = IsFileLoaded();
             btnAnalyse.Enabled = isFileLoaded;
-            btnExport.Enabled = isFileLoaded;
-            cmbExportType.Enabled = isFileLoaded;
             aTFCheckedListBox.Enabled = isFileLoaded;
             idleRPM.Enabled = isFileLoaded;
             minRPM.Enabled = isFileLoaded;
@@ -1017,7 +999,6 @@ namespace WoolichDecoder
             txtFeedback.Enabled = isFileLoaded;
             txtLogging.Enabled = isFileLoaded;
             cmbLogsLocation.Enabled = isFileLoaded;
-            cmbExportFormat.Enabled = isFileLoaded;
         }
         private void btnAnalyse_Click(object sender, EventArgs e)
         {
@@ -1868,7 +1849,7 @@ namespace WoolichDecoder
                 return false;
             }
         }
-        private async void ConvertAllWRLFilesToCSV()
+        private async void ConvertWRLFileToText()
         {
             using (FolderBrowserDialog folderDialog = new FolderBrowserDialog())
             {
@@ -1891,6 +1872,11 @@ namespace WoolichDecoder
                     int totalFiles = wrlFiles.Count();
                     int processedFiles = 0;
 
+                    // Determine the export format (CSV or TSV) based on user selection
+                    string exportFormat = cmbExportFormat.SelectedItem.ToString().ToLower();
+                    string fileExtension = exportFormat == "tsv" ? ".tsv" : ".csv"; // Choose .csv or .tsv
+                    char delimiter = exportFormat == "tsv" ? '\t' : ','; // Tab for TSV, comma for CSV
+
                     await Task.Run(() =>
                     {
                         foreach (var filePath in wrlFiles)
@@ -1906,24 +1892,24 @@ namespace WoolichDecoder
                                     continue;
                                 }
 
-                                // Prepare CSV file path
+                                // Prepare the new file path based on selected format
                                 string directoryPath = Path.GetDirectoryName(filePath);
                                 string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
-                                var csvFileName = Path.Combine(directoryPath, fileNameWithoutExtension + ".csv");
+                                var exportFileName = Path.Combine(directoryPath, fileNameWithoutExtension + fileExtension);
 
-                                // Export to CSV
+                                // Export to CSV or TSV
                                 WoolichMT09Log exportItem = logs; // Assuming 'logs' is the loaded log item
-                                using (StreamWriter outputFile = new StreamWriter(csvFileName))
+                                using (StreamWriter outputFile = new StreamWriter(exportFileName))
                                 {
-                                    // Write the header
-                                    string csvHeader = exportItem.GetHeader(this.presumedStaticColumns, new List<int>());
-                                    outputFile.WriteLine(csvHeader);
+                                    // Write the header with the appropriate delimiter
+                                    string exportHeader = exportItem.GetHeader(this.presumedStaticColumns, new List<int>());
+                                    outputFile.WriteLine(string.Join(delimiter.ToString(), exportHeader.Split(','))); // Dynamic delimiter
 
                                     var packets = exportItem.GetPackets();
                                     foreach (var packet in packets)
                                     {
                                         var exportLine = WoolichMT09Log.getCSV(packet.Value, packet.Key, exportItem.PacketFormat, this.presumedStaticColumns, new List<int>());
-                                        outputFile.WriteLine(exportLine);
+                                        outputFile.WriteLine(string.Join(delimiter.ToString(), exportLine.Split(','))); // Dynamic delimiter
                                     }
                                 }
 
@@ -1952,6 +1938,7 @@ namespace WoolichDecoder
             progressLabel.Visible = false;
             UpdateProgressLabel("Export finished.");
         }
+
     }
 }
 
