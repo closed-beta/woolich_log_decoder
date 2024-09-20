@@ -1769,7 +1769,7 @@ namespace WoolichDecoder
         {(0, 3, 0), ExportAutoTune}, // File, Autotune, wrl
         {(1, 0, 0), ExportDirToText}, // Directory, Full File, csv
         {(1, 0, 1), ExportDirToText}, // Directory, Full File, tsv
-        {(1, 3, 2), ExportDirAutoTune} // Directory, Autotune, wrl
+        {(1, 3, 0), ExportDirAutoTune} // Directory, Autotune, wrl
     };
 
             // Try to find the action for the selected combination of mode, type, and format
