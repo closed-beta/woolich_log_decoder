@@ -93,70 +93,6 @@ namespace WoolichDecoder
         {
             UpdateCmbExport();
         }
-        private void UpdateCmbExport()
-        {
-            // Define the options to display based on the selected index
-            string[][] options = new string[][]
-            {
-        new string[] { "csv", "tsv" },  // For "Full File" (index 0)
-        new string[] { "csv", "tsv", "wrl" }, // For "Analysis Only" (index 1)
-        new string[] { "wrl" },        // For "CRC" (index 2)
-        new string[] { "wrl" }         // For "Autotune" (index 3)
-            };
-
-            // Clear existing items in cmbExportFormat
-            cmbExportFormat.Items.Clear();
-
-            // Set items based on the selected index
-            int selectedTypeIndex = cmbExportType.SelectedIndex;
-            if (selectedTypeIndex >= 0 && selectedTypeIndex < options.Length)
-            {
-                cmbExportFormat.Items.AddRange(options[selectedTypeIndex]);
-                cmbExportFormat.SelectedIndex = 0; // Default to the first option
-
-                // Check if the cmbExportMode should be enabled or disabled
-                if (selectedTypeIndex == 0)
-                {
-                    // Enable cmbExportMode if "Full File" is selected
-                    cmbExportMode.Enabled = true;
-                    // Ensure cmbExportMode has a valid selection; set to default index 0 if no valid selection
-                    if (cmbExportMode.SelectedIndex == -1)
-                    {
-                        cmbExportMode.SelectedIndex = 0;
-                    }
-                }
-                else
-                {
-                    // Disable cmbExportMode if any other option is selected
-                    cmbExportMode.Enabled = false;
-                    // Set cmbExportMode to default index 0
-                    cmbExportMode.SelectedIndex = 0;
-                }
-
-                // Disable cmbExportFormat if "CRC" or "Autotune" is selected
-                cmbExportFormat.Enabled = (selectedTypeIndex < 2);
-            }
-
-            // Additional settings based on cmbExportMode
-            if (cmbExportMode.SelectedIndex == 1) // Directory mode
-            {
-                // Clear format options to avoid duplicates
-                cmbExportFormat.Items.Clear();
-                cmbExportFormat.Items.Add("csv");
-                cmbExportFormat.Items.Add("tsv");
-                cmbExportFormat.SelectedIndex = 0; // Default to the first option
-            }
-
-            // Enable or disable the CRCsize textbox based on selected Type
-            CRCsize.Enabled = (selectedTypeIndex == 2); // Enable if CRC is selected
-
-            // Ensure cmbExportType and cmbExportFormat are enabled if cmbExportMode is not 1
-            cmbExportType.Enabled = true;
-            cmbExportFormat.Enabled = (selectedTypeIndex < 2);
-
-            // Make btnExport active when mode is set to 1 or other valid conditions
-            btnExport.Enabled = cmbExportMode.SelectedIndex != -1 && cmbExportType.SelectedIndex != -1;
-        }
         public void SetMT09_StaticColumns()
         {
             decodedColumns = new List<int> {
@@ -480,149 +416,6 @@ namespace WoolichDecoder
                 progressLabel.Text = text;
             }
         }
-        private void ExportAutoTune()
-        {
-            if (!IsFileLoaded())
-            {
-
-                return;
-            }
-
-            WoolichMT09Log exportItem = logs;
-
-            // Check if the packet format is supported
-            if (exportItem.PacketFormat != 0x01)
-            {
-                MessageBox.Show("This bikes file cannot be adjusted by this software yet.");
-                return;
-            }
-
-            // Define the filter options and their corresponding binary values
-            var filterOptionMap = new Dictionary<string, int>
-    {
-        { autoTuneFilterOptions[0], 0 }, // MT09 ETV correction
-        { autoTuneFilterOptions[1], 1 }, // Remove Gear 2 logs
-        { autoTuneFilterOptions[2], 2 }, // Exclude below 1200 rpm
-        { autoTuneFilterOptions[3], 3 }, // Remove Gear 1, 2 & 3 engine braking
-        { autoTuneFilterOptions[4], 4 }  // Remove non-launch gear 1
-    };
-
-            // Create a binary string based on selected filter options
-            char[] binaryArray = new char[5];
-            for (int i = 0; i < 5; i++)
-            {
-                string filterOption = autoTuneFilterOptions[i];
-                binaryArray[i] = this.aTFCheckedListBox.CheckedItems.Contains(filterOption) ? '1' : '0';
-            }
-
-            string binaryString = new string(binaryArray);
-            string baseFileName = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
-            string directoryPath = lblDirName.Text.Trim();
-            string outputFileNameWithExtension = Path.Combine(directoryPath, $"{baseFileName}_{binaryString}_AT.WRL");
-
-            try
-            {
-                using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
-                {
-                    binWriter.Write(exportItem.PrimaryHeaderData);
-                    binWriter.Write(exportItem.SecondaryHeaderData);
-
-                    foreach (var packet in exportItem.GetPackets())
-                    {
-                        byte[] exportPackets = packet.Value.ToArray();
-                        int diff = 0;
-
-                        var outputGear = packet.Value.getGear();
-
-                        if (outputGear == 2 && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[1]))
-                        {
-                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                            diff = diff + newOutputGearByte - outputGear;
-                            outputGear = newOutputGearByte;
-                            exportPackets[24] = newOutputGearByte;
-                        }
-
-                        int minRPM = int.Parse(this.minRPM.Text);
-                        int maxRPM = int.Parse(this.maxRPM.Text);
-
-                        if (outputGear == 1 && (packet.Value.getRPM() < minRPM || packet.Value.getRPM() > maxRPM) && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[4]))
-                        {
-                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                            diff = diff + newOutputGearByte - outputGear;
-                            outputGear = newOutputGearByte;
-                            exportPackets[24] = newOutputGearByte;
-                        }
-
-                        int rpmLimit = int.Parse(idleRPM.Text);
-
-                        if (outputGear != 1 && packet.Value.getRPM() <= rpmLimit && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[2]))
-                        {
-                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                            diff = diff + newOutputGearByte - outputGear;
-                            outputGear = newOutputGearByte;
-                            exportPackets[24] = newOutputGearByte;
-                        }
-
-                        if (packet.Value.getCorrectETV() <= 1.2 && outputGear < 4 && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[3]))
-                        {
-                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
-                            diff = diff + newOutputGearByte - outputGear;
-                            outputGear = newOutputGearByte;
-                            exportPackets[24] = newOutputGearByte;
-                        }
-
-                        if (this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[0]))
-                        {
-                            double correctETV = exportPackets.getCorrectETV();
-                            byte hackedETVbyte = (byte)((correctETV * 1.66) + 38);
-                            diff = diff + hackedETVbyte - exportPackets[18];
-                            exportPackets[18] = hackedETVbyte;
-                        }
-                        exportPackets[95] += (byte)diff;
-
-                        binWriter.Write(exportPackets);
-                    }
-                }
-
-                log($"{LogPrefix.Prefix}Autotune WRL File saved as: " + Path.GetFileName(outputFileNameWithExtension));
-            }
-            catch (Exception ex)
-            {
-
-                log($"{LogPrefix.Prefix}Autotune WRL File saving error: {ex.Message}");
-            }
-        }
-        private void btnExport_Click(object sender, EventArgs e)
-        {
-            int exportTypeIndex = cmbExportType.SelectedIndex;
-            int exportFormatIndex = cmbExportFormat.SelectedIndex;
-            int exportModeIndex = cmbExportMode.SelectedIndex;
-
-            if (exportTypeIndex == 2)
-            {
-                ExportCRCHack();
-            }
-            else if (exportTypeIndex == 3)
-            {
-                ExportAutoTune();
-            }
-            else if (exportTypeIndex == 0 && exportModeIndex == 1)
-            {
-                ConvertWRLToText();
-            }
-            else if (exportTypeIndex == 1 && exportFormatIndex != 2 && exportModeIndex == 0)
-            {
-                ExportToText();
-            }
-            else if (exportTypeIndex == 1 && exportFormatIndex == 2 && exportModeIndex == 0)
-            {
-                ExportTargetColumn();
-            }
-            else if (exportTypeIndex == 0)
-            {
-                ExportToText();
-            }
-        }
         private void ExportCRCHack()
         {
             if (!IsFileLoaded())
@@ -632,7 +425,12 @@ namespace WoolichDecoder
             {
                 if (!int.TryParse(CRCsize.Text.Trim(), out int size))
                 {
-                    MessageBox.Show("Invalid size. Please enter a valid number.");
+                    MessageBox.Show(
+                        "Please enter a valid number.",
+                        "Invalid size",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information
+                    );
                     return;
                 }
 
@@ -686,17 +484,6 @@ namespace WoolichDecoder
                 exportItem = exportLogs;
             }
 
-            if (exportItem == null || !exportItem.GetPackets().Any())
-            {
-                MessageBox.Show(
-                    "No packets available for export.",
-                    "No Data Available",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
-                return;
-            }
-
             if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
             {
                 MessageBox.Show(
@@ -704,6 +491,17 @@ namespace WoolichDecoder
                     "Column Number Required",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information
+                );
+                return;
+            }
+
+            if (exportItem == null || !exportItem.GetPackets().Any())
+            {
+                MessageBox.Show(
+                    "No packets available for export.",
+                    "No Data Available",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
                 );
                 return;
             }
@@ -779,22 +577,37 @@ namespace WoolichDecoder
                         int columnNumber = int.Parse(txtBreakOnChange.Text.Trim());
                         exportFileName = Path.Combine(directoryPath, fileNameWithoutExtension + $"_C{columnNumber}" + fileExtension);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        MessageBox.Show("Invalid column number. Please provide a valid column number for analysis. " + ex.Message);
+                        MessageBox.Show(
+                            "Please provide a valid column number for analysis",
+                            "Invalid column number.",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information
+                        );
                         return;
                     }
                 }
                 else
                 {
-                    MessageBox.Show("No column number provided for analysis.");
+                    MessageBox.Show(
+                            "Please provide a column number for analysis",
+                            "No Column Number.",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information
+);
                     return;
                 }
             }
 
             if (exportItem.GetPacketCount() == 0)
             {
-                MessageBox.Show("No packets available for export.");
+                MessageBox.Show(
+                    "No packets available for export.",
+                    "No Data Available",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
                 return;
             }
 
@@ -917,7 +730,12 @@ namespace WoolichDecoder
             if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
             {
                 txtFeedback.Clear();
-                MessageBox.Show("Column number is empty. Please enter a valid column number." + Environment.NewLine);
+                MessageBox.Show(
+                    "Please enter a column number for export analysis.",
+                    "Column Number Required",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
                 DisplayLegend_Yamaha();
                 return;
             }
@@ -929,7 +747,13 @@ namespace WoolichDecoder
             }
             catch (Exception)
             {
-                MessageBox.Show("Invalid column number. Please enter a valid number.");
+                MessageBox.Show(
+                     "Please enter a valid number for export analysis.",
+                     "Column Number Required",
+                     MessageBoxButtons.OK,
+                     MessageBoxIcon.Information
+                );
+
                 txtFeedback.Clear();
                 ClearBoxAndPackets();
                 DisplayLegend_Yamaha();
@@ -961,7 +785,12 @@ namespace WoolichDecoder
             if (!columnFunctions.ContainsKey(columnNumber))
             {
                 // If not supported, display a message, log it, and clear data
-                MessageBox.Show("Unsupported column number. Please enter a valid column number.");
+                MessageBox.Show(
+                    "Please enter a valid column number for export analysis.",
+                    "Unsupported Column Number",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
                 txtFeedback.Clear();
                 ClearBoxAndPackets();
                 DisplayLegend_Yamaha();
@@ -1279,82 +1108,6 @@ namespace WoolichDecoder
                 progressLabel.Visible = false;
             }
         }
-        private void ConvertWRLToBIN(string wrlFileName, string binFileName, List<string> successfulConversions, List<string> failedConversions)
-        {
-            bool conversionSuccessful = false;
-
-            try
-            {
-                using (var fileStream = new FileStream(wrlFileName, FileMode.Open, FileAccess.Read))
-                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
-                using (var binFileStream = new FileStream(binFileName, FileMode.Create))
-                using (var binWriter = new BinaryWriter(binFileStream))
-                {
-                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
-
-                    byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
-                    long position = FindPatternInFile(wrlFileName, searchPattern);
-
-                    if (position >= 0)
-                    {
-                        if (position != logs.PrimaryHeaderLength + 1)
-                        {
-                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                        }
-                    }
-                    else
-                    {
-                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                    }
-
-                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
-
-                    while (true)
-                    {
-                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
-                        if (packetPrefixBytes.Length < logs.PacketPrefixLength)
-                            break;
-
-                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
-                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
-
-                        if (packetBytes.Length < remainingPacketBytes)
-                            break;
-
-                        byte[] packet = packetPrefixBytes.Concat(packetBytes).ToArray();
-                        binWriter.Write(packet);
-                    }
-
-                    conversionSuccessful = true;
-                }
-
-                if (conversionSuccessful)
-                {
-                    successfulConversions.Add(binFileName);
-                }
-            }
-            catch (Exception)
-            {
-                feedback($"ERROR converting file: {Path.GetFileName(wrlFileName)}");
-
-                failedConversions.Add(wrlFileName);
-
-                if (File.Exists(binFileName))
-                {
-                    try
-                    {
-                        File.Delete(binFileName);
-                        feedback($"Deleted corrupted BIN file: {Path.GetFileName(binFileName)}");
-                    }
-                    catch (Exception deleteEx)
-                    {
-                        feedback($"Failed to delete corrupted BIN file {binFileName}: {deleteEx.Message}");
-                    }
-                }
-            }
-        }
         private void RepairWRL(string inputFileName)
         {
             string directory = Path.GetDirectoryName(inputFileName);
@@ -1406,97 +1159,7 @@ namespace WoolichDecoder
                 }
             }
         }
-        private bool LoadFile(string filename)
-        {
-            try
-            {
-                logs.ClearPackets();
-                Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
-                Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
-
-                if (!File.Exists(filename))
-                {
-                    lblFileName.Text = "Error: File Not Found";
-                    return false;
-                }
-
-                logFolder = Path.GetDirectoryName(filename);
-                openWRLFileDialog.InitialDirectory = logFolder;
-
-                string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(filename) + ".bin");
-                lblFileName.Text = Path.GetFileName(filename);
-                lblDirName.Text = Path.GetDirectoryName(filename);
-
-                using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
-                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
-                {
-                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
-
-                    byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
-                    long position = FindPatternInFile(filename, searchPattern);
-
-                    if (position >= 0)
-                    {
-                        log($"{LogPrefix.Prefix}Header marker was found at position {position} bytes.");
-
-                        if (position != logs.PrimaryHeaderLength + 1)
-                        {
-                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                        }
-                    }
-                    else
-                    {
-                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                    }
-
-                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
-
-                    while (true)
-                    {
-                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
-                        if (packetPrefixBytes.Length < 5)
-                            break;
-
-                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
-                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
-
-                        if (packetBytes.Length < remainingPacketBytes)
-                            break;
-
-                        int totalPacketLength = packetPrefixBytes[3] + 3;
-                        logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, packetPrefixBytes[4]);
-                    }
-
-                    log($"{LogPrefix.Prefix}Data Loaded and {logs.GetPacketCount()} packets found.");
-                }
-
-                using (var fileStream = new FileStream(binOutputFileName, FileMode.Create))
-                using (var binWriter = new BinaryWriter(fileStream))
-                {
-                    foreach (var packet in logs.GetPackets())
-                    {
-                        binWriter.Write(packet.Value);
-                    }
-                }
-
-                string fileName = Path.GetFileName(binOutputFileName);
-                log($"{LogPrefix.Prefix}BIN file created and saved as: {fileName}");
-                return true;
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                log($"{LogPrefix.Prefix}File is corrupted or has an invalid format: {filename}.");
-                return false;
-            }
-            catch (Exception)
-            {
-                log($"{LogPrefix.Prefix}An unexpected error occurred with file {filename}.");
-                return false;
-            }
-        }
-        private async void ConvertWRLToText()
+        private async void ExportDirToText()
         {
             using (FolderBrowserDialog folderDialog = new FolderBrowserDialog())
             {
@@ -1650,6 +1313,481 @@ namespace WoolichDecoder
                 }
             }
         }
+        private bool LoadFile(string filename)
+        {
+            try
+            {
+                logs.ClearPackets();
+                Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
+                Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
+
+                if (!File.Exists(filename))
+                {
+                    lblFileName.Text = "Error: File Not Found";
+                    return false;
+                }
+
+                logFolder = Path.GetDirectoryName(filename);
+                openWRLFileDialog.InitialDirectory = logFolder;
+
+                string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(filename) + ".bin");
+                lblFileName.Text = Path.GetFileName(filename);
+                lblDirName.Text = Path.GetDirectoryName(filename);
+
+                using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
+                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
+                {
+                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
+
+                    byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
+                    long position = FindPatternInFile(filename, searchPattern);
+
+                    if (position >= 0)
+                    {
+                        log($"{LogPrefix.Prefix}Header marker was found at position {position} bytes.");
+
+                        if (position != logs.PrimaryHeaderLength + 1)
+                        {
+                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                        }
+                    }
+                    else
+                    {
+                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                    }
+
+                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
+
+                    while (true)
+                    {
+                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
+                        if (packetPrefixBytes.Length < 5)
+                            break;
+
+                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
+                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
+
+                        if (packetBytes.Length < remainingPacketBytes)
+                            break;
+
+                        int totalPacketLength = packetPrefixBytes[3] + 3;
+                        logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, packetPrefixBytes[4]);
+                    }
+
+                    log($"{LogPrefix.Prefix}Data Loaded and {logs.GetPacketCount()} packets found.");
+                }
+
+                using (var fileStream = new FileStream(binOutputFileName, FileMode.Create))
+                using (var binWriter = new BinaryWriter(fileStream))
+                {
+                    foreach (var packet in logs.GetPackets())
+                    {
+                        binWriter.Write(packet.Value);
+                    }
+                }
+
+                string fileName = Path.GetFileName(binOutputFileName);
+                log($"{LogPrefix.Prefix}BIN file created and saved as: {fileName}");
+                return true;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                log($"{LogPrefix.Prefix}File is corrupted or has an invalid format: {filename}.");
+                return false;
+            }
+            catch (Exception)
+            {
+                log($"{LogPrefix.Prefix}An unexpected error occurred with file {filename}.");
+                return false;
+            }
+        }
+        private void ExportAutoTune()
+        {
+            if (!IsFileLoaded())
+            {
+
+                return;
+            }
+
+            WoolichMT09Log exportItem = logs;
+
+            // Check if the packet format is supported
+            if (exportItem.PacketFormat != 0x01)
+            {
+                MessageBox.Show("This bikes file cannot be adjusted by this software yet.");
+                return;
+            }
+
+            // Define the filter options and their corresponding binary values
+            var filterOptionMap = new Dictionary<string, int>
+    {
+        { autoTuneFilterOptions[0], 0 }, // MT09 ETV correction
+        { autoTuneFilterOptions[1], 1 }, // Remove Gear 2 logs
+        { autoTuneFilterOptions[2], 2 }, // Exclude below 1200 rpm
+        { autoTuneFilterOptions[3], 3 }, // Remove Gear 1, 2 & 3 engine braking
+        { autoTuneFilterOptions[4], 4 }  // Remove non-launch gear 1
+    };
+
+            // Create a binary string based on selected filter options
+            char[] binaryArray = new char[5];
+            for (int i = 0; i < 5; i++)
+            {
+                string filterOption = autoTuneFilterOptions[i];
+                binaryArray[i] = this.aTFCheckedListBox.CheckedItems.Contains(filterOption) ? '1' : '0';
+            }
+
+            string binaryString = new string(binaryArray);
+            string baseFileName = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
+            string directoryPath = lblDirName.Text.Trim();
+            string outputFileNameWithExtension = Path.Combine(directoryPath, $"{baseFileName}_{binaryString}_AT.WRL");
+
+            try
+            {
+                using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
+                {
+                    binWriter.Write(exportItem.PrimaryHeaderData);
+                    binWriter.Write(exportItem.SecondaryHeaderData);
+
+                    foreach (var packet in exportItem.GetPackets())
+                    {
+                        byte[] exportPackets = packet.Value.ToArray();
+                        int diff = 0;
+
+                        var outputGear = packet.Value.getGear();
+
+                        if (outputGear == 2 && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[1]))
+                        {
+                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                            diff = diff + newOutputGearByte - outputGear;
+                            outputGear = newOutputGearByte;
+                            exportPackets[24] = newOutputGearByte;
+                        }
+
+                        int minRPM = int.Parse(this.minRPM.Text);
+                        int maxRPM = int.Parse(this.maxRPM.Text);
+
+                        if (outputGear == 1 && (packet.Value.getRPM() < minRPM || packet.Value.getRPM() > maxRPM) && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[4]))
+                        {
+                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                            diff = diff + newOutputGearByte - outputGear;
+                            outputGear = newOutputGearByte;
+                            exportPackets[24] = newOutputGearByte;
+                        }
+
+                        int rpmLimit = int.Parse(idleRPM.Text);
+
+                        if (outputGear != 1 && packet.Value.getRPM() <= rpmLimit && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[2]))
+                        {
+                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                            diff = diff + newOutputGearByte - outputGear;
+                            outputGear = newOutputGearByte;
+                            exportPackets[24] = newOutputGearByte;
+                        }
+
+                        if (packet.Value.getCorrectETV() <= 1.2 && outputGear < 4 && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[3]))
+                        {
+                            byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
+                            diff = diff + newOutputGearByte - outputGear;
+                            outputGear = newOutputGearByte;
+                            exportPackets[24] = newOutputGearByte;
+                        }
+
+                        if (this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[0]))
+                        {
+                            double correctETV = exportPackets.getCorrectETV();
+                            byte hackedETVbyte = (byte)((correctETV * 1.66) + 38);
+                            diff = diff + hackedETVbyte - exportPackets[18];
+                            exportPackets[18] = hackedETVbyte;
+                        }
+                        exportPackets[95] += (byte)diff;
+
+                        binWriter.Write(exportPackets);
+                    }
+                }
+
+                log($"{LogPrefix.Prefix}Autotune WRL File saved as: " + Path.GetFileName(outputFileNameWithExtension));
+            }
+            catch (Exception ex)
+            {
+
+                log($"{LogPrefix.Prefix}Autotune WRL File saving error: {ex.Message}");
+            }
+        }
+        private void ConvertWRLToBIN(string wrlFileName, string binFileName, List<string> successfulConversions, List<string> failedConversions)
+        {
+            bool conversionSuccessful = false;
+
+            try
+            {
+                using (var fileStream = new FileStream(wrlFileName, FileMode.Open, FileAccess.Read))
+                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
+                using (var binFileStream = new FileStream(binFileName, FileMode.Create))
+                using (var binWriter = new BinaryWriter(binFileStream))
+                {
+                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
+
+                    byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
+                    long position = FindPatternInFile(wrlFileName, searchPattern);
+
+                    if (position >= 0)
+                    {
+                        if (position != logs.PrimaryHeaderLength + 1)
+                        {
+                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                        }
+                    }
+                    else
+                    {
+                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                    }
+
+                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
+
+                    while (true)
+                    {
+                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
+                        if (packetPrefixBytes.Length < logs.PacketPrefixLength)
+                            break;
+
+                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
+                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
+
+                        if (packetBytes.Length < remainingPacketBytes)
+                            break;
+
+                        byte[] packet = packetPrefixBytes.Concat(packetBytes).ToArray();
+                        binWriter.Write(packet);
+                    }
+
+                    conversionSuccessful = true;
+                }
+
+                if (conversionSuccessful)
+                {
+                    successfulConversions.Add(binFileName);
+                }
+            }
+            catch (Exception)
+            {
+                feedback($"ERROR converting file: {Path.GetFileName(wrlFileName)}");
+
+                failedConversions.Add(wrlFileName);
+
+                if (File.Exists(binFileName))
+                {
+                    try
+                    {
+                        File.Delete(binFileName);
+                        feedback($"Deleted corrupted BIN file: {Path.GetFileName(binFileName)}");
+                    }
+                    catch (Exception deleteEx)
+                    {
+                        feedback($"Failed to delete corrupted BIN file {binFileName}: {deleteEx.Message}");
+                    }
+                }
+            }
+        }
+        private void ExportDirAutoTune()
+        {
+            using (var folderDialog = new FolderBrowserDialog())
+            {
+                if (folderDialog.ShowDialog() == DialogResult.OK)
+                {
+                    ExportDirAutoTune(folderDialog.SelectedPath);
+                }
+            }
+        }
+        private void ExportDirAutoTune(string directoryPath)
+        {
+            try
+            {
+                var wrlFiles = Directory.GetFiles(directoryPath, "*.wrl");
+
+                if (wrlFiles.Length == 0)
+                {
+                    MessageBox.Show("No WRL files found in the selected directory.", "No Files", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                int successfulCount = 0;
+                int failedCount = 0;
+                var stopwatch = new System.Diagnostics.Stopwatch();
+                stopwatch.Start();
+
+                foreach (var wrlFile in wrlFiles)
+                {
+                    OpenFileName = wrlFile;
+
+                    bool fileLoaded = LoadFile(wrlFile);
+                    if (fileLoaded)
+                    {
+                        ExportAutoTune();
+                        successfulCount++;
+                    }
+                    else
+                    {
+                        log($"{LogPrefix.Prefix}Failed to load file: {wrlFile}");
+                        failedCount++;
+                    }
+                }
+
+                stopwatch.Stop();
+
+                // Calculate time in minutes and seconds
+                var elapsed = stopwatch.Elapsed;
+                int minutes = elapsed.Minutes;
+                int seconds = elapsed.Seconds;
+
+                log($"{LogPrefix.Prefix}Total files processed: {wrlFiles.Length}");
+                log($"{LogPrefix.Prefix}Successfully processed: {successfulCount}");
+                log($"{LogPrefix.Prefix}Failed to process: {failedCount}");
+                log($"{LogPrefix.Prefix}Total processing time: {minutes} minutes {seconds} seconds");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred while processing the files: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        private void UpdateCmbExport()
+        {
+            // Define the options to display based on the selected index in cmbExportType
+            string[][] options = new string[][]
+            {
+        new string[] { "csv", "tsv" },       // For "Full File" (index 0)
+        new string[] { "csv", "tsv", "wrl" }, // For "Analysis Only" (index 1)
+        new string[] { "wrl" },               // For "CRC" (index 2)
+        new string[] { "wrl" }                // For "Autotune" (index 3)
+            };
+
+            // Clear existing items in cmbExportFormat
+            cmbExportFormat.Items.Clear();
+
+            // Set items based on the selected index in cmbExportType
+            int selectedTypeIndex = cmbExportType.SelectedIndex;
+            if (selectedTypeIndex >= 0 && selectedTypeIndex < options.Length)
+            {
+                cmbExportFormat.Items.AddRange(options[selectedTypeIndex]);
+                cmbExportFormat.SelectedIndex = 0; // Default to the first option
+
+                // Check if the cmbExportMode should be enabled or disabled
+                if (selectedTypeIndex == 0 || selectedTypeIndex == 1) // "Full File" or "Analysis Only"
+                {
+                    cmbExportMode.Enabled = true;
+                    if (cmbExportMode.SelectedIndex == -1)
+                    {
+                        cmbExportMode.SelectedIndex = 0;
+                    }
+                }
+                else if (selectedTypeIndex == 2 || selectedTypeIndex == 3) // "CRC" or "Autotune"
+                {
+                    cmbExportMode.Enabled = true; // Keep enabled for Autotune
+                }
+
+                // Disable cmbExportFormat if "CRC" is selected
+                if (selectedTypeIndex == 2)
+                {
+                    cmbExportFormat.Enabled = false;
+                }
+
+                // For "Autotune", gray out the cmbExportFormat and enable aTFCheckedListBox
+                if (selectedTypeIndex == 3) // Autotune
+                {
+                    cmbExportFormat.Enabled = false;  // Disable the export format combo box
+                    cmbExportFormat.SelectedIndex = 0; // Set to WRL as default
+
+                    // Enable the AutoTune filter options (aTFCheckedListBox)
+                    aTFCheckedListBox.Enabled = true;
+                    idleRPM.Enabled = true;
+                    minRPM.Enabled = true;
+                    maxRPM.Enabled = true;
+                }
+                else
+                {
+                    // For other types, enable the export format selection
+                    //cmbExportFormat.Enabled = true;
+
+                    // Disable the AutoTune filter options (aTFCheckedListBox) for other export types
+                    aTFCheckedListBox.Enabled = false;
+                    idleRPM.Enabled = false;
+                    minRPM.Enabled = false;
+                    maxRPM.Enabled = false;
+                }
+            }
+
+            // Additional settings if Directory mode is selected in cmbExportMode
+            if (cmbExportMode.SelectedIndex == 1) // Directory mode
+            {
+                // Check if "Autotune" is selected in cmbExportType
+                if (selectedTypeIndex == 3) // Autotune
+                {
+                    // Set export format to WRL only
+                    cmbExportFormat.Items.Clear();
+                    cmbExportFormat.Items.Add("wrl");
+                    cmbExportFormat.SelectedIndex = 0; // Default to WRL
+                    cmbExportFormat.Enabled = false; // Disable format combo box for Autotune
+                }
+                else
+                {
+                    // Clear format options and set to CSV/TSV for non-Autotune options
+                    cmbExportFormat.Items.Clear();
+                    cmbExportFormat.Items.Add("csv");
+                    cmbExportFormat.Items.Add("tsv");
+                    cmbExportFormat.SelectedIndex = 0; // Default to the first option
+                    cmbExportFormat.Enabled = true; // Enable format selection
+                }
+            }
+
+            // Enable or disable the CRCsize textbox based on selected Type
+            CRCsize.Enabled = (selectedTypeIndex == 2); // Enable if CRC is selected
+
+            // Ensure cmbExportType and cmbExportFormat are enabled if cmbExportMode is not 1
+            cmbExportType.Enabled = true;
+            cmbExportFormat.Enabled = (selectedTypeIndex < 2 || selectedTypeIndex == 3); // Enable for "Full File", "Analysis Only", or "Autotune"
+
+            // Make btnExport active when mode is set to 1 (Directory) or valid conditions
+            btnExport.Enabled = cmbExportMode.SelectedIndex != -1 && cmbExportType.SelectedIndex != -1;
+        }
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            int exportTypeIndex = cmbExportType.SelectedIndex;
+            int exportFormatIndex = cmbExportFormat.SelectedIndex;
+            int exportModeIndex = cmbExportMode.SelectedIndex;
+
+            // Dictionary mapping (mode, type, format) to corresponding export functions
+            var exportActions = new Dictionary<(int mode, int type, int format), Action>
+    {
+        {(0, 0, 0), ExportToText},  // File, Full File, csv
+        {(0, 0, 1), ExportToText},  // File, Full File, tsv
+        {(0, 1, 0), ExportToText},  // File, Analysis Only, csv
+        {(0, 1, 1), ExportToText},  // File, Analysis Only, tsv
+        {(0, 1, 2), ExportTargetColumn}, // File, Analysis Only, wrl
+        {(0, 2, 0), ExportCRCHack},  // File, CRC, wrl
+        {(0, 3, 0), ExportAutoTune}, // File, Autotune, wrl
+        {(1, 0, 0), ExportDirToText}, // Directory, Full File, csv
+        {(1, 0, 1), ExportDirToText}, // Directory, Full File, tsv
+        {(1, 3, 2), ExportDirAutoTune} // Directory, Autotune, wrl
+    };
+
+            // Try to find the action for the selected combination of mode, type, and format
+            if (exportActions.TryGetValue((exportModeIndex, exportTypeIndex, exportFormatIndex), out Action exportAction))
+            {
+                exportAction.Invoke();
+            }
+            else
+            {
+                MessageBox.Show(
+                    "Option is not supported at the moment.",
+                    "Not Supported",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
+        }
+
 
     }
 }

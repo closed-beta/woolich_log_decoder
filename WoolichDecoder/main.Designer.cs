@@ -41,12 +41,12 @@
             this.cmbExportType = new System.Windows.Forms.ComboBox();
             this.lblExportType = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.lblCRCsize = new System.Windows.Forms.Label();
-            this.CRCsize = new System.Windows.Forms.TextBox();
             this.lblPackets = new System.Windows.Forms.Label();
             this.lblAnalysisCol = new System.Windows.Forms.Label();
             this.txtBreakOnChange = new System.Windows.Forms.TextBox();
             this.btnAnalyse = new System.Windows.Forms.Button();
+            this.lblCRCsize = new System.Windows.Forms.Label();
+            this.CRCsize = new System.Windows.Forms.TextBox();
             this.btnRepair = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.aTFCheckedListBox = new System.Windows.Forms.CheckedListBox();
@@ -225,30 +225,6 @@
             this.panel1.Size = new System.Drawing.Size(455, 70);
             this.panel1.TabIndex = 16;
             // 
-            // lblCRCsize
-            // 
-            this.lblCRCsize.AutoSize = true;
-            this.lblCRCsize.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblCRCsize.Location = new System.Drawing.Point(5, 383);
-            this.lblCRCsize.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.lblCRCsize.Name = "lblCRCsize";
-            this.lblCRCsize.Size = new System.Drawing.Size(69, 15);
-            this.lblCRCsize.TabIndex = 38;
-            this.lblCRCsize.Text = "CRC size:";
-            // 
-            // CRCsize
-            // 
-            this.CRCsize.Enabled = false;
-            this.CRCsize.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.CRCsize.Location = new System.Drawing.Point(8, 400);
-            this.CRCsize.Margin = new System.Windows.Forms.Padding(2);
-            this.CRCsize.Name = "CRCsize";
-            this.CRCsize.Size = new System.Drawing.Size(66, 20);
-            this.CRCsize.TabIndex = 37;
-            this.CRCsize.Text = "100";
-            this.CRCsize.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.toolTip1.SetToolTip(this.CRCsize, "How many packets to export.");
-            // 
             // lblPackets
             // 
             this.lblPackets.AutoSize = true;
@@ -297,6 +273,30 @@
         "rt.");
             this.btnAnalyse.UseVisualStyleBackColor = true;
             this.btnAnalyse.Click += new System.EventHandler(this.btnAnalyse_Click);
+            // 
+            // lblCRCsize
+            // 
+            this.lblCRCsize.AutoSize = true;
+            this.lblCRCsize.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.lblCRCsize.Location = new System.Drawing.Point(5, 383);
+            this.lblCRCsize.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCRCsize.Name = "lblCRCsize";
+            this.lblCRCsize.Size = new System.Drawing.Size(69, 15);
+            this.lblCRCsize.TabIndex = 38;
+            this.lblCRCsize.Text = "CRC size:";
+            // 
+            // CRCsize
+            // 
+            this.CRCsize.Enabled = false;
+            this.CRCsize.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.CRCsize.Location = new System.Drawing.Point(8, 400);
+            this.CRCsize.Margin = new System.Windows.Forms.Padding(2);
+            this.CRCsize.Name = "CRCsize";
+            this.CRCsize.Size = new System.Drawing.Size(66, 20);
+            this.CRCsize.TabIndex = 37;
+            this.CRCsize.Text = "100";
+            this.CRCsize.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.toolTip1.SetToolTip(this.CRCsize, "How many packets to export.");
             // 
             // btnRepair
             // 
