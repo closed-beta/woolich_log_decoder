@@ -309,7 +309,7 @@
             this.btnRepair.Text = "Repair";
             this.toolTip1.SetToolTip(this.btnRepair, "Repair corrupted WRL ");
             this.btnRepair.UseVisualStyleBackColor = true;
-            this.btnRepair.Click += new System.EventHandler(this.btnRepairWRLFile_Click);
+            this.btnRepair.Click += new System.EventHandler(this.btnRepairWRL_Click);
             // 
             // label3
             // 
@@ -709,7 +709,7 @@
             this.MinimumSize = new System.Drawing.Size(1300, 625);
             this.Name = "WoolichFileDecoderForm";
             this.Text = "Woolich File Decoder";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.WoolichFileDecoderForm_FormClosing);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.WoolichFileDecoder_Close);
             this.Load += new System.EventHandler(this.WoolichFileDecoder_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();

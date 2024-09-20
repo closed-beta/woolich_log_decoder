@@ -4,12 +4,10 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WoolichDecoder.Models;
 using WoolichDecoder.Settings;
-using static System.Resources.ResXFileRef;
 
 namespace WoolichDecoder
 {
@@ -17,10 +15,7 @@ namespace WoolichDecoder
     {
         public static class LogPrefix
         {
-            // Date and Time format
             private static readonly string DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
-
-            // Generate prefix with date, time and string
             public static string Prefix => $"{DateTime.Now.ToString(DateTimeFormat)} -- ";
         }
 
@@ -69,7 +64,7 @@ namespace WoolichDecoder
         List<StaticPacketColumn> presumedStaticColumns = new List<StaticPacketColumn> { };
 
         List<int> analysisColumn = new List<int> { };
- 
+
         public WoolichFileDecoderForm()
         {
             InitializeComponent();
@@ -77,8 +72,8 @@ namespace WoolichDecoder
             cmbExportFormat.SelectedIndex = 0;
             cmbLogsLocation.SelectedIndex = 0;
             cmbExportMode.SelectedIndex = 0;
-            cmbExportType.SelectedIndexChanged += cmbExportType_SelectedIndexChanged;
-            cmbExportMode.SelectedIndexChanged += cmbExportMode_SelectedIndexChanged;
+            cmbExportType.SelectedIndexChanged += cmbExportType_Change;
+            cmbExportMode.SelectedIndexChanged += cmbExportMode_Change;
         }
         private bool IsFileLoaded()
         {
@@ -89,16 +84,16 @@ namespace WoolichDecoder
             }
             return true;
         }
-        private void cmbExportType_SelectedIndexChanged(object sender, EventArgs e)
+        private void cmbExportType_Change(object sender, EventArgs e)
         {
             // Update cmbExportFormat options based on the selected value in cmbExportType
-            UpdateExportFormatOptions();
+            UpdateCmbExport();
         }
-        private void cmbExportMode_SelectedIndexChanged(object sender, EventArgs e)
+        private void cmbExportMode_Change(object sender, EventArgs e)
         {
-            UpdateExportFormatOptions();
+            UpdateCmbExport();
         }
-        private void UpdateExportFormatOptions()
+        private void UpdateCmbExport()
         {
             // Define the options to display based on the selected index
             string[][] options = new string[][]
@@ -218,9 +213,7 @@ namespace WoolichDecoder
         }
         private void TxtBreakOnChange_TextChanged(object sender, EventArgs e)
         {
-            // Clear packets in exportLogs
             exportLogs.ClearPackets();
-            // Reset the packet count (if displayed in a label)
             lblExportPacketsCount.Text = "0";
         }
         private void WoolichFileDecoder_Load(object sender, EventArgs e)
@@ -247,6 +240,13 @@ namespace WoolichDecoder
                 aTFCheckedListBox.SetItemCheckState(i, CheckState.Checked);
             }
 
+        }
+        private void WoolichFileDecoder_Close(object sender, FormClosingEventArgs e)
+        {
+            userSettings.LogDirectory = this.logFolder;
+
+            // save the user settings.
+            userSettings.Save();
         }
         private List<int> FindPrefixes(byte[] data, byte[] prefix)
         {
@@ -281,7 +281,7 @@ namespace WoolichDecoder
         }
         private byte[] ProcessPackets(byte[] data, List<int> offsets, int prefixLength, int interval, out bool needsRepair)
         {
-            needsRepair = false; // Assume no repair needed by default
+            needsRepair = false;
 
             using (MemoryStream recoveredDataStream = new MemoryStream())
             {
@@ -289,7 +289,6 @@ namespace WoolichDecoder
                 byte[] header = new byte[headerLength];
                 Array.Copy(data, 0, header, 0, headerLength);
 
-                // Write the header to the stream initially
                 recoveredDataStream.Write(header, 0, header.Length);
 
                 int previousOffset = -1;
@@ -307,7 +306,7 @@ namespace WoolichDecoder
                         }
                     }
 
-                    if (currentOffset >= headerLength) // Ensure we only process packets after the header
+                    if (currentOffset >= headerLength)
                     {
                         int packetLength = Math.Min(interval, data.Length - currentOffset);
                         byte[] packetData = new byte[packetLength];
@@ -320,7 +319,6 @@ namespace WoolichDecoder
                     }
                 }
 
-                // Return the recovered data with the header included if gaps were found
                 return recoveredDataStream.ToArray();
             }
         }
@@ -345,28 +343,24 @@ namespace WoolichDecoder
 
                     if (match)
                     {
-                        return i; // Return the position where the pattern is found
+                        return i;
                     }
                 }
             }
-            return -1; // Pattern not found
+            return -1;
         }
         private void ClearBoxAndPackets()
         {
-            // Clear the text box
             txtBreakOnChange.Text = string.Empty;
 
-            // Clear packets in exportLogs
             exportLogs.ClearPackets();
 
-            // Reset the packet count (if displayed in a label)
             lblExportPacketsCount.Text = "0";
 
-            // Optionally, clear the export file name label
             lblExportFilename.Text = string.Empty;
 
         }
-        private void DisplayLegend()
+        private void DisplayLegend_Yamaha()
         {
             StringBuilder legend = new StringBuilder();
             legend.AppendLine("Available column numbers:");
@@ -391,33 +385,29 @@ namespace WoolichDecoder
         }
         private string GetDirectoryPath()
         {
-            // Check if cmbLogsLocation has a valid selection
-            if (cmbLogsLocation.SelectedIndex == 0) // Assuming 0 is the application's directory
+
+            if (cmbLogsLocation.SelectedIndex == 0)
             {
                 return AppDomain.CurrentDomain.BaseDirectory;
             }
-            else if (cmbLogsLocation.SelectedIndex == 1) // Assuming 1 is the open file directory
+            else if (cmbLogsLocation.SelectedIndex == 1)
             {
-                return lblDirName.Text; // Use the directory of the open file
+                return lblDirName.Text;
             }
             else
             {
-                // Default to application's directory if no valid selection is made
                 return AppDomain.CurrentDomain.BaseDirectory;
             }
         }
         private void feedback(string fbData)
         {
-            // Get the directory path
             string directoryPath = GetDirectoryPath();
 
-            // Ensure the directory path is valid
             if (string.IsNullOrEmpty(directoryPath))
             {
-                return; // Exit the function if the directory path is invalid
+                return;
             }
 
-            // Ensure the directory exists or try to create it
             if (!Directory.Exists(directoryPath))
             {
                 try
@@ -427,39 +417,32 @@ namespace WoolichDecoder
                 catch (Exception ex)
                 {
                     MessageBox.Show($"An error occurred while creating the directory: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return; // Exit the function if directory creation fails
+                    return;
                 }
             }
 
-            // Append the feedback data to the TextBox
             txtFeedback.AppendText(fbData + Environment.NewLine);
 
-            // Define the path to the feedback file
             string feedbackFilePath = Path.Combine(directoryPath, "feedback.txt");
 
             try
             {
-                // Write the feedback data to the file
                 File.AppendAllText(feedbackFilePath, $"{fbData}{Environment.NewLine}");
             }
             catch (Exception ex)
             {
-                // Display an error message if there is a problem writing to the file
                 MessageBox.Show($"An error occurred while saving the feedback: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         private void log(string logData)
         {
-            // Get the directory path
             string directoryPath = GetDirectoryPath();
 
-            // Ensure the directory path is valid
             if (string.IsNullOrEmpty(directoryPath))
             {
-                return; // Exit the function if the directory path is invalid
+                return;
             }
 
-            // Ensure the directory exists or try to create it
             if (!Directory.Exists(directoryPath))
             {
                 try
@@ -469,24 +452,20 @@ namespace WoolichDecoder
                 catch (Exception ex)
                 {
                     MessageBox.Show($"An error occurred while creating the directory: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return; // Exit the function if directory creation fails
+                    return;
                 }
             }
 
-            // Append the log data to the TextBox
             txtLogging.AppendText(logData + Environment.NewLine);
 
-            // Define the path to the log file
             string logFilePath = Path.Combine(directoryPath, "log.txt");
 
             try
             {
-                // Write the log data to the file
                 File.AppendAllText(logFilePath, $"{logData}{Environment.NewLine}");
             }
             catch (Exception ex)
             {
-                // Display an error message if there is a problem writing to the file
                 MessageBox.Show($"An error occurred while saving the log: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -501,10 +480,8 @@ namespace WoolichDecoder
                 progressLabel.Text = text;
             }
         }
-        private void AutoTuneExport()
-        //private void btnAutoTuneExport_Click(object sender, EventArgs e)
+        private void ExportAutoTune()
         {
-            // Check if a file is loaded
             if (!IsFileLoaded())
             {
 
@@ -539,18 +516,12 @@ namespace WoolichDecoder
             }
 
             string binaryString = new string(binaryArray);
-
-            // Extract the base file name from lblFileName
             string baseFileName = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
             string directoryPath = lblDirName.Text.Trim();
-
-            // Create the output file name based on the extracted base file name and binary string
             string outputFileNameWithExtension = Path.Combine(directoryPath, $"{baseFileName}_{binaryString}_AT.WRL");
-
 
             try
             {
-                // Write data to the output file
                 using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
                 {
                     binWriter.Write(exportItem.PrimaryHeaderData);
@@ -563,7 +534,6 @@ namespace WoolichDecoder
 
                         var outputGear = packet.Value.getGear();
 
-                        // Apply filters based on selected options
                         if (outputGear == 2 && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[1]))
                         {
                             byte newOutputGearByte = (byte)(exportPackets[24] & (~0b00000111));
@@ -572,8 +542,8 @@ namespace WoolichDecoder
                             exportPackets[24] = newOutputGearByte;
                         }
 
-                        int minRPM = int.Parse(this.minRPM.Text);  // Read and convert minimum RPM
-                        int maxRPM = int.Parse(this.maxRPM.Text);  // Read and convert maximum RPM
+                        int minRPM = int.Parse(this.minRPM.Text);
+                        int maxRPM = int.Parse(this.maxRPM.Text);
 
                         if (outputGear == 1 && (packet.Value.getRPM() < minRPM || packet.Value.getRPM() > maxRPM) && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[4]))
                         {
@@ -583,7 +553,7 @@ namespace WoolichDecoder
                             exportPackets[24] = newOutputGearByte;
                         }
 
-                        int rpmLimit = int.Parse(idleRPM.Text);  // Read and convert RPM limit
+                        int rpmLimit = int.Parse(idleRPM.Text);
 
                         if (outputGear != 1 && packet.Value.getRPM() <= rpmLimit && this.aTFCheckedListBox.CheckedItems.Contains(autoTuneFilterOptions[2]))
                         {
@@ -614,34 +584,31 @@ namespace WoolichDecoder
                     }
                 }
 
-                // Log success message
                 log($"{LogPrefix.Prefix}Autotune WRL File saved as: " + Path.GetFileName(outputFileNameWithExtension));
             }
             catch (Exception ex)
             {
-                // Log any errors that occur during file saving
+
                 log($"{LogPrefix.Prefix}Autotune WRL File saving error: {ex.Message}");
             }
         }
         private void btnExport_Click(object sender, EventArgs e)
         {
-            // Get the selected indexes from the ComboBoxes
             int exportTypeIndex = cmbExportType.SelectedIndex;
             int exportFormatIndex = cmbExportFormat.SelectedIndex;
             int exportModeIndex = cmbExportMode.SelectedIndex;
 
-            // Determine which function to call based on ComboBox selections
             if (exportTypeIndex == 2)
             {
-                ExportCRCHack();  // Call ExportCRCHack if cmbExportType index is 2
-            }            
+                ExportCRCHack();
+            }
             else if (exportTypeIndex == 3)
             {
-                AutoTuneExport();
+                ExportAutoTune();
             }
             else if (exportTypeIndex == 0 && exportModeIndex == 1)
             {
-                ConvertWRLFileToText();
+                ConvertWRLToText();
             }
             else if (exportTypeIndex == 1 && exportFormatIndex != 2 && exportModeIndex == 0)
             {
@@ -649,40 +616,32 @@ namespace WoolichDecoder
             }
             else if (exportTypeIndex == 1 && exportFormatIndex == 2 && exportModeIndex == 0)
             {
-                ExportTargetColumn();  // Call ExportTargetColumn if cmbExportType index is 1 and cmbExportFormat index is 2
+                ExportTargetColumn();
             }
             else if (exportTypeIndex == 0)
             {
-                ExportToText();  // Call ExportToText if cmbExportType index is 0
+                ExportToText();
             }
         }
         private void ExportCRCHack()
-        //private void btnExportCRCHack_Click(object sender, EventArgs e)
         {
             if (!IsFileLoaded())
                 return;
 
             try
             {
-                // Get size from textBox
                 if (!int.TryParse(CRCsize.Text.Trim(), out int size))
                 {
                     MessageBox.Show("Invalid size. Please enter a valid number.");
                     return;
                 }
 
-                // Extract the base file name from lblFilename (excluding any file extension)
                 string baseFileName = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
                 string directoryPath = lblDirName.Text.Trim();
-
-
-                // Generate the file name based on the size
                 outputFileNameWithExtension = Path.Combine(directoryPath, $"{baseFileName}_CRC.{size}.WRL");
-
 
                 WoolichMT09Log exportItem = logs;
 
-                // Write data to a binary file
                 using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
                 {
                     binWriter.Write(exportItem.PrimaryHeaderData);
@@ -696,87 +655,67 @@ namespace WoolichDecoder
                     }
                 }
 
-                // Log information about the saved file
                 log($"{LogPrefix.Prefix}CRC saved as: " + Path.GetFileName(outputFileNameWithExtension));
             }
             catch (Exception ex)
             {
-                // Log any error that occurs during the export process
                 log($"Error while exporting CRC: {ex.Message}");
             }
         }
         private void ExportTargetColumn()
-        //private void btnExportTargetColumn_Click(object sender, EventArgs e)
         {
             if (!IsFileLoaded())
                 return;
 
             WoolichMT09Log exportItem = null;
 
-            // Check if the selected export type is supported
             if (cmbExportType.SelectedIndex == 0)
             {
-                // "Export Full File"
                 exportItem = logs;
 
-                // Inform the user that only "Export Analysis Only" is supported
                 MessageBox.Show(
                     "Export Analysis Only is supported at the moment.",
                     "Export Not Supported",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information
                 );
-                return; // Exit the method if the export type is not supported
+                return;
             }
             else
             {
-                // "Export Analysis Only"
                 exportItem = exportLogs;
             }
 
-            // Check if there are any packets to process
             if (exportItem == null || !exportItem.GetPackets().Any())
             {
-                // Show a message prompting the user to select and analyze data
                 MessageBox.Show(
                     "No packets available for export.",
                     "No Data Available",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning
                 );
-                return; // Exit the method if no packets are available
+                return;
             }
 
-            // Check if a valid column number is provided
             if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
             {
-                // Prompt the user to enter a column number
                 MessageBox.Show(
                     "Please enter a column number for export analysis.",
                     "Column Number Required",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information
                 );
-                return; // Exit the method if no column number is provided
+                return;
             }
 
             string outputFileNameWithExtension = "";
 
             try
             {
-                // Extract the base file name from lblFileName
                 string baseFileName = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
                 string directoryPath = lblDirName.Text.Trim();
-
-                // Get the column number from the text box
                 var columnToExport = int.Parse(txtBreakOnChange.Text.Trim());
-
-                // Construct the output file name
-                //outputFileNameWithExtension = $"{baseFileName}_C{columnToExport}.WRL";
                 outputFileNameWithExtension = Path.Combine(directoryPath, $"{baseFileName}_C{columnToExport}.WRL");
-
-
-                // Write data to a binary file
                 using (BinaryWriter binWriter = new BinaryWriter(File.Open(outputFileNameWithExtension, FileMode.Create)))
                 {
                     binWriter.Write(exportItem.PrimaryHeaderData);
@@ -789,16 +728,13 @@ namespace WoolichDecoder
             }
             catch (Exception ex)
             {
-                // Handle exceptions and provide feedback
                 MessageBox.Show($"Error during file export: {ex.Message}");
             }
 
-            // Log the successful export
             log($"{LogPrefix.Prefix}Analysis WRL File saved as: " + Path.GetFileName(outputFileNameWithExtension));
         }
         private async void ExportToText()
         {
-            // Check if a file is loaded
             if (!IsFileLoaded())
             {
                 return;
@@ -806,83 +742,62 @@ namespace WoolichDecoder
 
             WoolichMT09Log exportItem = null;
 
-            // Get the directory path from lblDirName
             string directoryPath = lblDirName.Text.Trim();
 
-            // Check if the directory path is valid
             if (string.IsNullOrWhiteSpace(directoryPath))
             {
                 MessageBox.Show("Directory path is not defined.");
                 return;
             }
 
-            // Get the file name from lblFileName and remove the extension
             string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
 
-            // Check if the file name is valid
             if (string.IsNullOrWhiteSpace(fileNameWithoutExtension))
             {
                 MessageBox.Show("File name is not defined.");
                 return;
             }
 
-            // Check the export format: CSV or TSV
             string exportFormat = cmbExportFormat.SelectedItem.ToString().ToLower();
             string fileExtension = exportFormat == "tsv" ? ".tsv" : ".csv";
             char delimiter = exportFormat == "tsv" ? '\t' : ',';
 
-            // Set the file name based on the chosen format
             var exportFileName = Path.Combine(directoryPath, fileNameWithoutExtension + fileExtension);
 
-            // "Export Full File" (Index 0) or "Export Analysis Only" (Index 1)
             if (cmbExportType.SelectedIndex == 0)
             {
-                // "Export Full File" option selected
                 exportItem = logs;
             }
             else
             {
-                // "Export Analysis Only" option selected
                 exportItem = exportLogs;
 
-                // Check if a valid column number is provided
                 if (!string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
                 {
                     try
                     {
-                        // Parse the column number from the text input
                         int columnNumber = int.Parse(txtBreakOnChange.Text.Trim());
-
-                        // Modify the file name to include the column number for analysis
                         exportFileName = Path.Combine(directoryPath, fileNameWithoutExtension + $"_C{columnNumber}" + fileExtension);
                     }
                     catch (Exception ex)
                     {
-                        // Handle parsing errors if the input is not a valid integer
                         MessageBox.Show("Invalid column number. Please provide a valid column number for analysis. " + ex.Message);
-                        return; // Exit function if the column number is invalid
+                        return;
                     }
                 }
                 else
                 {
-                    // No column number provided, show a warning message
                     MessageBox.Show("No column number provided for analysis.");
                     return;
                 }
             }
 
-            // Check if there are any packets to export
             if (exportItem.GetPacketCount() == 0)
             {
-                // Display a message if there are no packets to export
                 MessageBox.Show("No packets available for export.");
                 return;
             }
 
-            // Log the file name for debugging purposes
-            Console.WriteLine($"Exporting to file: {exportFileName}");
-
-            // Check if the directory exists; if not, create it
             if (!Directory.Exists(directoryPath))
             {
                 try
@@ -896,12 +811,10 @@ namespace WoolichDecoder
                 }
             }
 
-            // Proceed with export
             progressBar.Visible = true;
             progressLabel.Visible = true;
             UpdateProgressLabel("Starting export...");
 
-            // Run the export process asynchronously using Task.Run
             await Task.Run(() =>
             {
                 int packetCount = exportItem.GetPacketCount();
@@ -926,7 +839,6 @@ namespace WoolichDecoder
                 {
                     using (StreamWriter outputFile = new StreamWriter(exportFileName))
                     {
-                        // Write the header
                         string exportHeader = exportItem.GetHeader(this.presumedStaticColumns, combinedCols);
                         outputFile.WriteLine(string.Join(delimiter.ToString(), exportHeader.Split(','))); // Use the correct delimiter
 
@@ -934,14 +846,12 @@ namespace WoolichDecoder
                         int totalPackets = packets.Count;
                         int processedPackets = 0;
 
-                        // Write packet data to file
                         foreach (var packet in packets)
                         {
                             var exportLine = WoolichMT09Log.getCSV(packet.Value, packet.Key, exportItem.PacketFormat, this.presumedStaticColumns, combinedCols);
                             outputFile.WriteLine(string.Join(delimiter.ToString(), exportLine.Split(','))); // Use the correct delimiter
                             outputFile.Flush();
 
-                            // Update progress bar and label
                             processedPackets++;
                             int progressPercentage = (processedPackets * 100) / totalPackets;
                             Invoke(new Action(() => progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum)));
@@ -956,21 +866,16 @@ namespace WoolichDecoder
                             }
                         }
                     }
-
-                    // Log
-                    // Log success and update UI
                     Invoke(new Action(() => log($"{LogPrefix.Prefix}Data exported to {exportFormat.ToUpper()} format: " + Path.GetFileName(exportFileName))));
                     Invoke(new Action(() => UpdateProgressLabel("Export completed successfully.")));
                 }
                 catch (Exception ex)
                 {
-                    // Handle any errors during file writing
                     Invoke(new Action(() => MessageBox.Show($"An error occurred: {ex.Message}")));
                     Invoke(new Action(() => UpdateProgressLabel("Error occurred during export.")));
                 }
                 finally
                 {
-                    // Hide progress bar and reset labels
                     Invoke(new Action(() => UpdateProgressLabel("Export finished.")));
                     System.Threading.Thread.Sleep(3000);
                     Invoke(new Action(() => progressBar.Visible = false));
@@ -978,14 +883,7 @@ namespace WoolichDecoder
                 }
             });
         }
-        private void WoolichFileDecoderForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            userSettings.LogDirectory = this.logFolder;
-
-            // save the user settings.
-            userSettings.Save();
-        }
-        private void UpdateButtonStates()
+        private void UpdateFormsStates()
         {
             bool isFileLoaded = IsFileLoaded();
             btnAnalyse.Enabled = isFileLoaded;
@@ -995,54 +893,46 @@ namespace WoolichDecoder
             maxRPM.Enabled = isFileLoaded;
             lblExportPacketsCount.Enabled = isFileLoaded;
             txtBreakOnChange.Enabled = isFileLoaded;
-            CRCsize.Enabled = isFileLoaded;
             txtFeedback.Enabled = isFileLoaded;
             txtLogging.Enabled = isFileLoaded;
             cmbLogsLocation.Enabled = isFileLoaded;
         }
         private void btnAnalyse_Click(object sender, EventArgs e)
         {
-            // Get the selected index from the ComboBox (cmbExportMode)
             int selectedIndex = cmbExportMode.SelectedIndex;
 
-            // Check the index and call the corresponding function
             if (selectedIndex == 0)
             {
                 if (!IsFileLoaded())
                     return;
-                Analyse();  // Call Analyse function if index is 0
+                Analyse();
             }
             else if (selectedIndex == 1)
             {
-                MultiAnalyse();  // Call MultiAnalyse function if index is 1
+                MultiAnalyse();
             }
         }
         private async void Analyse()
         {
-            // Check if the textbox contains a valid column number
             if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
             {
-                // Display a message if the column number is empty and log it
                 txtFeedback.Clear();
                 MessageBox.Show("Column number is empty. Please enter a valid column number." + Environment.NewLine);
-                DisplayLegend();
+                DisplayLegend_Yamaha();
                 return;
             }
 
             int columnNumber;
             try
             {
-                // Try to parse the textbox input as an integer
                 columnNumber = int.Parse(txtBreakOnChange.Text);
             }
             catch (Exception)
             {
-                // If parsing fails, display an error message and log the exception
                 MessageBox.Show("Invalid column number. Please enter a valid number.");
                 txtFeedback.Clear();
-                //log($"{LogPrefix.Prefix}Error parsing column number." + Environment.NewLine);
-                ClearBoxAndPackets();   // Clear text box and packets
-                DisplayLegend();        // Show legend for valid columns
+                ClearBoxAndPackets();
+                DisplayLegend_Yamaha();
                 return;
             }
 
@@ -1072,21 +962,18 @@ namespace WoolichDecoder
             {
                 // If not supported, display a message, log it, and clear data
                 MessageBox.Show("Unsupported column number. Please enter a valid column number.");
-                //log($"{LogPrefix.Prefix}Column not supported for analysis.");
                 txtFeedback.Clear();
-                ClearBoxAndPackets();  // Clear text box and packets
-                DisplayLegend();        // Show legend for valid columns
+                ClearBoxAndPackets();
+                DisplayLegend_Yamaha();
                 return;
             }
 
-            // Proceed with analysis if column number is valid
             feedback($"{LogPrefix.Prefix}Monitoring changes on column: {columnNumber}");
             analysisColumn.Add(columnNumber);
 
-            // Begin analysis for the specific column
             feedback($"{LogPrefix.Prefix}Analysing column {columnNumber}...");
             lblExportPacketsCount.Text = string.Empty;
-            exportLogs.ClearPackets(); // Clear the export log
+            exportLogs.ClearPackets();
             DateTime startTime = DateTime.Now;
             log($"{LogPrefix.Prefix}Start Analysing...");
 
@@ -1097,28 +984,23 @@ namespace WoolichDecoder
             double? minValue = null;
             double? maxValue = null;
 
-            // Get all packets from the logs for analysis
             var packets = logs.GetPackets();
             int totalPackets = packets.Count;
             int processedPackets = 0;
 
-            // Show the progress bar and initialize it
             progressBar.Visible = true;
             progressLabel.Visible = true;
             progressBar.Value = 0;
             UpdateProgressLabel("Starting analysis...");
 
-            // Run the analysis in a separate task to avoid blocking the UI
             await Task.Run(() =>
             {
                 foreach (KeyValuePair<string, byte[]> packet in packets)
                 {
                     try
                     {
-                        // Perform conversion and get the current value for the column
                         double currentValue = conversionFunction(packet.Value);
 
-                        // Initialize min and max values on the first packet
                         if (previousValue == null)
                         {
                             minValue = currentValue;
@@ -1128,17 +1010,14 @@ namespace WoolichDecoder
                             continue;
                         }
 
-                        // Update min and max values as the analysis proceeds
                         if (currentValue > maxValue) maxValue = currentValue;
                         if (currentValue < minValue) minValue = currentValue;
 
-                        // If the value changes, log the change and add packet to export
                         if (currentValue != previousValue)
                         {
                             feedbackBuffer.AppendLine($"Column {columnNumber} changed from {previousValue} to {currentValue}");
                             previousValue = currentValue;
 
-                            // Export the packet if the column is being monitored
                             if (analysisColumn.Contains(columnNumber))
                             {
                                 exportLogs.AddPacket(packet.Value, logs.PacketLength, logs.PacketFormat);
@@ -1147,31 +1026,25 @@ namespace WoolichDecoder
                     }
                     catch (Exception ex)
                     {
-                        // Log any errors encountered during analysis
                         feedbackBuffer.AppendLine($"Error processing column {columnNumber}: {ex.Message}");
                     }
 
-                    // Update the progress of the analysis
                     processedPackets++;
                     int progressPercentage = (processedPackets * 100) / totalPackets;
 
-                    // Update progress bar and label in the UI
                     this.Invoke(new Action(() =>
                     {
                         progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum);
                         UpdateProgressLabel($"Analyzing... {progressPercentage}% completed");
                     }));
 
-                    // Allow the UI to update during the analysis loop
                     Application.DoEvents();
                 }
             });
 
-            // Once analysis is completed, log min and max values
             feedbackBuffer.AppendLine($"Column {columnNumber} min value: {minValue}, max value: {maxValue}");
             feedback(feedbackBuffer.ToString());
 
-            // Continue with further operations, such as exporting the results
             feedback($"{LogPrefix.Prefix}Exporting {exportLogs.GetPacketCount()}/{processedPackets} packets");
             lblExportPacketsCount.Text = $"{exportLogs.GetPacketCount()}";
 
@@ -1180,19 +1053,18 @@ namespace WoolichDecoder
             string durationFormatted = duration.ToString(@"mm\:ss\.ff");
             log($"{LogPrefix.Prefix}Analysis completed in {durationFormatted}.");
             UpdateProgressLabel("Analysis finished.");
-            System.Threading.Thread.Sleep(3000); // Allow time for user to see completion status
+            System.Threading.Thread.Sleep(3000);
             progressBar.Visible = false;
-            progressLabel.Visible = false; // Hide progress UI elements
+            progressLabel.Visible = false;
         }
         private async void MultiAnalyse()
-        //private async void btnMultiAnalyse_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
             {
                 txtFeedback.Clear();
                 MessageBox.Show("Column number is empty. Please enter a valid column number." + Environment.NewLine);
-                DisplayLegend();
- 
+                DisplayLegend_Yamaha();
+
                 return;
             }
 
@@ -1205,7 +1077,7 @@ namespace WoolichDecoder
             {
                 txtFeedback.Clear();
                 MessageBox.Show($"Invalid column number. Please enter a valid number." + Environment.NewLine);
-                DisplayLegend();
+                DisplayLegend_Yamaha();
                 return;
             }
 
@@ -1233,9 +1105,9 @@ namespace WoolichDecoder
             {
                 txtFeedback.Clear();
                 MessageBox.Show("Unsupported column number. Please enter a valid column number." + Environment.NewLine);
-                DisplayLegend();
-                
-                
+                DisplayLegend_Yamaha();
+
+
                 return;
             }
 
@@ -1247,21 +1119,18 @@ namespace WoolichDecoder
                 string folderPath = folderDialog.SelectedPath;
                 lblDirName.Text = folderPath;
 
-                // Step 1: Find WRL files and inform the user
                 var wrlFiles = Directory.GetFiles(folderPath, "*.wrl", SearchOption.AllDirectories);
                 log($"{LogPrefix.Prefix}Total WRL files found: {wrlFiles.Length}");
 
-                // Step 2: Convert WRL files to BIN and inform the user about the conversion progress
                 var successfulConversions = new List<string>();
                 var failedConversions = new List<string>();
 
                 DateTime startTime = DateTime.Now;
                 log($"{LogPrefix.Prefix}Starting Multi File Conversion...");
 
-                // Initialize progress bar
                 progressBar.Visible = true;
                 progressLabel.Visible = true;
-                progressBar.Maximum = wrlFiles.Length; // Set maximum value for progress bar
+                progressBar.Maximum = wrlFiles.Length;
                 progressBar.Value = 0;
                 UpdateProgressLabel("Converting files...");
 
@@ -1270,14 +1139,13 @@ namespace WoolichDecoder
                     string binFile = Path.Combine(Path.GetDirectoryName(wrlFile), Path.GetFileNameWithoutExtension(wrlFile) + ".bin");
                     ConvertWRLToBIN(wrlFile, binFile, successfulConversions, failedConversions);
 
-                    // Update progress bar
                     this.Invoke(new Action(() =>
                     {
                         progressBar.Value++;
                         UpdateProgressLabel($"Converting files... {progressBar.Value}/{progressBar.Maximum} files processed");
                     }));
 
-                    Application.DoEvents(); // Ensure the UI updates
+                    Application.DoEvents();
                 }
 
                 int totalFiles = wrlFiles.Length;
@@ -1288,9 +1156,6 @@ namespace WoolichDecoder
                 log($"{LogPrefix.Prefix}Successfully converted {convertedFiles} files.");
                 log($"{LogPrefix.Prefix}{failedFiles} files failed.");
 
-
-
-                // Step 3: Analyze converted files
                 if (successfulConversions.Count == 0)
                 {
                     feedback("No successful BIN files found in the selected folder.");
@@ -1305,7 +1170,7 @@ namespace WoolichDecoder
 
                 await Task.Run(() =>
                 {
-                    int processedFilesCount = 0; // Counter for processed files
+                    int processedFilesCount = 0;
 
                     foreach (var binFile in successfulConversions)
                     {
@@ -1373,7 +1238,6 @@ namespace WoolichDecoder
                         processedFilesCount++;
                         int progressPercentage = (int)((double)processedFilesCount / successfulConversions.Count * 100);
 
-                        // Update the progress bar only if the percentage has changed
                         this.Invoke(new Action(() =>
                         {
                             progressBar.Value = Math.Min(processedFilesCount, progressBar.Maximum);
@@ -1391,7 +1255,6 @@ namespace WoolichDecoder
                 string durationFormatted = duration.ToString(@"mm\:ss\.ff");
                 log($"{LogPrefix.Prefix}Analysis completed in {durationFormatted}.");
 
-                // Provide final feedback and results
                 if (sortedResults.Count > 0)
                 {
                     var resultText = $"{Environment.NewLine}Found max {columnName}:{Environment.NewLine}" +
@@ -1434,8 +1297,6 @@ namespace WoolichDecoder
 
                     if (position >= 0)
                     {
-                        //feedback($"Header marker was found at position {position} bytes.");
-
                         if (position != logs.PrimaryHeaderLength + 1)
                         {
                             logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
@@ -1466,23 +1327,20 @@ namespace WoolichDecoder
                         binWriter.Write(packet);
                     }
 
-                    conversionSuccessful = true; // Set the flag to true if no exceptions were thrown
+                    conversionSuccessful = true;
                 }
 
                 if (conversionSuccessful)
                 {
-                    feedback($"Converted file: {Path.GetFileName(wrlFileName)}.");
-                    // Add to successful conversions
                     successfulConversions.Add(binFileName);
                 }
             }
             catch (Exception)
             {
                 feedback($"ERROR converting file: {Path.GetFileName(wrlFileName)}");
-                // Add to failed conversions
+
                 failedConversions.Add(wrlFileName);
 
-                // If the BIN file was created before the error occurred, attempt to delete it
                 if (File.Exists(binFileName))
                 {
                     try
@@ -1497,42 +1355,34 @@ namespace WoolichDecoder
                 }
             }
         }
-        private void RepairWRLFile(string inputFileName)
+        private void RepairWRL(string inputFileName)
         {
-            // Get the directory of the selected file
             string directory = Path.GetDirectoryName(inputFileName);
 
-            // Define the output file name by appending "_fixed" to the original file name
             string outputFileName = Path.Combine(directory, Path.GetFileNameWithoutExtension(inputFileName) + "_fixed.WRL");
 
             try
             {
-                // Read all bytes from the selected file
                 byte[] data = File.ReadAllBytes(inputFileName);
                 log($"{LogPrefix.Prefix}Read data from file. Size: {data.Length} bytes."); // Log the size of the read data
 
-                // Define the prefix to search for in the data
                 byte[] prefix = { 0x01, 0x02, 0x5D, 0x01 };
                 int prefixLength = prefix.Length; // Length of the prefix
                 int interval = 96; // Define an interval for processing
 
-                // Find the offsets of the specified prefix in the data
                 List<int> offsets = FindPrefixes(data, prefix);
                 log($"{LogPrefix.Prefix}Total number of prefixes found: {offsets.Count}."); // Log the number of prefixes found
 
-                // Process the data packets using the found offsets and prefix information
                 bool needsRepair;
                 byte[] recoveredData = ProcessPackets(data, offsets, prefixLength, interval, out needsRepair);
 
                 if (needsRepair)
                 {
-                    // Write the processed data to the new file in the same directory as the input file
                     File.WriteAllBytes(outputFileName, recoveredData);
                     log($"{LogPrefix.Prefix}File repaired and saved to:{Environment.NewLine}{outputFileName}."); // Log completion and file save information
                 }
                 else
                 {
-                    // Inform the user that the file is already valid
                     log($"{LogPrefix.Prefix}No repair needed for file: {Path.GetFileName(inputFileName)}.");
                 }
             }
@@ -1541,7 +1391,7 @@ namespace WoolichDecoder
                 MessageBox.Show($"An error occurred during repair: {ex.Message}", "Repair Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private void btnRepairWRLFile_Click(object sender, EventArgs e)
+        private void btnRepairWRL_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
@@ -1550,217 +1400,17 @@ namespace WoolichDecoder
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    // Get the selected file's name
                     string inputFileName = openFileDialog.FileName;
 
-                    // Call the repair function with the selected file
-                    RepairWRLFile(inputFileName);
+                    RepairWRL(inputFileName);
                 }
-            }
-        }
-        private void btnOpenFile_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                openWRLFileDialog.Title = "Select WRL file to inspect";
-                openWRLFileDialog.InitialDirectory = string.IsNullOrWhiteSpace(openWRLFileDialog.InitialDirectory)
-                    ? logFolder ?? Directory.GetCurrentDirectory()
-                    : openWRLFileDialog.InitialDirectory;
-
-                openWRLFileDialog.Multiselect = false;
-                openWRLFileDialog.Filter = "WRL files (*.wrl)|*.wrl|BIN files (*.bin)|*.bin|All files (*.*)|*.*";
-
-                if (openWRLFileDialog.ShowDialog() != DialogResult.OK)
-                    return;
-
-                ClearBoxAndPackets();
-                var filename = openWRLFileDialog.FileNames.FirstOrDefault();
-                OpenFileName = filename;
-
-                // Clear any existing data
-                logs.ClearPackets();
-                UpdateButtonStates();
-                Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
-                Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
-
-                if (!File.Exists(filename))
-                {
-                    lblFileName.Text = "Error: File Not Found";
-                    return;
-                }
-
-                logFolder = Path.GetDirectoryName(filename);
-                openWRLFileDialog.InitialDirectory = logFolder;
-
-                string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(filename) + ".bin");
-                lblFileName.Text = Path.GetFileName(filename);
-                lblDirName.Text = Path.GetDirectoryName(filename);
-
-                using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
-                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
-                {
-                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
-
-                    // Search for the byte sequence 01 02 5D 01
-                    byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
-                    long position = FindPatternInFile(filename, searchPattern);
-
-                    if (position >= 0)
-                    {
-                        log($"{LogPrefix.Prefix}Header marker was found at position {position} bytes.");
-
-                        if (position != logs.PrimaryHeaderLength + 1)
-                        {
-                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                        }
-                    }
-                    else
-                    {
-                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                    }
-
-                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
-
-                    while (true)
-                    {
-                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
-                        if (packetPrefixBytes.Length < 5)
-                            break;
-
-                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
-                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
-
-                        if (packetBytes.Length < remainingPacketBytes)
-                            break;
-
-                        int totalPacketLength = packetPrefixBytes[3] + 3;
-                        logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, packetPrefixBytes[4]);
-                    }
-
-                    log($"{LogPrefix.Prefix}Data Loaded and {logs.GetPacketCount()} packets found.");
-                }
-
-                using (var fileStream = new FileStream(binOutputFileName, FileMode.Create))
-                using (var binWriter = new BinaryWriter(fileStream))
-                {
-                    foreach (var packet in logs.GetPackets())
-                    {
-                        binWriter.Write(packet.Value);
-                    }
-                }
-
-                string fileName = Path.GetFileName(binOutputFileName);
-                log($"{LogPrefix.Prefix}BIN file created and saved as: {fileName}");
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                // Inform the user that the file is corrupted
-                DialogResult result = MessageBox.Show("The file is corrupted or has an invalid format.\n\nWould you like to attempt repair?", "File Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
-
-                // If user chooses to repair the file
-                if (result == DialogResult.Yes)
-                {
-                    // Call the repair function and pass the file name
-                    RepairWRLFile(OpenFileName);
-
-                    // After attempting repair, automatically open the repaired file without re-opening the dialog
-                    string repairedFile = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(OpenFileName) + "_fixed.WRL");
-                    if (File.Exists(repairedFile))
-                    {
-                        
-                        logs.ClearPackets();
-                        Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
-                        Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
-                        OpenFileName = repairedFile; // Set the repaired file as the new file to open
- 
-                        // Load the repaired file
-                        ClearBoxAndPackets();
-
-                        logFolder = Path.GetDirectoryName(repairedFile);
-                        lblFileName.Text = Path.GetFileName(repairedFile);
-                        lblDirName.Text = Path.GetDirectoryName(repairedFile);
-
-                        string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(repairedFile) + ".bin");
-
-                        using (var fileStream = new FileStream(repairedFile, FileMode.Open, FileAccess.Read))
-                        using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
-                        {
-                            logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
-
-                            // Search for the byte sequence 01 02 5D 01
-                            byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
-                            long position = FindPatternInFile(repairedFile, searchPattern);
-
-                            if (position >= 0)
-                            {
-                                log($"{LogPrefix.Prefix}Header marker was found at position {position} bytes.");
-
-                                if (position != logs.PrimaryHeaderLength + 1)
-                                {
-                                    logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                                    exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                                }
-                            }
-                            else
-                            {
-                                logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                                exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                            }
-
-                            exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
-
-                            while (true)
-                            {
-                                byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
-                                if (packetPrefixBytes.Length < 5)
-                                    break;
-
-                                int remainingPacketBytes = packetPrefixBytes[3] - 2;
-                                byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
-
-                                if (packetBytes.Length < remainingPacketBytes)
-                                    break;
-
-                                int totalPacketLength = packetPrefixBytes[3] + 3;
-                                logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, packetPrefixBytes[4]);
-                            }
-
-                            log($"{LogPrefix.Prefix}Data Loaded and {logs.GetPacketCount()} packets found.");
-                        }
-
-                        using (var fileStream = new FileStream(binOutputFileName, FileMode.Create))
-                        using (var binWriter = new BinaryWriter(fileStream))
-                        {
-                            foreach (var packet in logs.GetPackets())
-                            {
-                                binWriter.Write(packet.Value);
-                            }
-                        }
-
-                        string fileName = Path.GetFileName(binOutputFileName);
-                        log($"{LogPrefix.Prefix}Repaired BIN file created and saved as: {fileName}");
-                    }
-                    else
-                    {
-                        MessageBox.Show("Repair operation failed or was not needed. The file could not be opened.", "Repair Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Show a generic error message if an unexpected error occurs
-                MessageBox.Show($"An unexpected error occurred: {ex.Message}\n\n Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         private bool LoadFile(string filename)
         {
             try
             {
-                // Clear any existing data
                 logs.ClearPackets();
-                //UpdateButtonStates();
                 Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
                 Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
 
@@ -1782,7 +1432,6 @@ namespace WoolichDecoder
                 {
                     logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
 
-                    // Search for the byte sequence 01 02 5D 01
                     byte[] searchPattern = { 0x01, 0x02, 0x5D, 0x01 };
                     long position = FindPatternInFile(filename, searchPattern);
 
@@ -1838,33 +1487,28 @@ namespace WoolichDecoder
             }
             catch (ArgumentOutOfRangeException)
             {
-                // Handle corrupted file scenario
                 log($"{LogPrefix.Prefix}File is corrupted or has an invalid format: {filename}.");
                 return false;
             }
             catch (Exception)
             {
-                // Handle any unexpected errors
                 log($"{LogPrefix.Prefix}An unexpected error occurred with file {filename}.");
                 return false;
             }
         }
-        private async void ConvertWRLFileToText()
+        private async void ConvertWRLToText()
         {
             using (FolderBrowserDialog folderDialog = new FolderBrowserDialog())
             {
                 folderDialog.Description = "Select the folder containing WRL files";
                 folderDialog.ShowNewFolderButton = false;
 
-                // Show dialog and check if user selected a folder
                 if (folderDialog.ShowDialog() == DialogResult.OK)
                 {
                     string rootFolderPath = folderDialog.SelectedPath;
 
-                    // Find all WRL files in the selected directory and subdirectories
                     var wrlFiles = Directory.EnumerateFiles(rootFolderPath, "*.wrl", SearchOption.AllDirectories);
 
-                    // Set up progress reporting
                     progressBar.Visible = true;
                     progressLabel.Visible = true;
                     UpdateProgressLabel("Starting conversion...");
@@ -1872,7 +1516,6 @@ namespace WoolichDecoder
                     int totalFiles = wrlFiles.Count();
                     int processedFiles = 0;
 
-                    // Determine the export format (CSV or TSV) based on user selection
                     string exportFormat = cmbExportFormat.SelectedItem.ToString().ToLower();
                     string fileExtension = exportFormat == "tsv" ? ".tsv" : ".csv"; // Choose .csv or .tsv
                     char delimiter = exportFormat == "tsv" ? '\t' : ','; // Tab for TSV, comma for CSV
@@ -1883,25 +1526,20 @@ namespace WoolichDecoder
                         {
                             try
                             {
-                                // Load the WRL file
                                 bool fileLoaded = LoadFile(filePath);
                                 if (!fileLoaded)
                                 {
-                                    // Log error and continue with next file
                                     Invoke(new Action(() => log($"{LogPrefix.Prefix}Skipping file {filePath}.")));
                                     continue;
                                 }
 
-                                // Prepare the new file path based on selected format
                                 string directoryPath = Path.GetDirectoryName(filePath);
                                 string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
                                 var exportFileName = Path.Combine(directoryPath, fileNameWithoutExtension + fileExtension);
 
-                                // Export to CSV or TSV
                                 WoolichMT09Log exportItem = logs; // Assuming 'logs' is the loaded log item
                                 using (StreamWriter outputFile = new StreamWriter(exportFileName))
                                 {
-                                    // Write the header with the appropriate delimiter
                                     string exportHeader = exportItem.GetHeader(this.presumedStaticColumns, new List<int>());
                                     outputFile.WriteLine(string.Join(delimiter.ToString(), exportHeader.Split(','))); // Dynamic delimiter
 
@@ -1913,7 +1551,6 @@ namespace WoolichDecoder
                                     }
                                 }
 
-                                // Update progress bar and label
                                 processedFiles++;
                                 Invoke(new Action(() => UpdateProgressLabel($"Processing file {processedFiles}/{totalFiles}")));
                                 int progressPercentage = (processedFiles * 100) / totalFiles;
@@ -1921,28 +1558,103 @@ namespace WoolichDecoder
                             }
                             catch (Exception ex)
                             {
-                                // Log error and continue processing other files
                                 Invoke(new Action(() => log($"{LogPrefix.Prefix}Failed to process file {filePath}: {ex.Message}")));
                             }
                         }
 
-                        // Log success and update UI
                         Invoke(new Action(() => log($"{LogPrefix.Prefix}Conversion completed for {processedFiles} files.")));
                         Invoke(new Action(() => UpdateProgressLabel("Conversion completed successfully.")));
                     });
                 }
             }
 
-            // Hide progress bar and reset labels outside the Task.Run
             progressBar.Visible = false;
             progressLabel.Visible = false;
             UpdateProgressLabel("Export finished.");
+        }
+        private void btnOpenFile_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                openWRLFileDialog.Title = "Select WRL file to inspect";
+                openWRLFileDialog.InitialDirectory = string.IsNullOrWhiteSpace(openWRLFileDialog.InitialDirectory)
+                    ? logFolder ?? Directory.GetCurrentDirectory()
+                    : openWRLFileDialog.InitialDirectory;
+
+                openWRLFileDialog.Multiselect = false;
+                openWRLFileDialog.Filter = "WRL files (*.wrl)|*.wrl|BIN files (*.bin)|*.bin|All files (*.*)|*.*";
+
+                if (openWRLFileDialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                ClearBoxAndPackets();
+                var filename = openWRLFileDialog.FileNames.FirstOrDefault();
+                OpenFileName = filename;
+                UpdateFormsStates();
+
+                if (!File.Exists(filename))
+                {
+                    lblFileName.Text = "Error: File Not Found";
+                    return;
+                }
+
+                logFolder = Path.GetDirectoryName(filename);
+
+                if (!LoadFile(filename))
+                {
+                    HandleCorruptedFile();
+                    return;
+                }
+
+                string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(filename) + ".bin");
+                ConvertWRLToBIN(filename, binOutputFileName, new List<string>(), new List<string>());
+
+                lblFileName.Text = Path.GetFileName(filename);
+                lblDirName.Text = Path.GetDirectoryName(filename);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An unexpected error occurred: {ex.Message}\n\n Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        private void HandleCorruptedFile()
+        {
+            DialogResult result = MessageBox.Show("The file is corrupted or has an invalid format.\n\nWould you like to attempt repair?", "File Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+
+            if (result == DialogResult.Yes)
+            {
+                RepairWRL(OpenFileName);
+
+                string repairedFile = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(OpenFileName) + "_fixed.WRL");
+                if (File.Exists(repairedFile))
+                {
+                    logs.ClearPackets();
+                    Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
+                    Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
+                    OpenFileName = repairedFile;
+
+                    ClearBoxAndPackets();
+                    logFolder = Path.GetDirectoryName(repairedFile);
+                    lblFileName.Text = Path.GetFileName(repairedFile);
+                    lblDirName.Text = Path.GetDirectoryName(repairedFile);
+
+                    if (!LoadFile(repairedFile))
+                    {
+                        MessageBox.Show("Repair operation failed or was not needed. The file could not be opened.", "Repair Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(repairedFile) + ".bin");
+                        ConvertWRLToBIN(repairedFile, binOutputFileName, new List<string>(), new List<string>());
+                    }
+                }
+            }
         }
 
     }
 }
 
 
-        
+
 
 
