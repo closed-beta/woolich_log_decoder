@@ -643,11 +643,11 @@ namespace WoolichDecoder
             {
                 ConvertWRLFileToText();
             }
-            else if (exportTypeIndex == 1 && exportFormatIndex == 0 && exportModeIndex == 0)
+            else if (exportTypeIndex == 1 && exportFormatIndex != 2 && exportModeIndex == 0)
             {
                 ExportToText();
             }
-            else if (exportTypeIndex == 1 && exportFormatIndex == 1 && exportModeIndex == 0)
+            else if (exportTypeIndex == 1 && exportFormatIndex == 2 && exportModeIndex == 0)
             {
                 ExportTargetColumn();  // Call ExportTargetColumn if cmbExportType index is 1 and cmbExportFormat index is 2
             }
