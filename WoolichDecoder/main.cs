@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using WoolichDecoder.Models;
 using WoolichDecoder.Settings;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WoolichDecoder
 {
@@ -73,6 +74,7 @@ namespace WoolichDecoder
             cmbLogsLocation.SelectedIndex = 0;
             cmbBinDelete.SelectedIndex = 0;
             cmbExportMode.SelectedIndex = 0;
+            cmbATFileName.SelectedIndex = 0;
             cmbExportType.SelectedIndexChanged += cmbExportType_Change;
             cmbExportMode.SelectedIndexChanged += cmbExportMode_Change;
         }
@@ -176,6 +178,14 @@ namespace WoolichDecoder
             {
                 aTFCheckedListBox.SetItemCheckState(i, CheckState.Checked);
             }
+
+            toolTip1.SetToolTip(btnExport, 
+                            "Executes options from Mode, Type, and Format.\n\n" +
+                            "Available functions include:\n" +
+                            "- Converting to text format (CSV, TSV)\n" +
+                            "- Analyzing specific packets in a selected column\n    and saving results in CSV, TSV, or WRL format.\n" +
+                            "- Saving CRC as counted packets\n" +
+                            "- Saving filtered autotune data");
 
         }
         private void WoolichFileDecoder_Close(object sender, FormClosingEventArgs e)
@@ -1228,6 +1238,7 @@ namespace WoolichDecoder
 
                         Invoke(new Action(() => log($"{LogPrefix.Prefix}Conversion completed for {processedFiles} files.")));
                         Invoke(new Action(() => UpdateProgressLabel("Conversion completed successfully.")));
+                        DeleteBinFiles(rootFolderPath);
                     });
                 }
             }
@@ -1275,6 +1286,7 @@ namespace WoolichDecoder
 
                 lblFileName.Text = Path.GetFileName(filename);
                 lblDirName.Text = Path.GetDirectoryName(filename);
+                cmbExportType.SelectedIndex = 3;
             }
             catch (Exception ex)
             {
