@@ -8,18 +8,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using WoolichDecoder.Models;
 using WoolichDecoder.Settings;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WoolichDecoder
 {
     public partial class WoolichFileDecoderForm : Form
     {
-        public static class LogPrefix
-        {
-            private static readonly string DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
-            public static string Prefix => $"{DateTime.Now.ToString(DateTimeFormat)} -- ";
-        }
-
         string OpenFileName = string.Empty;
 
         WoolichMT09Log logs = new WoolichMT09Log();
@@ -86,6 +79,81 @@ namespace WoolichDecoder
                 return false;
             }
             return true;
+        }
+        public static class LogPrefix
+        {
+            private static readonly string DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
+            public static string Prefix => $"{DateTime.Now.ToString(DateTimeFormat)} -- ";
+        }
+        private void feedback(string fbData)
+        {
+            string directoryPath = GetDirectoryPath();
+
+            if (string.IsNullOrEmpty(directoryPath))
+            {
+                return;
+            }
+
+            if (!Directory.Exists(directoryPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An error occurred while creating the directory: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            txtFeedback.AppendText(fbData + Environment.NewLine);
+
+            string feedbackFilePath = Path.Combine(directoryPath, "feedback.txt");
+
+            try
+            {
+                File.AppendAllText(feedbackFilePath, $"{fbData}{Environment.NewLine}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred while saving the feedback: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        private void log(string logData)
+        {
+            string directoryPath = GetDirectoryPath();
+
+            if (string.IsNullOrEmpty(directoryPath))
+            {
+                return;
+            }
+
+            if (!Directory.Exists(directoryPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An error occurred while creating the directory: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            txtLogging.AppendText(logData + Environment.NewLine);
+
+            string logFilePath = Path.Combine(directoryPath, "log.txt");
+
+            try
+            {
+                File.AppendAllText(logFilePath, $"{logData}{Environment.NewLine}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred while saving the log: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
         private void cmbExportType_Change(object sender, EventArgs e)
         {
@@ -179,7 +247,7 @@ namespace WoolichDecoder
                 aTFCheckedListBox.SetItemCheckState(i, CheckState.Checked);
             }
 
-            toolTip1.SetToolTip(btnExport, 
+            toolTip1.SetToolTip(btnExport,
                             "Executes options from Mode, Type, and Format.\n\n" +
                             "Available functions include:\n" +
                             "- Converting to text format (CSV, TSV)\n" +
@@ -344,76 +412,6 @@ namespace WoolichDecoder
             else
             {
                 return AppDomain.CurrentDomain.BaseDirectory;
-            }
-        }
-        private void feedback(string fbData)
-        {
-            string directoryPath = GetDirectoryPath();
-
-            if (string.IsNullOrEmpty(directoryPath))
-            {
-                return;
-            }
-
-            if (!Directory.Exists(directoryPath))
-            {
-                try
-                {
-                    Directory.CreateDirectory(directoryPath);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"An error occurred while creating the directory: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-            }
-
-            txtFeedback.AppendText(fbData + Environment.NewLine);
-
-            string feedbackFilePath = Path.Combine(directoryPath, "feedback.txt");
-
-            try
-            {
-                File.AppendAllText(feedbackFilePath, $"{fbData}{Environment.NewLine}");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"An error occurred while saving the feedback: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-        private void log(string logData)
-        {
-            string directoryPath = GetDirectoryPath();
-
-            if (string.IsNullOrEmpty(directoryPath))
-            {
-                return;
-            }
-
-            if (!Directory.Exists(directoryPath))
-            {
-                try
-                {
-                    Directory.CreateDirectory(directoryPath);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"An error occurred while creating the directory: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-            }
-
-            txtLogging.AppendText(logData + Environment.NewLine);
-
-            string logFilePath = Path.Combine(directoryPath, "log.txt");
-
-            try
-            {
-                File.AppendAllText(logFilePath, $"{logData}{Environment.NewLine}");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"An error occurred while saving the log: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         private void UpdateProgressLabel(string text)
@@ -1420,7 +1418,6 @@ namespace WoolichDecoder
         {
             if (!IsFileLoaded())
             {
-
                 return;
             }
 
@@ -1429,7 +1426,7 @@ namespace WoolichDecoder
             // Check if the packet format is supported
             if (exportItem.PacketFormat != 0x01)
             {
-                MessageBox.Show("This bikes file cannot be adjusted by this software yet.");
+                MessageBox.Show("This bike's file cannot be adjusted by this software yet.");
                 return;
             }
 
@@ -1454,7 +1451,22 @@ namespace WoolichDecoder
             string binaryString = new string(binaryArray);
             string baseFileName = Path.GetFileNameWithoutExtension(lblFileName.Text.Trim());
             string directoryPath = lblDirName.Text.Trim();
-            string outputFileNameWithExtension = Path.Combine(directoryPath, $"{baseFileName}_{binaryString}_AT.WRL");
+            string outputFileNameWithExtension;
+
+            // Determine file name based on cmbATFileName selection
+            if (cmbATFileName.SelectedItem.ToString() == "Binary")
+            {
+                outputFileNameWithExtension = Path.Combine(directoryPath, $"{baseFileName}_{binaryString}_AT.WRL");
+            }
+            else if (cmbATFileName.SelectedItem.ToString() == "Default")
+            {
+                outputFileNameWithExtension = Path.Combine(directoryPath, $"{baseFileName}_AT.WRL");
+            }
+            else
+            {
+                MessageBox.Show("Invalid file naming option selected.");
+                return;
+            }
 
             try
             {
@@ -1524,7 +1536,6 @@ namespace WoolichDecoder
             }
             catch (Exception ex)
             {
-
                 log($"{LogPrefix.Prefix}Autotune WRL File saving error: {ex.Message}");
             }
         }
@@ -1610,61 +1621,58 @@ namespace WoolichDecoder
             {
                 if (folderDialog.ShowDialog() == DialogResult.OK)
                 {
-                    ExportDirAutoTune(folderDialog.SelectedPath);
-                }
-            }
-        }
-        private void ExportDirAutoTune(string directoryPath)
-        {
-            try
-            {
-                var wrlFiles = Directory.GetFiles(directoryPath, "*.wrl", SearchOption.AllDirectories);
-
-                if (wrlFiles.Length == 0)
-                {
-                    MessageBox.Show("No WRL files found in the selected directory.", "No Files", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                int successfulCount = 0;
-                int failedCount = 0;
-                var stopwatch = new System.Diagnostics.Stopwatch();
-                stopwatch.Start();
-
-                foreach (var wrlFile in wrlFiles)
-                {
-                    OpenFileName = wrlFile;
-
-                    bool fileLoaded = LoadFile(wrlFile);
-                    if (fileLoaded)
+                    string directoryPath = folderDialog.SelectedPath;
+                    try
                     {
-                        ExportAutoTune();
-                        successfulCount++;
+                        var wrlFiles = Directory.GetFiles(directoryPath, "*.wrl", SearchOption.AllDirectories);
+
+                        if (wrlFiles.Length == 0)
+                        {
+                            MessageBox.Show("No WRL files found in the selected directory.", "No Files", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            return;
+                        }
+
+                        int successfulCount = 0;
+                        int failedCount = 0;
+                        var stopwatch = new System.Diagnostics.Stopwatch();
+                        stopwatch.Start();
+
+                        foreach (var wrlFile in wrlFiles)
+                        {
+                            OpenFileName = wrlFile;
+
+                            bool fileLoaded = LoadFile(wrlFile);
+                            if (fileLoaded)
+                            {
+                                ExportAutoTune();
+                                successfulCount++;
+                            }
+                            else
+                            {
+                                log($"{LogPrefix.Prefix}Failed to load file: {wrlFile}");
+                                failedCount++;
+                            }
+                        }
+
+                        stopwatch.Stop();
+
+                        // Calculate time in minutes and seconds
+                        var elapsed = stopwatch.Elapsed;
+                        int minutes = elapsed.Minutes;
+                        int seconds = elapsed.Seconds;
+
+                        log($"{LogPrefix.Prefix}Total files processed: {wrlFiles.Length}");
+                        log($"{LogPrefix.Prefix}Successfully processed: {successfulCount}");
+                        log($"{LogPrefix.Prefix}Failed to process: {failedCount}");
+                        log($"{LogPrefix.Prefix}Total processing time: {minutes} minutes {seconds} seconds");
+
+                        DeleteBinFiles(directoryPath);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        log($"{LogPrefix.Prefix}Failed to load file: {wrlFile}");
-                        failedCount++;
+                        MessageBox.Show($"An error occurred while processing the files: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
-
-                stopwatch.Stop();
-
-                // Calculate time in minutes and seconds
-                var elapsed = stopwatch.Elapsed;
-                int minutes = elapsed.Minutes;
-                int seconds = elapsed.Seconds;
-
-                log($"{LogPrefix.Prefix}Total files processed: {wrlFiles.Length}");
-                log($"{LogPrefix.Prefix}Successfully processed: {successfulCount}");
-                log($"{LogPrefix.Prefix}Failed to process: {failedCount}");
-                log($"{LogPrefix.Prefix}Total processing time: {minutes} minutes {seconds} seconds");
-
-                DeleteBinFiles(directoryPath);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"An error occurred while processing the files: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         private void UpdateCmbExport()
