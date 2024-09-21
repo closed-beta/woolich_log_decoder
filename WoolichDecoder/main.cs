@@ -1187,6 +1187,11 @@ namespace WoolichDecoder
 
                     int totalFiles = wrlFiles.Count();
                     int processedFiles = 0;
+                    int successfulCount = 0;
+                    int failedCount = 0;
+
+                    var stopwatch = new System.Diagnostics.Stopwatch();
+                    stopwatch.Start();
 
                     string exportFormat = cmbExportFormat.SelectedItem.ToString().ToLower();
                     string fileExtension = exportFormat == "tsv" ? ".tsv" : ".csv"; // Choose .csv or .tsv
@@ -1202,6 +1207,7 @@ namespace WoolichDecoder
                                 if (!fileLoaded)
                                 {
                                     Invoke(new Action(() => log($"{LogPrefix.Prefix}Skipping file {filePath}.")));
+                                    failedCount++;
                                     continue;
                                 }
 
@@ -1224,6 +1230,8 @@ namespace WoolichDecoder
                                 }
 
                                 processedFiles++;
+                                successfulCount++;
+
                                 Invoke(new Action(() => UpdateProgressLabel($"Processing file {processedFiles}/{totalFiles}")));
                                 int progressPercentage = (processedFiles * 100) / totalFiles;
                                 Invoke(new Action(() => progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum)));
@@ -1231,10 +1239,23 @@ namespace WoolichDecoder
                             catch (Exception ex)
                             {
                                 Invoke(new Action(() => log($"{LogPrefix.Prefix}Failed to process file {filePath}: {ex.Message}")));
+                                failedCount++;
                             }
                         }
 
-                        Invoke(new Action(() => log($"{LogPrefix.Prefix}Conversion completed for {processedFiles} files.")));
+                        stopwatch.Stop();
+
+                        // Calculate time in minutes and seconds
+                        var elapsed = stopwatch.Elapsed;
+                        int minutes = elapsed.Minutes;
+                        int seconds = elapsed.Seconds;
+
+                        // Logging results
+                        Invoke(new Action(() => log($"{LogPrefix.Prefix}Total files processed: {totalFiles}")));
+                        Invoke(new Action(() => log($"{LogPrefix.Prefix}Successfully processed: {successfulCount}")));
+                        Invoke(new Action(() => log($"{LogPrefix.Prefix}Failed to process: {failedCount}")));
+                        Invoke(new Action(() => log($"{LogPrefix.Prefix}Total processing time: {minutes} minutes {seconds} seconds")));
+
                         Invoke(new Action(() => UpdateProgressLabel("Conversion completed successfully.")));
                         DeleteBinFiles(rootFolderPath);
                     });
@@ -1244,6 +1265,8 @@ namespace WoolichDecoder
             progressBar.Visible = false;
             progressLabel.Visible = false;
             UpdateProgressLabel("Export finished.");
+            lblFileName.Text = "None";
+            lblDirName.Text = "None";
         }
         private void btnOpenFile_Click(object sender, EventArgs e)
         {
@@ -1667,6 +1690,8 @@ namespace WoolichDecoder
                         log($"{LogPrefix.Prefix}Total processing time: {minutes} minutes {seconds} seconds");
 
                         DeleteBinFiles(directoryPath);
+                        lblFileName.Text = "None";
+                        lblDirName.Text = "None";
                     }
                     catch (Exception ex)
                     {
