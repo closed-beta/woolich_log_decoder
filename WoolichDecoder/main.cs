@@ -71,6 +71,7 @@ namespace WoolichDecoder
             cmbExportType.SelectedIndex = 0;
             cmbExportFormat.SelectedIndex = 0;
             cmbLogsLocation.SelectedIndex = 0;
+            cmbBinDelete.SelectedIndex = 0;
             cmbExportMode.SelectedIndex = 0;
             cmbExportType.SelectedIndexChanged += cmbExportType_Change;
             cmbExportMode.SelectedIndexChanged += cmbExportMode_Change;
@@ -1605,7 +1606,7 @@ namespace WoolichDecoder
         {
             try
             {
-                var wrlFiles = Directory.GetFiles(directoryPath, "*.wrl");
+                var wrlFiles = Directory.GetFiles(directoryPath, "*.wrl", SearchOption.AllDirectories);
 
                 if (wrlFiles.Length == 0)
                 {
@@ -1646,6 +1647,8 @@ namespace WoolichDecoder
                 log($"{LogPrefix.Prefix}Successfully processed: {successfulCount}");
                 log($"{LogPrefix.Prefix}Failed to process: {failedCount}");
                 log($"{LogPrefix.Prefix}Total processing time: {minutes} minutes {seconds} seconds");
+
+                DeleteBinFiles(directoryPath);
             }
             catch (Exception ex)
             {
@@ -1787,6 +1790,59 @@ namespace WoolichDecoder
                 );
             }
         }
+        private void DeleteBinFiles(string directoryPath)
+        {
+            if (cmbBinDelete.Text == "Delete")
+            {
+                var wrlFiles = Directory.GetFiles(directoryPath, "*.wrl", SearchOption.AllDirectories);
+                int totalCount = 0;
+                int deletedCount = 0;
+                int failedCount = 0;
+
+                foreach (var wrlFile in wrlFiles)
+                {
+                    string binOutputFileName = Path.Combine(Path.GetDirectoryName(wrlFile),
+                        Path.GetFileNameWithoutExtension(wrlFile) + ".bin");
+
+                    //log($"{LogPrefix.Prefix}Checking for BIN file: {binOutputFileName}"); // Debug log
+
+                    if (File.Exists(binOutputFileName))
+                    {
+                        //log($"{LogPrefix.Prefix}Found BIN file: {binOutputFileName}"); // Debug log
+                        totalCount++;
+
+                        try
+                        {
+                            File.Delete(binOutputFileName);
+                            deletedCount++;
+                            //log($"{LogPrefix.Prefix}Deleted BIN file: {binOutputFileName}");
+                        }
+                        catch (Exception)
+                        {
+                            failedCount++;
+                            //log($"{LogPrefix.Prefix}Failed to delete BIN file: {ex.Message}");
+                        }
+                    }
+                    else
+                    {
+                        //log($"{LogPrefix.Prefix}BIN file does not exist, skipping: {binOutputFileName}"); // Debug log
+                    }
+                }
+
+                log($"{LogPrefix.Prefix}Total BIN files checked: {totalCount}");
+                log($"{LogPrefix.Prefix}Successfully deleted: {deletedCount}");
+                log($"{LogPrefix.Prefix}Failed to delete: {failedCount}");
+            }
+            else
+            {
+                log($"{LogPrefix.Prefix}Deletion not enabled. Setting is on: {cmbBinDelete.Text}"); // Debug log
+            }
+        }
+
+
+
+
+
 
 
     }

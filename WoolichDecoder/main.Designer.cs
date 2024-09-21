@@ -79,6 +79,8 @@
             this.lblExportMode = new System.Windows.Forms.Label();
             this.cmbExportMode = new System.Windows.Forms.ComboBox();
             this.panel4 = new System.Windows.Forms.Panel();
+            this.cmbBinDelete = new System.Windows.Forms.ComboBox();
+            this.lblBinDelete = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -263,14 +265,13 @@
             // btnAnalyse
             // 
             this.btnAnalyse.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnAnalyse.Location = new System.Drawing.Point(13, 7);
+            this.btnAnalyse.Location = new System.Drawing.Point(7, 15);
             this.btnAnalyse.Margin = new System.Windows.Forms.Padding(2);
             this.btnAnalyse.Name = "btnAnalyse";
             this.btnAnalyse.Size = new System.Drawing.Size(237, 28);
             this.btnAnalyse.TabIndex = 15;
             this.btnAnalyse.Text = "Analyse";
-            this.toolTip1.SetToolTip(this.btnAnalyse, "Analyse data in open WRL file or directory depends on settigs in Export and Conve" +
-        "rt.");
+            this.toolTip1.SetToolTip(this.btnAnalyse, "Analyse single file or directory depends on Mode settigs in Export and Convert.");
             this.btnAnalyse.UseVisualStyleBackColor = true;
             this.btnAnalyse.Click += new System.EventHandler(this.btnAnalyse_Click);
             // 
@@ -375,7 +376,6 @@
             // cmbLogsLocation
             // 
             this.cmbLogsLocation.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.cmbLogsLocation.Enabled = false;
             this.cmbLogsLocation.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.cmbLogsLocation.FormattingEnabled = true;
             this.cmbLogsLocation.ImeMode = System.Windows.Forms.ImeMode.NoControl;
@@ -671,11 +671,39 @@
             this.panel4.Size = new System.Drawing.Size(456, 45);
             this.panel4.TabIndex = 32;
             // 
+            // cmbBinDelete
+            // 
+            this.cmbBinDelete.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.cmbBinDelete.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.cmbBinDelete.FormattingEnabled = true;
+            this.cmbBinDelete.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.cmbBinDelete.Items.AddRange(new object[] {
+            "Save",
+            "Delete"});
+            this.cmbBinDelete.Location = new System.Drawing.Point(115, 334);
+            this.cmbBinDelete.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.cmbBinDelete.Name = "cmbBinDelete";
+            this.cmbBinDelete.Size = new System.Drawing.Size(101, 21);
+            this.cmbBinDelete.TabIndex = 45;
+            this.toolTip1.SetToolTip(this.cmbBinDelete, "Delete BIN files in Directory Mode.");
+            // 
+            // lblBinDelete
+            // 
+            this.lblBinDelete.AutoSize = true;
+            this.lblBinDelete.Location = new System.Drawing.Point(112, 318);
+            this.lblBinDelete.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblBinDelete.Name = "lblBinDelete";
+            this.lblBinDelete.Size = new System.Drawing.Size(59, 13);
+            this.lblBinDelete.TabIndex = 44;
+            this.lblBinDelete.Text = "Bin Files:";
+            // 
             // WoolichFileDecoderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1284, 586);
+            this.Controls.Add(this.cmbBinDelete);
+            this.Controls.Add(this.lblBinDelete);
             this.Controls.Add(this.lblCRCsize);
             this.Controls.Add(this.CRCsize);
             this.Controls.Add(this.label1);
@@ -774,6 +802,8 @@
         private System.Windows.Forms.ComboBox cmbExportMode;
         private System.Windows.Forms.Panel panel4;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox cmbBinDelete;
+        private System.Windows.Forms.Label lblBinDelete;
     }
 }
 
