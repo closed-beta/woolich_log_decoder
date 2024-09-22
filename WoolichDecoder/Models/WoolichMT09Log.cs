@@ -6,22 +6,19 @@ namespace WoolichDecoder.Models
 {
     public class WoolichMT09Log
     {
-
-
-
-        /// <summary>
+        // Header Marker for MT-09, MT-10 and R1
+        public byte[] MT09Pattern { get; } = new byte[] { 0x01, 0x02, 0x5D, 0x01 };
+ 
+        // Packet size for MT-09, MT-10 and R1
+        public int MT09Packet { get; } = 96;
+        
         /// PrimaryHeaderLength I expect this identifies the source of the log data. What collected it.
-        /// </summary>
         public int PrimaryHeaderLength { get; set; } = 352;
 
-        /// <summary>
         /// SecondaryHeaderLength: for mt09 was all 0xFF but for R1 wasn't. We don't use it though.
-        /// </summary>
         public int SecondaryHeaderLength { get; set; } = 164;
 
-        /// <summary>
-        /// packetLength The length of the actual data packet.
-        /// </summary>
+        /// PacketLength The length of the actual data packet.
         public int PacketLength { get; set; } = 0;
         public int PacketPrefixLength { get; set; } = 5;
 

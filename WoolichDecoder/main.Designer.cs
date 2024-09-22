@@ -85,6 +85,8 @@
             this.lblATFileName = new System.Windows.Forms.Label();
             this.panel5 = new System.Windows.Forms.Panel();
             this.label2 = new System.Windows.Forms.Label();
+            this.lblTotalPackets = new System.Windows.Forms.Label();
+            this.lblTotalPacketsCount = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -115,7 +117,7 @@
             this.btnOpenFile.Text = "Open File";
             this.toolTip1.SetToolTip(this.btnOpenFile, "Open WRL File");
             this.btnOpenFile.UseVisualStyleBackColor = true;
-            this.btnOpenFile.Click += new System.EventHandler(this.btnOpenFile_Click);
+            this.btnOpenFile.Click += new System.EventHandler(this.OpenFile_Click);
             // 
             // openWRLFileDialog
             // 
@@ -150,11 +152,11 @@
             // lblExportPacketsCount
             // 
             this.lblExportPacketsCount.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.lblExportPacketsCount.BackColor = System.Drawing.SystemColors.Window;
+            this.lblExportPacketsCount.BackColor = System.Drawing.SystemColors.Control;
             this.lblExportPacketsCount.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblExportPacketsCount.Enabled = false;
             this.lblExportPacketsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblExportPacketsCount.Location = new System.Drawing.Point(360, 40);
+            this.lblExportPacketsCount.Location = new System.Drawing.Point(364, 13);
             this.lblExportPacketsCount.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblExportPacketsCount.Name = "lblExportPacketsCount";
             this.lblExportPacketsCount.Size = new System.Drawing.Size(78, 20);
@@ -187,7 +189,7 @@
             this.btnExport.TabIndex = 11;
             this.btnExport.Text = "Export";
             this.btnExport.UseVisualStyleBackColor = false;
-            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
+            this.btnExport.Click += new System.EventHandler(this.Export_Click);
             // 
             // cmbExportType
             // 
@@ -195,7 +197,7 @@
             this.cmbExportType.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.cmbExportType.FormattingEnabled = true;
             this.cmbExportType.Items.AddRange(new object[] {
-            "Full File",
+            "Export to",
             "Analysis Only",
             "CRC",
             "Autotune"});
@@ -204,6 +206,7 @@
             this.cmbExportType.Name = "cmbExportType";
             this.cmbExportType.Size = new System.Drawing.Size(160, 21);
             this.cmbExportType.TabIndex = 12;
+            this.cmbExportType.Text = "Export to";
             // 
             // lblExportType
             // 
@@ -220,6 +223,8 @@
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.ControlLight;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.lblTotalPackets);
+            this.panel1.Controls.Add(this.lblTotalPacketsCount);
             this.panel1.Controls.Add(this.lblPackets);
             this.panel1.Controls.Add(this.lblAnalysisCol);
             this.panel1.Controls.Add(this.txtBreakOnChange);
@@ -234,11 +239,11 @@
             // lblPackets
             // 
             this.lblPackets.AutoSize = true;
-            this.lblPackets.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblPackets.Location = new System.Drawing.Point(287, 45);
+            this.lblPackets.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.lblPackets.Location = new System.Drawing.Point(309, 17);
             this.lblPackets.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblPackets.Name = "lblPackets";
-            this.lblPackets.Size = new System.Drawing.Size(53, 15);
+            this.lblPackets.Size = new System.Drawing.Size(49, 13);
             this.lblPackets.TabIndex = 36;
             this.lblPackets.Text = "Packets:";
             // 
@@ -246,7 +251,7 @@
             // 
             this.lblAnalysisCol.AutoSize = true;
             this.lblAnalysisCol.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblAnalysisCol.Location = new System.Drawing.Point(285, 15);
+            this.lblAnalysisCol.Location = new System.Drawing.Point(108, 44);
             this.lblAnalysisCol.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblAnalysisCol.Name = "lblAnalysisCol";
             this.lblAnalysisCol.Size = new System.Drawing.Size(86, 13);
@@ -255,8 +260,9 @@
             // 
             // txtBreakOnChange
             // 
+            this.txtBreakOnChange.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtBreakOnChange.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.txtBreakOnChange.Location = new System.Drawing.Point(390, 12);
+            this.txtBreakOnChange.Location = new System.Drawing.Point(202, 41);
             this.txtBreakOnChange.Margin = new System.Windows.Forms.Padding(2);
             this.txtBreakOnChange.Name = "txtBreakOnChange";
             this.txtBreakOnChange.Size = new System.Drawing.Size(48, 20);
@@ -269,7 +275,7 @@
             // btnAnalyse
             // 
             this.btnAnalyse.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnAnalyse.Location = new System.Drawing.Point(7, 15);
+            this.btnAnalyse.Location = new System.Drawing.Point(13, 9);
             this.btnAnalyse.Margin = new System.Windows.Forms.Padding(2);
             this.btnAnalyse.Name = "btnAnalyse";
             this.btnAnalyse.Size = new System.Drawing.Size(237, 28);
@@ -277,7 +283,7 @@
             this.btnAnalyse.Text = "Analyse";
             this.toolTip1.SetToolTip(this.btnAnalyse, "Analyse single file or directory depends on Mode settigs in Export and Convert.");
             this.btnAnalyse.UseVisualStyleBackColor = true;
-            this.btnAnalyse.Click += new System.EventHandler(this.btnAnalyse_Click);
+            this.btnAnalyse.Click += new System.EventHandler(this.Analyse_Click);
             // 
             // lblCRCsize
             // 
@@ -292,6 +298,7 @@
             // 
             // CRCsize
             // 
+            this.CRCsize.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.CRCsize.Enabled = false;
             this.CRCsize.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.CRCsize.Location = new System.Drawing.Point(8, 400);
@@ -314,7 +321,7 @@
             this.btnRepair.Text = "Repair";
             this.toolTip1.SetToolTip(this.btnRepair, "Repair corrupted WRL ");
             this.btnRepair.UseVisualStyleBackColor = true;
-            this.btnRepair.Click += new System.EventHandler(this.btnRepairWRL_Click);
+            this.btnRepair.Click += new System.EventHandler(this.Repair_Click);
             // 
             // label3
             // 
@@ -391,6 +398,7 @@
             this.cmbLogsLocation.Name = "cmbLogsLocation";
             this.cmbLogsLocation.Size = new System.Drawing.Size(101, 21);
             this.cmbLogsLocation.TabIndex = 42;
+            this.cmbLogsLocation.Text = "Default";
             this.toolTip1.SetToolTip(this.cmbLogsLocation, "Default is set for application directory.");
             // 
             // label1
@@ -418,6 +426,7 @@
             this.cmbBinDelete.Name = "cmbBinDelete";
             this.cmbBinDelete.Size = new System.Drawing.Size(101, 21);
             this.cmbBinDelete.TabIndex = 45;
+            this.cmbBinDelete.Text = "Default";
             this.toolTip1.SetToolTip(this.cmbBinDelete, "Delete BIN files in Directory Mode.");
             // 
             // cmbATFileName
@@ -434,6 +443,7 @@
             this.cmbATFileName.Name = "cmbATFileName";
             this.cmbATFileName.Size = new System.Drawing.Size(101, 21);
             this.cmbATFileName.TabIndex = 47;
+            this.cmbATFileName.Text = "Default";
             this.toolTip1.SetToolTip(this.cmbATFileName, "Autotune Output Filename format.");
             // 
             // label7
@@ -460,6 +470,7 @@
             // 
             // idleRPM
             // 
+            this.idleRPM.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.idleRPM.Enabled = false;
             this.idleRPM.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.idleRPM.Location = new System.Drawing.Point(150, 3);
@@ -473,6 +484,7 @@
             // 
             // minRPM
             // 
+            this.minRPM.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.minRPM.Enabled = false;
             this.minRPM.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.minRPM.Location = new System.Drawing.Point(150, 7);
@@ -496,6 +508,7 @@
             // 
             // maxRPM
             // 
+            this.maxRPM.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.maxRPM.Enabled = false;
             this.maxRPM.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.maxRPM.Location = new System.Drawing.Point(150, 33);
@@ -645,9 +658,9 @@
             this.cmbExportFormat.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.cmbExportFormat.FormattingEnabled = true;
             this.cmbExportFormat.Items.AddRange(new object[] {
-            "csv",
-            "tsv",
-            "wrl"});
+            "    csv",
+            "    tsv",
+            "    wrl"});
             this.cmbExportFormat.Location = new System.Drawing.Point(266, 19);
             this.cmbExportFormat.Margin = new System.Windows.Forms.Padding(1);
             this.cmbExportFormat.Name = "cmbExportFormat";
@@ -690,6 +703,7 @@
             this.cmbExportMode.Name = "cmbExportMode";
             this.cmbExportMode.Size = new System.Drawing.Size(95, 21);
             this.cmbExportMode.TabIndex = 45;
+            this.cmbExportMode.Text = "File";
             // 
             // panel4
             // 
@@ -754,6 +768,34 @@
             this.label2.TabIndex = 48;
             this.label2.Text = "File settings:";
             // 
+            // lblTotalPackets
+            // 
+            this.lblTotalPackets.AutoSize = true;
+            this.lblTotalPackets.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.lblTotalPackets.Location = new System.Drawing.Point(282, 44);
+            this.lblTotalPackets.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblTotalPackets.Name = "lblTotalPackets";
+            this.lblTotalPackets.Size = new System.Drawing.Size(76, 13);
+            this.lblTotalPackets.TabIndex = 38;
+            this.lblTotalPackets.Text = "Total Packets:";
+            // 
+            // lblTotalPacketsCount
+            // 
+            this.lblTotalPacketsCount.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.lblTotalPacketsCount.BackColor = System.Drawing.SystemColors.Control;
+            this.lblTotalPacketsCount.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblTotalPacketsCount.Enabled = false;
+            this.lblTotalPacketsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.lblTotalPacketsCount.Location = new System.Drawing.Point(364, 40);
+            this.lblTotalPacketsCount.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblTotalPacketsCount.Name = "lblTotalPacketsCount";
+            this.lblTotalPacketsCount.Size = new System.Drawing.Size(78, 20);
+            this.lblTotalPacketsCount.TabIndex = 37;
+            this.lblTotalPacketsCount.Text = "0";
+            this.lblTotalPacketsCount.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.toolTip1.SetToolTip(this.lblTotalPacketsCount, "Found packets.");
+            this.lblTotalPacketsCount.UseMnemonic = false;
+            // 
             // WoolichFileDecoderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
@@ -793,8 +835,8 @@
             this.MinimumSize = new System.Drawing.Size(1300, 625);
             this.Name = "WoolichFileDecoderForm";
             this.Text = "Woolich File Decoder";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.WoolichFileDecoder_Close);
-            this.Load += new System.EventHandler(this.WoolichFileDecoder_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.App_Close);
+            this.Load += new System.EventHandler(this.App_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
@@ -866,6 +908,8 @@
         private System.Windows.Forms.Label lblATFileName;
         private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label lblTotalPackets;
+        private System.Windows.Forms.Label lblTotalPacketsCount;
     }
 }
 
