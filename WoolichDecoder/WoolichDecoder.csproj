@@ -103,12 +103,6 @@
     <Compile Include="main.Designer.cs">
       <DependentUpon>main.cs</DependentUpon>
     </Compile>
-    <Compile Include="settings.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="settings.Designer.cs">
-      <DependentUpon>settings.cs</DependentUpon>
-    </Compile>
     <Compile Include="Models\Enums.cs" />
     <Compile Include="Models\StaticPacketColumn.cs" />
     <Compile Include="Models\WoolichConversions.cs" />
@@ -118,9 +112,6 @@
     <Compile Include="Settings\UserSettings.cs" />
     <EmbeddedResource Include="main.resx">
       <DependentUpon>main.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="settings.resx">
-      <DependentUpon>settings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

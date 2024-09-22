@@ -186,7 +186,6 @@
             this.btnExport.Size = new System.Drawing.Size(121, 37);
             this.btnExport.TabIndex = 11;
             this.btnExport.Text = "Export";
-            this.toolTip1.SetToolTip(this.btnExport, "Run Export or Conversion.aaaaaaaabbbccc");
             this.btnExport.UseVisualStyleBackColor = false;
             this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
             // 
@@ -435,7 +434,7 @@
             this.cmbATFileName.Name = "cmbATFileName";
             this.cmbATFileName.Size = new System.Drawing.Size(101, 21);
             this.cmbATFileName.TabIndex = 47;
-            this.toolTip1.SetToolTip(this.cmbATFileName, "Autotune Output Filename.");
+            this.toolTip1.SetToolTip(this.cmbATFileName, "Autotune Output Filename format.");
             // 
             // label7
             // 
