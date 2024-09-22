@@ -886,14 +886,6 @@ namespace WoolichDecoder
             feedback($"{LogPrefix.Prefix}Exporting {exportLogs.GetPacketCount()}/{processedPackets} packets");
             lblExportPacketsCount.Text = $"{exportLogs.GetPacketCount()}";
 
-            DateTime endTime = DateTime.Now;
-            TimeSpan duration = endTime - startTime;
-            string durationFormatted = duration.ToString(@"mm\:ss\.ff");
-            log($"{LogPrefix.Prefix}Analysis completed in {durationFormatted}.");
-            UpdateProgressLabel("Analysis finished.");
-            System.Threading.Thread.Sleep(3000);
-            progressBar.Visible = false;
-            progressLabel.Visible = false;
         }
         private async void MultiAnalyse()
         {
