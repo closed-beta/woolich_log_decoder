@@ -57,6 +57,7 @@
             this.cmbLogsLocation = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.cmbBinDelete = new System.Windows.Forms.ComboBox();
+            this.cmbATFileName = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.idleRPM = new System.Windows.Forms.TextBox();
@@ -81,12 +82,14 @@
             this.cmbExportMode = new System.Windows.Forms.ComboBox();
             this.panel4 = new System.Windows.Forms.Panel();
             this.lblBinDelete = new System.Windows.Forms.Label();
-            this.cmbATFileName = new System.Windows.Forms.ComboBox();
             this.lblATFileName = new System.Windows.Forms.Label();
+            this.panel5 = new System.Windows.Forms.Panel();
+            this.label2 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
+            this.panel5.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtLogging
@@ -384,7 +387,7 @@
             this.cmbLogsLocation.Items.AddRange(new object[] {
             "Default",
             "Work Directory"});
-            this.cmbLogsLocation.Location = new System.Drawing.Point(10, 334);
+            this.cmbLogsLocation.Location = new System.Drawing.Point(94, 6);
             this.cmbLogsLocation.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cmbLogsLocation.Name = "cmbLogsLocation";
             this.cmbLogsLocation.Size = new System.Drawing.Size(101, 21);
@@ -411,12 +414,28 @@
             this.cmbBinDelete.Items.AddRange(new object[] {
             "Save",
             "Delete"});
-            this.cmbBinDelete.Location = new System.Drawing.Point(220, 334);
+            this.cmbBinDelete.Location = new System.Drawing.Point(359, 285);
             this.cmbBinDelete.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cmbBinDelete.Name = "cmbBinDelete";
             this.cmbBinDelete.Size = new System.Drawing.Size(101, 21);
             this.cmbBinDelete.TabIndex = 45;
             this.toolTip1.SetToolTip(this.cmbBinDelete, "Delete BIN files in Directory Mode.");
+            // 
+            // cmbATFileName
+            // 
+            this.cmbATFileName.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.cmbATFileName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.cmbATFileName.FormattingEnabled = true;
+            this.cmbATFileName.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.cmbATFileName.Items.AddRange(new object[] {
+            "Default",
+            "Binary"});
+            this.cmbATFileName.Location = new System.Drawing.Point(94, 41);
+            this.cmbATFileName.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.cmbATFileName.Name = "cmbATFileName";
+            this.cmbATFileName.Size = new System.Drawing.Size(101, 21);
+            this.cmbATFileName.TabIndex = 47;
+            this.toolTip1.SetToolTip(this.cmbATFileName, "Autotune Output Filename.");
             // 
             // label7
             // 
@@ -553,9 +572,9 @@
             this.label14.Location = new System.Drawing.Point(10, 196);
             this.label14.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(129, 15);
+            this.label14.Size = new System.Drawing.Size(96, 15);
             this.label14.TabIndex = 33;
-            this.label14.Text = "Additional settings:";
+            this.label14.Text = "RPM settings:";
             // 
             // progressBar
             // 
@@ -613,12 +632,13 @@
             // lblLogsLocation
             // 
             this.lblLogsLocation.AutoSize = true;
-            this.lblLogsLocation.Location = new System.Drawing.Point(7, 318);
+            this.lblLogsLocation.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.lblLogsLocation.Location = new System.Drawing.Point(12, 8);
             this.lblLogsLocation.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblLogsLocation.Name = "lblLogsLocation";
-            this.lblLogsLocation.Size = new System.Drawing.Size(87, 13);
+            this.lblLogsLocation.Size = new System.Drawing.Size(70, 13);
             this.lblLogsLocation.TabIndex = 41;
-            this.lblLogsLocation.Text = "Logs location:";
+            this.lblLogsLocation.Text = "Logs location";
             // 
             // cmbExportFormat
             // 
@@ -692,53 +712,59 @@
             // lblBinDelete
             // 
             this.lblBinDelete.AutoSize = true;
-            this.lblBinDelete.Location = new System.Drawing.Point(217, 318);
+            this.lblBinDelete.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.lblBinDelete.Location = new System.Drawing.Point(38, 72);
             this.lblBinDelete.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblBinDelete.Name = "lblBinDelete";
-            this.lblBinDelete.Size = new System.Drawing.Size(59, 13);
+            this.lblBinDelete.Size = new System.Drawing.Size(46, 13);
             this.lblBinDelete.TabIndex = 44;
-            this.lblBinDelete.Text = "Bin Files:";
-            // 
-            // cmbATFileName
-            // 
-            this.cmbATFileName.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.cmbATFileName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.cmbATFileName.FormattingEnabled = true;
-            this.cmbATFileName.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.cmbATFileName.Items.AddRange(new object[] {
-            "Default",
-            "Binary"});
-            this.cmbATFileName.Location = new System.Drawing.Point(115, 334);
-            this.cmbATFileName.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.cmbATFileName.Name = "cmbATFileName";
-            this.cmbATFileName.Size = new System.Drawing.Size(101, 21);
-            this.cmbATFileName.TabIndex = 47;
-            this.toolTip1.SetToolTip(this.cmbATFileName, "Autotune Output Filename.");
+            this.lblBinDelete.Text = "Bin Files";
             // 
             // lblATFileName
             // 
             this.lblATFileName.AutoSize = true;
-            this.lblATFileName.Location = new System.Drawing.Point(112, 318);
+            this.lblATFileName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.lblATFileName.Location = new System.Drawing.Point(16, 46);
             this.lblATFileName.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblATFileName.Name = "lblATFileName";
-            this.lblATFileName.Size = new System.Drawing.Size(81, 13);
+            this.lblATFileName.Size = new System.Drawing.Size(66, 13);
             this.lblATFileName.TabIndex = 46;
-            this.lblATFileName.Text = "AT Filename:";
+            this.lblATFileName.Text = "AT Filename";
+            // 
+            // panel5
+            // 
+            this.panel5.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel5.Controls.Add(this.lblATFileName);
+            this.panel5.Controls.Add(this.cmbATFileName);
+            this.panel5.Controls.Add(this.lblLogsLocation);
+            this.panel5.Controls.Add(this.lblBinDelete);
+            this.panel5.Controls.Add(this.cmbLogsLocation);
+            this.panel5.Location = new System.Drawing.Point(265, 214);
+            this.panel5.Name = "panel5";
+            this.panel5.Size = new System.Drawing.Size(201, 97);
+            this.panel5.TabIndex = 32;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label2.Location = new System.Drawing.Point(266, 196);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(89, 15);
+            this.label2.TabIndex = 48;
+            this.label2.Text = "File settings:";
             // 
             // WoolichFileDecoderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1284, 586);
-            this.Controls.Add(this.cmbATFileName);
-            this.Controls.Add(this.lblATFileName);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.cmbBinDelete);
-            this.Controls.Add(this.lblBinDelete);
             this.Controls.Add(this.lblCRCsize);
             this.Controls.Add(this.CRCsize);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.cmbLogsLocation);
-            this.Controls.Add(this.lblLogsLocation);
             this.Controls.Add(this.lblDirName);
             this.Controls.Add(this.label19);
             this.Controls.Add(this.label3);
@@ -760,6 +786,7 @@
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.aTFCheckedListBox);
             this.Controls.Add(this.panel4);
+            this.Controls.Add(this.panel5);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(2);
@@ -777,6 +804,8 @@
             this.panel3.PerformLayout();
             this.panel4.ResumeLayout(false);
             this.panel4.PerformLayout();
+            this.panel5.ResumeLayout(false);
+            this.panel5.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -836,6 +865,8 @@
         private System.Windows.Forms.Label lblBinDelete;
         private System.Windows.Forms.ComboBox cmbATFileName;
         private System.Windows.Forms.Label lblATFileName;
+        private System.Windows.Forms.Panel panel5;
+        private System.Windows.Forms.Label label2;
     }
 }
 

@@ -719,32 +719,12 @@ namespace WoolichDecoder
             txtLogging.Enabled = isFileLoaded;
             cmbLogsLocation.Enabled = isFileLoaded;
         }
-        private void btnAnalyse_Click(object sender, EventArgs e)
-        {
-            int selectedIndex = cmbExportMode.SelectedIndex;
-
-            if (selectedIndex == 0)
-            {
-                if (!IsFileLoaded())
-                    return;
-                Analyse();
-            }
-            else if (selectedIndex == 1)
-            {
-                MultiAnalyse();
-            }
-        }
-        private async void Analyse()
+        private async void btnAnalyse_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
             {
                 txtFeedback.Clear();
-                MessageBox.Show(
-                    "Please enter a column number for export analysis.",
-                    "Column Number Required",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
-                );
+                MessageBox.Show("Please enter a column number for export analysis.", "Column Number Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 DisplayLegend_Yamaha();
                 return;
             }
@@ -756,321 +736,105 @@ namespace WoolichDecoder
             }
             catch (Exception)
             {
-                MessageBox.Show(
-                     "Please enter a valid number for export analysis.",
-                     "Column Number Required",
-                     MessageBoxButtons.OK,
-                     MessageBoxIcon.Information
-                );
-
                 txtFeedback.Clear();
-                ClearBoxAndPackets();
+                MessageBox.Show("Please enter a valid number for export analysis.", "Invalid Column Number", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 DisplayLegend_Yamaha();
                 return;
             }
 
-            // Mapping of column numbers to corresponding analysis functions
-            var columnFunctions = new Dictionary<int, Func<byte[], double>>()
-        {
-            { 10, packet => WoolichConversions.getRPM(packet) },    // RPM
-            { 12, packet => WoolichConversions.getTrueTPS(packet) }, // True TPS
-            { 15, packet => WoolichConversions.getWoolichTPS(packet) }, // Woolich TPS
-            { 18, packet => WoolichConversions.getCorrectETV(packet) }, // Correct ETV
-            { 21, packet => WoolichConversions.getIAP(packet) }, // IAP
-            { 23, packet => WoolichConversions.getATMPressure(packet) }, // ATM Pressure
-            { 24, packet => WoolichConversions.getGear(packet) }, // Gear
-            { 26, packet => WoolichConversions.getEngineTemperature(packet) }, // Engine Temperature
-            { 27, packet => WoolichConversions.getInletTemperature(packet) }, // Inlet Temperature
-            { 28, packet => WoolichConversions.getInjectorDuration(packet) }, // Injector Duration
-            { 29, packet => WoolichConversions.getIgnitionOffset(packet) }, // Ignition Offset
-            { 31, packet => WoolichConversions.getSpeedo(packet) }, // Speedo
-            { 33, packet => WoolichConversions.getFrontWheelSpeed(packet) }, // Front Wheel Speed
-            { 35, packet => WoolichConversions.getRearWheelSpeed(packet) }, // Rear Wheel Speed
-            { 41, packet => WoolichConversions.getBatteryVoltage(packet) }, // Battery Voltage
-            { 42, packet => WoolichConversions.getAFR(packet) } // AFR
-        };
+            var columnFunctions = new Dictionary<int, (Func<byte[], double>, string)>
+    {
+        { 10, (packet => WoolichConversions.getRPM(packet), "RPM") },
+        { 12, (packet => WoolichConversions.getTrueTPS(packet), "True TPS") },
+        { 15, (packet => WoolichConversions.getWoolichTPS(packet), "Woolich TPS") },
+        { 18, (packet => WoolichConversions.getCorrectETV(packet), "Correct ETV") },
+        { 21, (packet => WoolichConversions.getIAP(packet), "IAP") },
+        { 23, (packet => WoolichConversions.getATMPressure(packet), "ATM Pressure") },
+        { 24, (packet => WoolichConversions.getGear(packet), "Gear") },
+        { 26, (packet => WoolichConversions.getEngineTemperature(packet), "Engine Temperature") },
+        { 27, (packet => WoolichConversions.getInletTemperature(packet), "Inlet Temperature") },
+        { 28, (packet => WoolichConversions.getInjectorDuration(packet), "Injector Duration") },
+        { 29, (packet => WoolichConversions.getIgnitionOffset(packet), "Ignition Offset") },
+        { 31, (packet => WoolichConversions.getSpeedo(packet), "Speedo") },
+        { 33, (packet => WoolichConversions.getFrontWheelSpeed(packet), "Front Wheel Speed") },
+        { 35, (packet => WoolichConversions.getRearWheelSpeed(packet), "Rear Wheel Speed") },
+        { 41, (packet => WoolichConversions.getBatteryVoltage(packet), "Battery Voltage") },
+        { 42, (packet => WoolichConversions.getAFR(packet), "AFR") }
+    };
 
-            // Check if the column number is supported in the analysis
             if (!columnFunctions.ContainsKey(columnNumber))
             {
-                // If not supported, display a message, log it, and clear data
-                MessageBox.Show(
-                    "Please enter a valid column number for export analysis.",
-                    "Unsupported Column Number",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
-                );
-                txtFeedback.Clear();
-                ClearBoxAndPackets();
+                MessageBox.Show("Please enter a valid column number for export analysis.", "Unsupported Column Number", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 DisplayLegend_Yamaha();
                 return;
             }
 
-            feedback($"{LogPrefix.Prefix}Monitoring changes on column: {columnNumber}");
-            analysisColumn.Add(columnNumber);
-
-            feedback($"{LogPrefix.Prefix}Analysing column {columnNumber}...");
+            var (conversionFunction, columnName) = columnFunctions[columnNumber];
             lblExportPacketsCount.Text = string.Empty;
             exportLogs.ClearPackets();
             DateTime startTime = DateTime.Now;
-            log($"{LogPrefix.Prefix}Start Analysing...");
 
-            StringBuilder feedbackBuffer = new StringBuilder();
-            Func<byte[], double> conversionFunction = columnFunctions[columnNumber];
-
-            double? previousValue = null;
-            double? minValue = null;
-            double? maxValue = null;
-
-            var packets = logs.GetPackets();
-            int totalPackets = packets.Count;
-            int processedPackets = 0;
-
-            progressBar.Visible = true;
-            progressLabel.Visible = true;
-            progressBar.Value = 0;
-            UpdateProgressLabel("Starting analysis...");
-
-            await Task.Run(() =>
+            if (cmbExportMode.SelectedIndex == 0)
             {
-                foreach (KeyValuePair<string, byte[]> packet in packets)
-                {
-                    try
-                    {
-                        double currentValue = conversionFunction(packet.Value);
-
-                        if (previousValue == null)
-                        {
-                            minValue = currentValue;
-                            maxValue = currentValue;
-                            previousValue = currentValue;
-                            feedbackBuffer.AppendLine($"Initial value in column {columnNumber}: {currentValue}");
-                            continue;
-                        }
-
-                        if (currentValue > maxValue) maxValue = currentValue;
-                        if (currentValue < minValue) minValue = currentValue;
-
-                        if (currentValue != previousValue)
-                        {
-                            feedbackBuffer.AppendLine($"Column {columnNumber} changed from {previousValue} to {currentValue}");
-                            previousValue = currentValue;
-
-                            if (analysisColumn.Contains(columnNumber))
-                            {
-                                exportLogs.AddPacket(packet.Value, logs.PacketLength, logs.PacketFormat);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        feedbackBuffer.AppendLine($"Error processing column {columnNumber}: {ex.Message}");
-                    }
-
-                    processedPackets++;
-                    int progressPercentage = (processedPackets * 100) / totalPackets;
-
-                    this.Invoke(new Action(() =>
-                    {
-                        progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum);
-                        UpdateProgressLabel($"Analyzing... {progressPercentage}% completed");
-                    }));
-
-                    Application.DoEvents();
-                }
-            });
-
-            feedbackBuffer.AppendLine($"Column {columnNumber} min value: {minValue}, max value: {maxValue}");
-            feedback(feedbackBuffer.ToString());
-
-            feedback($"{LogPrefix.Prefix}Exporting {exportLogs.GetPacketCount()}/{processedPackets} packets");
-            lblExportPacketsCount.Text = $"{exportLogs.GetPacketCount()}";
-
-        }
-        private async void MultiAnalyse()
-        {
-            if (string.IsNullOrWhiteSpace(txtBreakOnChange.Text))
-            {
-                txtFeedback.Clear();
-                MessageBox.Show("Column number is empty. Please enter a valid column number." + Environment.NewLine);
-                DisplayLegend_Yamaha();
-
-                return;
-            }
-
-            int columnNumber;
-            try
-            {
-                columnNumber = int.Parse(txtBreakOnChange.Text);
-            }
-            catch (Exception)
-            {
-                txtFeedback.Clear();
-                MessageBox.Show($"Invalid column number. Please enter a valid number." + Environment.NewLine);
-                DisplayLegend_Yamaha();
-                return;
-            }
-
-            var columnFunctions = new Dictionary<int, (Func<byte[], double>, string)>()
-        {
-            { 10, (packet => WoolichConversions.getRPM(packet), "RPM") },
-            { 12, (packet => WoolichConversions.getTrueTPS(packet), "True TPS") },
-            { 15, (packet => WoolichConversions.getWoolichTPS(packet), "Woolich TPS") },
-            { 18, (packet => WoolichConversions.getCorrectETV(packet), "Correct ETV") },
-            { 21, (packet => WoolichConversions.getIAP(packet), "IAP") },
-            { 23, (packet => WoolichConversions.getATMPressure(packet), "ATM Pressure") },
-            { 24, (packet => WoolichConversions.getGear(packet), "Gear") },
-            { 26, (packet => WoolichConversions.getEngineTemperature(packet), "Engine Temperature") },
-            { 27, (packet => WoolichConversions.getInletTemperature(packet), "Inlet Temperature") },
-            { 28, (packet => WoolichConversions.getInjectorDuration(packet), "Injector Duration") },
-            { 29, (packet => WoolichConversions.getIgnitionOffset(packet), "Ignition Offset") },
-            { 31, (packet => WoolichConversions.getSpeedo(packet), "Speedo") },
-            { 33, (packet => WoolichConversions.getFrontWheelSpeed(packet), "Front Wheel Speed") },
-            { 35, (packet => WoolichConversions.getRearWheelSpeed(packet), "Rear Wheel Speed") },
-            { 41, (packet => WoolichConversions.getBatteryVoltage(packet), "Battery Voltage") },
-            { 42, (packet => WoolichConversions.getAFR(packet), "AFR") }
-        };
-
-            if (!columnFunctions.ContainsKey(columnNumber))
-            {
-                txtFeedback.Clear();
-                MessageBox.Show("Unsupported column number. Please enter a valid column number." + Environment.NewLine);
-                DisplayLegend_Yamaha();
-
-
-                return;
-            }
-
-            using (var folderDialog = new FolderBrowserDialog())
-            {
-                if (folderDialog.ShowDialog() != DialogResult.OK)
+                if (!IsFileLoaded())
                     return;
 
-                string folderPath = folderDialog.SelectedPath;
-                lblDirName.Text = folderPath;
+                log($"{LogPrefix.Prefix}Start analyzing...");
+                txtFeedback.Clear();
+                feedback($"Analyzing column {columnNumber}...");
+                var packets = logs.GetPackets();
+                StringBuilder feedbackBuffer = new StringBuilder();
 
-                var wrlFiles = Directory.GetFiles(folderPath, "*.wrl", SearchOption.AllDirectories);
-                log($"{LogPrefix.Prefix}Total WRL files found: {wrlFiles.Length}");
+                double? previousValue = null;
+                double? minValue = null;
+                double? maxValue = null;
 
-                var successfulConversions = new List<string>();
-                var failedConversions = new List<string>();
-
-                DateTime startTime = DateTime.Now;
-                log($"{LogPrefix.Prefix}Starting Multi File Conversion...");
+                int processedPackets = 0;
+                int totalPackets = packets.Count;
 
                 progressBar.Visible = true;
                 progressLabel.Visible = true;
-                progressBar.Maximum = wrlFiles.Length;
                 progressBar.Value = 0;
-                UpdateProgressLabel("Converting files...");
-
-                foreach (var wrlFile in wrlFiles)
-                {
-                    string binFile = Path.Combine(Path.GetDirectoryName(wrlFile), Path.GetFileNameWithoutExtension(wrlFile) + ".bin");
-                    ConvertWRLToBIN(wrlFile, binFile, successfulConversions, failedConversions);
-
-                    this.Invoke(new Action(() =>
-                    {
-                        progressBar.Value++;
-                        UpdateProgressLabel($"Converting files... {progressBar.Value}/{progressBar.Maximum} files processed");
-                    }));
-
-                    Application.DoEvents();
-                }
-
-                int totalFiles = wrlFiles.Length;
-                int convertedFiles = successfulConversions.Count;
-                int failedFiles = failedConversions.Count;
-
-                log($"{LogPrefix.Prefix}Conversion completed.");
-                log($"{LogPrefix.Prefix}Successfully converted {convertedFiles} files.");
-                log($"{LogPrefix.Prefix}{failedFiles} files failed.");
-
-                if (successfulConversions.Count == 0)
-                {
-                    feedback("No successful BIN files found in the selected folder.");
-                    return;
-                }
-
-                var results = new List<(string FileName, double MaxValue)>();
-                var (conversionFunction, columnName) = columnFunctions[columnNumber];
-
-                log($"{LogPrefix.Prefix}Starting Analysis...");
                 UpdateProgressLabel("Starting analysis...");
 
                 await Task.Run(() =>
                 {
-                    int processedFilesCount = 0;
-
-                    foreach (var binFile in successfulConversions)
+                    foreach (var packet in packets)
                     {
-                        double? maxValue = null;
-
                         try
                         {
-                            using (var fileStream = new FileStream(binFile, FileMode.Open, FileAccess.Read))
-                            using (var binReader = new BinaryReader(fileStream))
+                            double currentValue = conversionFunction(packet.Value);
+                            processedPackets++;
+
+                            if (previousValue == null)
                             {
-                                while (fileStream.Position < fileStream.Length)
-                                {
-                                    if (fileStream.Length - fileStream.Position < logs.PacketPrefixLength)
-                                    {
-                                        feedback($"File {binFile} does not have enough data for packet prefix.");
-                                        break;
-                                    }
+                                minValue = currentValue;
+                                maxValue = currentValue;
+                                previousValue = currentValue;
+                                feedbackBuffer.AppendLine($"Initial value in column {columnNumber}: {currentValue}");
+                                continue;
+                            }
 
-                                    byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
-                                    if (packetPrefixBytes.Length != logs.PacketPrefixLength)
-                                    {
-                                        feedback($"Incomplete packet prefix in {binFile}. Skipping.");
-                                        break;
-                                    }
+                            if (currentValue > maxValue) maxValue = currentValue;
+                            if (currentValue < minValue) minValue = currentValue;
 
-                                    int remainingPacketBytes = packetPrefixBytes[3] - 2;
-
-                                    if (fileStream.Length - fileStream.Position < remainingPacketBytes)
-                                    {
-                                        feedback($"File {binFile} does not have enough data for full packet. Skipping.");
-                                        break;
-                                    }
-
-                                    byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
-
-                                    if (packetBytes.Length != remainingPacketBytes)
-                                    {
-                                        feedback($"Incomplete packet data in {binFile}. Skipping.");
-                                        break;
-                                    }
-
-                                    byte[] fullPacket = packetPrefixBytes.Concat(packetBytes).ToArray();
-
-                                    double currentValue = conversionFunction(fullPacket);
-
-                                    if (maxValue == null || currentValue > maxValue)
-                                    {
-                                        maxValue = currentValue;
-                                    }
-                                }
-
-                                if (maxValue.HasValue)
-                                {
-                                    var directoryInfo = new DirectoryInfo(Path.GetDirectoryName(binFile));
-                                    var lastTwoDirs = Path.Combine(directoryInfo.Parent.Name, directoryInfo.Name);
-                                    results.Add((Path.Combine(lastTwoDirs, Path.GetFileName(binFile)), maxValue.Value));
-                                }
+                            if (currentValue != previousValue)
+                            {
+                                feedbackBuffer.AppendLine($"Column {columnNumber} changed from {previousValue} to {currentValue}");
+                                previousValue = currentValue;
+                                exportLogs.AddPacket(packet.Value, logs.PacketLength, logs.PacketFormat);
                             }
                         }
                         catch (Exception ex)
                         {
-                            feedback($"Error processing file {binFile}: {ex.Message}");
+                            feedbackBuffer.AppendLine($"Error processing column {columnNumber}: {ex.Message}");
                         }
 
-                        processedFilesCount++;
-                        int progressPercentage = (int)((double)processedFilesCount / successfulConversions.Count * 100);
+                        int progressPercentage = (processedPackets * 100) / totalPackets;
 
                         this.Invoke(new Action(() =>
                         {
-                            progressBar.Value = Math.Min(processedFilesCount, progressBar.Maximum);
+                            progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum);
                             UpdateProgressLabel($"Analyzing... {progressPercentage}% completed");
                         }));
 
@@ -1078,36 +842,167 @@ namespace WoolichDecoder
                     }
                 });
 
-                var sortedResults = results.OrderByDescending(r => r.MaxValue).ToList();
+                feedbackBuffer.AppendLine($"Column {columnNumber} min value: {minValue}, max value: {maxValue}");
+                feedback(feedbackBuffer.ToString());
 
-                DateTime endTime = DateTime.Now;
-                TimeSpan duration = endTime - startTime;
-                string durationFormatted = duration.ToString(@"mm\:ss\.ff");
-                log($"{LogPrefix.Prefix}Analysis completed in {durationFormatted}.");
+                log($"{LogPrefix.Prefix}-------------------------------------------------------------------------");
+                log($"{LogPrefix.Prefix}Analysis summary for column {columnNumber}:");
+                log($"{LogPrefix.Prefix}Total packets analyzed: {processedPackets}");
+                log($"{LogPrefix.Prefix}Packets exported: {exportLogs.GetPacketCount()}");
+                log($"{LogPrefix.Prefix}Min value: {minValue}, Max value: {maxValue}");
 
-                if (sortedResults.Count > 0)
-                {
-                    var resultText = $"{Environment.NewLine}Found max {columnName}:{Environment.NewLine}" +
-                                     string.Join(Environment.NewLine, sortedResults.Select(r => $"{r.FileName.Replace('\\', '/')} - {r.MaxValue}"));
-                    feedback(resultText);
-                }
-                else
-                {
-                    feedback("No results found.");
-                }
+                feedback($"{LogPrefix.Prefix}Exporting {exportLogs.GetPacketCount()}/{processedPackets} packets");
+                lblExportPacketsCount.Text = $"{exportLogs.GetPacketCount()}";
 
-                if (failedConversions.Count > 0)
-                {
-                    var failedFilesText = $"{Environment.NewLine}Files that could not be converted:{Environment.NewLine}" +
-                                          string.Join(Environment.NewLine, failedConversions.Select(f => f.Replace('\\', '/')));
-                    feedback(failedFilesText);
-                }
-
-                UpdateProgressLabel("Analysis finished.");
-                System.Threading.Thread.Sleep(3000);
                 progressBar.Visible = false;
                 progressLabel.Visible = false;
             }
+            else if (cmbExportMode.SelectedIndex == 1)
+            {
+                using (var folderDialog = new FolderBrowserDialog())
+                {
+                    if (folderDialog.ShowDialog() != DialogResult.OK)
+                        return;
+
+                    string folderPath = folderDialog.SelectedPath;
+                    lblDirName.Text = folderPath;
+
+                    var wrlFiles = Directory.GetFiles(folderPath, "*.wrl", SearchOption.AllDirectories);
+                    log($"{LogPrefix.Prefix}Total WRL files found: {wrlFiles.Length}");
+
+                    var successfulConversions = new List<string>();
+                    var failedConversions = new List<string>();
+
+                    progressBar.Visible = true;
+                    progressLabel.Visible = true;
+                    progressBar.Maximum = wrlFiles.Length;
+                    progressBar.Value = 0;
+                    UpdateProgressLabel("Converting files...");
+
+                    foreach (var wrlFile in wrlFiles)
+                    {
+                        string binFile = Path.Combine(Path.GetDirectoryName(wrlFile), Path.GetFileNameWithoutExtension(wrlFile) + ".bin");
+                        ConvertWRLToBIN(wrlFile, binFile, successfulConversions, failedConversions);
+
+                        this.Invoke(new Action(() =>
+                        {
+                            progressBar.Value++;
+                            UpdateProgressLabel($"Converting files... {progressBar.Value}/{wrlFiles.Length} files processed");
+                        }));
+
+                        Application.DoEvents();
+                    }
+
+                    if (successfulConversions.Count == 0)
+                    {
+                        feedback("No successful BIN files found in the selected folder.");
+                        return;
+                    }
+
+                    var results = new List<(string FileName, double MaxValue)>();
+                    log($"{LogPrefix.Prefix}Starting Analysis...");
+
+                    await Task.Run(() =>
+                    {
+                        foreach (var binFile in successfulConversions)
+                        {
+                            double? maxValue = null;
+
+                            try
+                            {
+                                using (var fileStream = new FileStream(binFile, FileMode.Open, FileAccess.Read))
+                                using (var binReader = new BinaryReader(fileStream))
+                                {
+                                    while (fileStream.Position < fileStream.Length)
+                                    {
+                                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
+                                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
+
+                                        if (fileStream.Length - fileStream.Position < remainingPacketBytes)
+                                        {
+                                            feedback($"File {binFile} does not have enough data for full packet. Skipping.");
+                                            break;
+                                        }
+
+                                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
+                                        byte[] fullPacket = packetPrefixBytes.Concat(packetBytes).ToArray();
+
+                                        double currentValue = conversionFunction(fullPacket);
+                                        if (maxValue == null || currentValue > maxValue)
+                                            maxValue = currentValue;
+                                    }
+
+                                    if (maxValue.HasValue)
+                                    {
+                                        results.Add((binFile, maxValue.Value));
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                feedback($"Error processing file {binFile}: {ex.Message}");
+                            }
+
+                            int processedFilesCount = results.Count;
+                            int progressPercentage = (int)((double)processedFilesCount / successfulConversions.Count * 100);
+
+                            this.Invoke(new Action(() =>
+                            {
+                                progressBar.Value = Math.Min(processedFilesCount, progressBar.Maximum);
+                                UpdateProgressLabel($"Analyzing... {progressPercentage}% completed");
+                            }));
+
+                            Application.DoEvents();
+                        }
+                    });
+
+                    var sortedResults = results.OrderByDescending(r => r.MaxValue).ToList();
+                    if (sortedResults.Count > 0)
+                    {
+                        var resultText = $"{Environment.NewLine}Max {columnName} for each file:" + Environment.NewLine +
+                            string.Join(Environment.NewLine, sortedResults.Select(r =>
+                            {
+                                var fullPath = Path.GetDirectoryName(r.FileName);
+                                var directoryParts = fullPath.Split(Path.DirectorySeparatorChar).ToList();
+
+                                var relevantDirectories = directoryParts.Skip(Math.Max(0, directoryParts.Count - 2)).ToArray();
+                                var fileName = Path.GetFileName(r.FileName);
+                                var resultPath = relevantDirectories.Length > 0
+                                    ? string.Join("/", relevantDirectories) + "/" + fileName
+                                    : fileName;
+                                return resultPath + $" - {r.MaxValue}";
+                            }));
+
+                        feedback(resultText);
+
+                        log($"{LogPrefix.Prefix}-------------------------------------------------------------------------");
+                        log($"{LogPrefix.Prefix}Analysis summary for multi-file analysis:");
+                        log($"{LogPrefix.Prefix}Total WRL files processed: {wrlFiles.Length}");
+                        log($"{LogPrefix.Prefix}Successful BIN file conversions: {successfulConversions.Count}");
+                        log($"{LogPrefix.Prefix}Failed BIN file conversions: {failedConversions.Count}");
+
+                        feedback(Environment.NewLine + "Failed to convert:" + Environment.NewLine + string.Join(Environment.NewLine, failedConversions) + Environment.NewLine);
+                    }
+                    else
+                    {
+                        feedback("No results found.");
+                    }
+
+                    DeleteBinFiles(folderPath);
+
+                    progressBar.Visible = false;
+                    progressLabel.Visible = false;
+                }
+            }
+
+            DateTime endTime = DateTime.Now;
+            TimeSpan duration = endTime - startTime;
+            string durationFormatted = duration.ToString(@"mm\:ss\.ff");
+            log($"{LogPrefix.Prefix}Analysis completed in {durationFormatted}.");
+            log($"{LogPrefix.Prefix}-------------------------------------------------------------------------");
+            UpdateProgressLabel("Analysis finished.");
+            progressBar.Visible = false;
+            progressLabel.Visible = false;
         }
         private void RepairWRL(string inputFileName)
         {
@@ -1243,11 +1138,12 @@ namespace WoolichDecoder
                         int seconds = elapsed.Seconds;
 
                         // Logging results
+                        Invoke(new Action(() => log($"{LogPrefix.Prefix}--------------------------------------------------------------------------")));
                         Invoke(new Action(() => log($"{LogPrefix.Prefix}Total files processed: {totalFiles}")));
                         Invoke(new Action(() => log($"{LogPrefix.Prefix}Successfully processed: {successfulCount}")));
                         Invoke(new Action(() => log($"{LogPrefix.Prefix}Failed to process: {failedCount}")));
                         Invoke(new Action(() => log($"{LogPrefix.Prefix}Total processing time: {minutes} minutes {seconds} seconds")));
-
+                        Invoke(new Action(() => log($"{LogPrefix.Prefix}--------------------------------------------------------------------------")));
                         Invoke(new Action(() => UpdateProgressLabel("Conversion completed successfully.")));
                         DeleteBinFiles(rootFolderPath);
                     });
@@ -1612,7 +1508,7 @@ namespace WoolichDecoder
             }
             catch (Exception)
             {
-                feedback($"ERROR converting file: {Path.GetFileName(wrlFileName)}");
+                feedback($"Error converting file: {Path.GetFileName(wrlFileName)}");
 
                 failedConversions.Add(wrlFileName);
 
@@ -1621,7 +1517,7 @@ namespace WoolichDecoder
                     try
                     {
                         File.Delete(binFileName);
-                        feedback($"Deleted corrupted BIN file: {Path.GetFileName(binFileName)}");
+                        //feedback($"Deleted corrupted BIN file: {Path.GetFileName(binFileName)}");
                     }
                     catch (Exception deleteEx)
                     {
@@ -1676,10 +1572,13 @@ namespace WoolichDecoder
                         int minutes = elapsed.Minutes;
                         int seconds = elapsed.Seconds;
 
+                        log($"{LogPrefix.Prefix}-------------------------------------------------------------------------");
                         log($"{LogPrefix.Prefix}Total files processed: {wrlFiles.Length}");
                         log($"{LogPrefix.Prefix}Successfully processed: {successfulCount}");
                         log($"{LogPrefix.Prefix}Failed to process: {failedCount}");
                         log($"{LogPrefix.Prefix}Total processing time: {minutes} minutes {seconds} seconds");
+                        log($"{LogPrefix.Prefix}-------------------------------------------------------------------------");
+
 
                         DeleteBinFiles(directoryPath);
                         lblFileName.Text = "None";
@@ -1876,16 +1775,5 @@ namespace WoolichDecoder
             }
         }
 
-
-
-
-
-
-
     }
 }
-
-
-
-
-
