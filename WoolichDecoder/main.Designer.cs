@@ -488,7 +488,8 @@
             this.btnAFR.Size = new System.Drawing.Size(76, 21);
             this.btnAFR.TabIndex = 49;
             this.btnAFR.Text = "Calibrate";
-            this.toolTip1.SetToolTip(this.btnAFR, "Calibrate AFR between Woolich software and Decoder.");
+            this.toolTip1.SetToolTip(this.btnAFR, "Calibrate AFR between Woolich software and Decoder. Mitigate difference in CSV/TS" +
+        "V files.");
             this.btnAFR.UseVisualStyleBackColor = true;
             this.btnAFR.Click += new System.EventHandler(this.CompareAFR_Click);
             // 

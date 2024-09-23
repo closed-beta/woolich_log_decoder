@@ -76,6 +76,14 @@ namespace WoolichDecoder
             cmbExportType.SelectedIndexChanged += cmbExportType_Change;
             cmbExportMode.SelectedIndexChanged += cmbExportMode_Change;
             lblTotalPacketsCount.Text = "0";
+            btnAnalyse.MouseEnter += (s, e) => {
+                cmbExportType.SelectedIndex = 1;   
+                cmbExportFormat.Enabled = false;   
+            };
+            btnAnalyse.MouseLeave += (s, e) => {
+                //cmbExportType.SelectedIndex = 0;
+                cmbExportFormat.Enabled = true;  
+            };
         }
         private bool IsFileLoaded()
         {
@@ -378,7 +386,11 @@ namespace WoolichDecoder
             }
 
             this.aTFCheckedListBox.Items.AddRange(autoTuneFilterOptions.ToArray());
-
+            
+            AFRdivisor.Text = userSettings.AFRdivisor;
+            idleRPM.Text = userSettings.idleRPM; 
+            minRPM.Text = userSettings.minRPM; 
+            maxRPM.Text = userSettings.maxRPM; 
 
             for (int i = 0; i < this.aTFCheckedListBox.Items.Count; i++)
             {
@@ -397,6 +409,11 @@ namespace WoolichDecoder
         private void App_Close(object sender, FormClosingEventArgs e)
         {
             userSettings.LogDirectory = this.logFolder;
+            userSettings.AFRdivisor = AFRdivisor.Text;
+            userSettings.idleRPM = idleRPM.Text;
+            userSettings.minRPM = minRPM.Text;
+            userSettings.maxRPM = maxRPM.Text;
+
 
             // save the user settings.
             userSettings.Save();
