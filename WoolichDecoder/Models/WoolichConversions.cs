@@ -42,7 +42,7 @@ namespace WoolichDecoder.Models
         public static double getWoolichBadETV(this byte[] packet)
         {
             // var ETV = Math.Round(((double)col18 - 38) / 1.6575, 2);
-            // WTF did I get this from? var ETV = Math.Round(((double)packet[18] - 32) / 1.78, 2); <--- This is the true formula. See log 21
+            // WTF did I get this from? var ETV = Math.Round(((double)packet[18] - 32) / 1.78, 2); <--- This is the true formula. See Log 21
             // Because there were some 34's in there???
             // I really think woolich screwed up on this one. Col 19 might actually be more accurate.
 
@@ -53,7 +53,7 @@ namespace WoolichDecoder.Models
         public static double getCorrectETV(this byte[] packet)
         {
             // var ETV = Math.Round(((double)col18 - 38) / 1.6575, 2);
-            // WTF did I get this from? var ETV = Math.Round(((double)packet[18] - 32) / 1.78, 2); <--- This is the true formula. See log 21
+            // WTF did I get this from? var ETV = Math.Round(((double)packet[18] - 32) / 1.78, 2); <--- This is the true formula. See Log 21
             // Because there were some 34's in there???
             // I really think woolich screwed up on this one. Col 19 might actually be more accurate.
 

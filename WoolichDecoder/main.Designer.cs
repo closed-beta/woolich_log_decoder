@@ -41,6 +41,8 @@
             this.cmbExportType = new System.Windows.Forms.ComboBox();
             this.lblExportType = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.lblTotalPackets = new System.Windows.Forms.Label();
+            this.lblTotalPacketsCount = new System.Windows.Forms.Label();
             this.lblPackets = new System.Windows.Forms.Label();
             this.lblAnalysisCol = new System.Windows.Forms.Label();
             this.txtBreakOnChange = new System.Windows.Forms.TextBox();
@@ -85,8 +87,6 @@
             this.lblATFileName = new System.Windows.Forms.Label();
             this.panel5 = new System.Windows.Forms.Panel();
             this.label2 = new System.Windows.Forms.Label();
-            this.lblTotalPackets = new System.Windows.Forms.Label();
-            this.lblTotalPacketsCount = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -235,6 +235,34 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(455, 70);
             this.panel1.TabIndex = 16;
+            // 
+            // lblTotalPackets
+            // 
+            this.lblTotalPackets.AutoSize = true;
+            this.lblTotalPackets.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.lblTotalPackets.Location = new System.Drawing.Point(282, 44);
+            this.lblTotalPackets.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblTotalPackets.Name = "lblTotalPackets";
+            this.lblTotalPackets.Size = new System.Drawing.Size(76, 13);
+            this.lblTotalPackets.TabIndex = 38;
+            this.lblTotalPackets.Text = "Total Packets:";
+            // 
+            // lblTotalPacketsCount
+            // 
+            this.lblTotalPacketsCount.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.lblTotalPacketsCount.BackColor = System.Drawing.SystemColors.Control;
+            this.lblTotalPacketsCount.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblTotalPacketsCount.Enabled = false;
+            this.lblTotalPacketsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.lblTotalPacketsCount.Location = new System.Drawing.Point(364, 40);
+            this.lblTotalPacketsCount.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblTotalPacketsCount.Name = "lblTotalPacketsCount";
+            this.lblTotalPacketsCount.Size = new System.Drawing.Size(78, 20);
+            this.lblTotalPacketsCount.TabIndex = 37;
+            this.lblTotalPacketsCount.Text = "0";
+            this.lblTotalPacketsCount.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.toolTip1.SetToolTip(this.lblTotalPacketsCount, "Found packets.");
+            this.lblTotalPacketsCount.UseMnemonic = false;
             // 
             // lblPackets
             // 
@@ -658,9 +686,9 @@
             this.cmbExportFormat.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.cmbExportFormat.FormattingEnabled = true;
             this.cmbExportFormat.Items.AddRange(new object[] {
-            "    csv",
-            "    tsv",
-            "    wrl"});
+            "csv",
+            "tsv",
+            "wrl"});
             this.cmbExportFormat.Location = new System.Drawing.Point(266, 19);
             this.cmbExportFormat.Margin = new System.Windows.Forms.Padding(1);
             this.cmbExportFormat.Name = "cmbExportFormat";
@@ -767,34 +795,6 @@
             this.label2.Size = new System.Drawing.Size(89, 15);
             this.label2.TabIndex = 48;
             this.label2.Text = "File settings:";
-            // 
-            // lblTotalPackets
-            // 
-            this.lblTotalPackets.AutoSize = true;
-            this.lblTotalPackets.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.lblTotalPackets.Location = new System.Drawing.Point(282, 44);
-            this.lblTotalPackets.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.lblTotalPackets.Name = "lblTotalPackets";
-            this.lblTotalPackets.Size = new System.Drawing.Size(76, 13);
-            this.lblTotalPackets.TabIndex = 38;
-            this.lblTotalPackets.Text = "Total Packets:";
-            // 
-            // lblTotalPacketsCount
-            // 
-            this.lblTotalPacketsCount.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.lblTotalPacketsCount.BackColor = System.Drawing.SystemColors.Control;
-            this.lblTotalPacketsCount.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lblTotalPacketsCount.Enabled = false;
-            this.lblTotalPacketsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblTotalPacketsCount.Location = new System.Drawing.Point(364, 40);
-            this.lblTotalPacketsCount.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblTotalPacketsCount.Name = "lblTotalPacketsCount";
-            this.lblTotalPacketsCount.Size = new System.Drawing.Size(78, 20);
-            this.lblTotalPacketsCount.TabIndex = 37;
-            this.lblTotalPacketsCount.Text = "0";
-            this.lblTotalPacketsCount.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.toolTip1.SetToolTip(this.lblTotalPacketsCount, "Found packets.");
-            this.lblTotalPacketsCount.UseMnemonic = false;
             // 
             // WoolichFileDecoderForm
             // 

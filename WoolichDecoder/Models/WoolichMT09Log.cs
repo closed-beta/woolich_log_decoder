@@ -12,7 +12,7 @@ namespace WoolichDecoder.Models
         // Packet size for MT-09, MT-10 and R1
         public int MT09Packet { get; } = 96;
         
-        /// PrimaryHeaderLength I expect this identifies the source of the log data. What collected it.
+        /// PrimaryHeaderLength I expect this identifies the source of the Log data. What collected it.
         public int PrimaryHeaderLength { get; set; } = 352;
 
         /// SecondaryHeaderLength: for mt09 was all 0xFF but for R1 wasn't. We don't use it though.
