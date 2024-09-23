@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using WoolichDecoder.Models;
 using WoolichDecoder.Settings;
+using System.Drawing; // for Size, Font, FontStyle
+
+
 
 namespace WoolichDecoder
 {
@@ -87,6 +90,135 @@ namespace WoolichDecoder
         {
             private static readonly string DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
             public static string Prefix => $"{DateTime.Now.ToString(DateTimeFormat)} -- ";
+        }
+        public void CompareAFR_Click(object sender, EventArgs e)
+        {
+            var result = MessageBox.Show(
+                "This function compares AFR from Woolich Racing Tuned and Woolich File Decoder.\n\nTo proceed, you need two CSV files converted from the same WRL file in the Woolich Racing Tuned software and this application.",
+                "Information",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Information);
+
+ 
+            if (result == DialogResult.Cancel)
+            {
+                return; 
+            }
+
+            // Open WRT CSV file
+            MessageBox.Show("Please have ready converted WRL file to CSV in Woolich Racing Tuned software.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "CSV files (*.csv)|*.csv",
+                Title = "Select CSV File from Woolich Racing Tuned"
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string wrtFilePath = openFileDialog.FileName;
+
+                // Open Woolich CSV file
+                MessageBox.Show("Please have ready converted THE SAME WRL file to CSV in this application.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                openFileDialog.Title = "Select CSV File from this application";
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string woolichFilePath = openFileDialog.FileName;
+
+                    // Read lines from both files
+                    var wrtLines = File.ReadAllLines(wrtFilePath);
+                    var woolichLines = File.ReadAllLines(woolichFilePath);
+
+                    // Ensure we have enough data in both files for comparison
+                    if (wrtLines.Length < 2 || woolichLines.Length < 2)
+                    {
+                        MessageBox.Show("Not enough data in one of the files.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // Initialize a list to randomly select 5 unique indexes (skip the first line - headers)
+                    Random random = new Random();
+                    HashSet<int> randomIndices = new HashSet<int>();
+
+                    while (randomIndices.Count < 5)
+                    {
+                        randomIndices.Add(random.Next(1, Math.Min(wrtLines.Length, woolichLines.Length)));
+                    }
+
+                    StringBuilder comparisonResults = new StringBuilder();
+                    comparisonResults.AppendLine("Time                 |  WRT     |  WFD      |  Diff");
+                    comparisonResults.AppendLine("--------------------------------------------------");
+
+                    double totalDifference = 0;
+                    int validComparisons = 0;
+                    double currentDivisor = double.Parse(AFRdivisor.Text);
+
+                    foreach (int index in randomIndices)
+                    {
+                        // Parse lines
+                        var wrtLine = wrtLines[index].Split(',');
+                        var woolichLine = woolichLines[index].Split(',');
+
+                        // Timestamps (assumed to be in the first column in both files)
+                        string wrtTimestamp = wrtLine[0];
+                        string woolichTimestamp = woolichLine[0];
+
+                        if (wrtTimestamp != woolichTimestamp)
+                        {
+                            MessageBox.Show("The CSV files likely come from different WRL files. Please check your conversions.", "Mismatch Detected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+
+                        // AFR values (assumed to be in the 5th column for WRT and 10th column for Woolich)
+                        if (double.TryParse(wrtLine[4], out double wrtAFR) && double.TryParse(woolichLine[9], out double woolichAFR))
+                        {
+                            double difference = Math.Abs(wrtAFR - woolichAFR);
+                            totalDifference += woolichAFR / wrtAFR;  // Add the proportion of Woolich AFR to WRT AFR
+                            validComparisons++;
+
+                            // Format and round values to 2 decimal places for display
+                            comparisonResults.AppendLine($"{wrtTimestamp.PadRight(15)} | {wrtAFR.ToString("F2").PadRight(9)} | {woolichAFR.ToString("F2").PadRight(10)} | {difference.ToString("F2")}");
+                        }
+                        else
+                        {
+                            comparisonResults.AppendLine($"Error parsing AFR values at line {index}");
+                        }
+                    }
+
+                    if (validComparisons > 0)
+                    {
+                        // Calculate the new correction factor
+                        double averageRatio = totalDifference / validComparisons;
+                        double newDivisor = currentDivisor * averageRatio;
+
+                        comparisonResults.AppendLine();
+                        comparisonResults.AppendLine($"     Current AFR divisor: {currentDivisor}");
+                        comparisonResults.AppendLine($"Suggested AFR divisor: {Math.Round(newDivisor, 2)}");
+                    }
+                    else
+                    {
+                        comparisonResults.AppendLine("No valid AFR comparisons could be made.");
+                    }
+
+                    // Display the comparison results in a formatted MessageBox
+                    MessageBox.Show(comparisonResults.ToString(), "AFR Comparison and Correction Factor", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+        }
+        private double GetAFRDivisor()
+        {
+            if (double.TryParse(AFRdivisor.Text, out double divisor) && divisor >= 1 && divisor <= 20)
+            {
+                return divisor;
+            }
+
+            MessageBox.Show("Invalid value. Setting to default (10.2).", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            AFRdivisor.Text = "10.2";
+            return 10.2;
+        }
+        private void AFRdivisor_TextChanged(object sender, EventArgs e)
+        {
+            GetAFRDivisor();
         }
         private void Feedback(string fbData)
         {
@@ -589,35 +721,20 @@ namespace WoolichDecoder
                     }
                     catch (Exception)
                     {
-                        MessageBox.Show(
-                            "Please provide a valid column number for analysis",
-                            "Invalid column number.",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information
-                        );
+                        MessageBox.Show("Please provide a valid column number for analysis", "Invalid column number.", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
                 }
                 else
                 {
-                    MessageBox.Show(
-                        "Please provide a column number for analysis",
-                        "No Column Number.",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information
-                    );
+                    MessageBox.Show("Please provide a column number for analysis", "No Column Number.", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
             }
 
             if (exportItem.GetPacketCount() == 0)
             {
-                MessageBox.Show(
-                    "No packets available for export.",
-                    "No Data Available",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
+                MessageBox.Show("No packets available for export.", "No Data Available", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -637,6 +754,13 @@ namespace WoolichDecoder
             progressBar.Visible = true;
             progressLabel.Visible = true;
             UpdateProgressLabel("Starting export...");
+
+            
+            double divisor = double.Parse(AFRdivisor.Text);
+            if (double.TryParse(AFRdivisor.Text, out double parsedDivisor) && parsedDivisor >= 5 && parsedDivisor <= 20)
+            {
+                divisor = parsedDivisor;
+            }
 
             await Task.Run(() =>
             {
@@ -667,12 +791,12 @@ namespace WoolichDecoder
 
                         var packets = exportItem.GetPackets();
                         int totalPackets = packets.Count;
-                        int processedPackets = 0; 
-                        const int updateFrequency = 10000; 
+                        int processedPackets = 0;
+                        const int updateFrequency = 10000;
 
                         foreach (var packet in packets)
                         {
-                            var exportLine = WoolichMT09Log.getCSV(packet.Value, packet.Key, exportItem.PacketFormat, this.presumedStaticColumns, combinedCols);
+                            var exportLine = WoolichMT09Log.getCSV(packet.Value, packet.Key, exportItem.PacketFormat, this.presumedStaticColumns, combinedCols, divisor);
                             outputFile.WriteLine(string.Join(delimiter.ToString(), exportLine.Split(',')));
                             outputFile.Flush();
 
@@ -730,6 +854,8 @@ namespace WoolichDecoder
                 return;
             }
 
+            double divisor = GetAFRDivisor();
+
             int columnNumber;
             try
             {
@@ -760,7 +886,7 @@ namespace WoolichDecoder
         { 33, (packet => WoolichConversions.getFrontWheelSpeed(packet), "Front Wheel Speed") },
         { 35, (packet => WoolichConversions.getRearWheelSpeed(packet), "Rear Wheel Speed") },
         { 41, (packet => WoolichConversions.getBatteryVoltage(packet), "Battery Voltage") },
-        { 42, (packet => WoolichConversions.getAFR(packet), "AFR") }
+        { 42, (packet => WoolichConversions.getAFR(packet, divisor), "AFR") }
     };
 
             if (!columnFunctions.ContainsKey(columnNumber))
@@ -1068,6 +1194,7 @@ namespace WoolichDecoder
         }
         private async void ExportDirToExcel()
         {
+            double divisor = GetAFRDivisor();
             using (FolderBrowserDialog folderDialog = new FolderBrowserDialog())
             {
                 folderDialog.Description = "Select the folder containing WRL files";
@@ -1121,7 +1248,7 @@ namespace WoolichDecoder
                                     var packets = exportItem.GetPackets();
                                     foreach (var packet in packets)
                                     {
-                                        var exportLine = WoolichMT09Log.getCSV(packet.Value, packet.Key, exportItem.PacketFormat, this.presumedStaticColumns, new List<int>());
+                                        var exportLine = WoolichMT09Log.getCSV(packet.Value, packet.Key, exportItem.PacketFormat, this.presumedStaticColumns, new List<int>(), divisor);
                                         outputFile.WriteLine(string.Join(delimiter.ToString(), exportLine.Split(','))); // Dynamic delimiter
                                     }
                                 }

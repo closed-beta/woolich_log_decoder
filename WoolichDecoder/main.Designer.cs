@@ -60,6 +60,8 @@
             this.label1 = new System.Windows.Forms.Label();
             this.cmbBinDelete = new System.Windows.Forms.ComboBox();
             this.cmbATFileName = new System.Windows.Forms.ComboBox();
+            this.btnAFR = new System.Windows.Forms.Button();
+            this.AFRdivisor = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.idleRPM = new System.Windows.Forms.TextBox();
@@ -87,11 +89,14 @@
             this.lblATFileName = new System.Windows.Forms.Label();
             this.panel5 = new System.Windows.Forms.Panel();
             this.label2 = new System.Windows.Forms.Label();
+            this.panel6 = new System.Windows.Forms.Panel();
+            this.label10 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
             this.panel5.SuspendLayout();
+            this.panel6.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtLogging
@@ -474,6 +479,33 @@
             this.cmbATFileName.Text = "Default";
             this.toolTip1.SetToolTip(this.cmbATFileName, "Autotune Output Filename format.");
             // 
+            // btnAFR
+            // 
+            this.btnAFR.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.btnAFR.Location = new System.Drawing.Point(2, 3);
+            this.btnAFR.Margin = new System.Windows.Forms.Padding(1);
+            this.btnAFR.Name = "btnAFR";
+            this.btnAFR.Size = new System.Drawing.Size(76, 21);
+            this.btnAFR.TabIndex = 49;
+            this.btnAFR.Text = "Calibrate";
+            this.toolTip1.SetToolTip(this.btnAFR, "Calibrate AFR between Woolich software and Decoder.");
+            this.btnAFR.UseVisualStyleBackColor = true;
+            this.btnAFR.Click += new System.EventHandler(this.CompareAFR_Click);
+            // 
+            // AFRdivisor
+            // 
+            this.AFRdivisor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.AFRdivisor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.AFRdivisor.Location = new System.Drawing.Point(81, 3);
+            this.AFRdivisor.Margin = new System.Windows.Forms.Padding(1);
+            this.AFRdivisor.Name = "AFRdivisor";
+            this.AFRdivisor.Size = new System.Drawing.Size(55, 20);
+            this.AFRdivisor.TabIndex = 50;
+            this.AFRdivisor.Text = "10.2";
+            this.AFRdivisor.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.toolTip1.SetToolTip(this.AFRdivisor, "AFR Divisor");
+            this.AFRdivisor.TextChanged += new System.EventHandler(this.AFRdivisor_TextChanged);
+            // 
             // label7
             // 
             this.label7.AutoSize = true;
@@ -796,11 +828,34 @@
             this.label2.TabIndex = 48;
             this.label2.Text = "File settings:";
             // 
+            // panel6
+            // 
+            this.panel6.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel6.Controls.Add(this.AFRdivisor);
+            this.panel6.Controls.Add(this.btnAFR);
+            this.panel6.Location = new System.Drawing.Point(10, 329);
+            this.panel6.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.panel6.Name = "panel6";
+            this.panel6.Size = new System.Drawing.Size(144, 29);
+            this.panel6.TabIndex = 32;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label10.Location = new System.Drawing.Point(10, 314);
+            this.label10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(85, 15);
+            this.label10.TabIndex = 49;
+            this.label10.Text = "AFR Divisor:";
+            // 
             // WoolichFileDecoderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1284, 586);
+            this.Controls.Add(this.label10);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.cmbBinDelete);
             this.Controls.Add(this.lblCRCsize);
@@ -828,6 +883,7 @@
             this.Controls.Add(this.aTFCheckedListBox);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel5);
+            this.Controls.Add(this.panel6);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(2);
@@ -847,6 +903,8 @@
             this.panel4.PerformLayout();
             this.panel5.ResumeLayout(false);
             this.panel5.PerformLayout();
+            this.panel6.ResumeLayout(false);
+            this.panel6.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -910,6 +968,10 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label lblTotalPackets;
         private System.Windows.Forms.Label lblTotalPacketsCount;
+        private System.Windows.Forms.Button btnAFR;
+        private System.Windows.Forms.TextBox AFRdivisor;
+        private System.Windows.Forms.Panel panel6;
+        private System.Windows.Forms.Label label10;
     }
 }
 

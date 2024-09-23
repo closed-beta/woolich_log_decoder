@@ -135,12 +135,12 @@ namespace WoolichDecoder.Models
 
         }
 
-        public static string getCSV(byte[] packet, string timeStamp, int packetFormat, List<StaticPacketColumn> staticPacketColumns, List<int> combinedCols)
+        public static string getCSV(byte[] packet, string timeStamp, int packetFormat, List<StaticPacketColumn> staticPacketColumns, List<int> combinedCols, double divisor)
         {
             if (packetFormat == 0x01)
             {
                 // MT09 and R1
-                return WoolichMT09Log.getCSV_MT09(packet, timeStamp);
+                return WoolichMT09Log.getCSV_MT09(packet, timeStamp, divisor);
             }
             if (packetFormat == 0x10)
             {
@@ -263,7 +263,7 @@ namespace WoolichDecoder.Models
             return outputString;
         }
 
-        public static string getCSV_MT09(byte[] packet, string timeStamp)
+        public static string getCSV_MT09(byte[] packet, string timeStamp, double divisor)
         {
             string outputString = string.Empty;
             // Timestamp
@@ -320,7 +320,7 @@ namespace WoolichDecoder.Models
             outputString += $"{packet.getIAP()},";
 
             // AFR 42
-            outputString += $"{packet.getAFR()},";
+            outputString += $"{packet.getAFR(divisor)},";
 
             // 32 Speedo No conversion ??? but that means 0 to 255 and some bikes go faster.
             // outputString += $"{packet[32]},";

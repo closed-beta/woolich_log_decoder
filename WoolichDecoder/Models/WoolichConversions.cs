@@ -75,9 +75,12 @@ namespace WoolichDecoder.Models
             return Math.Round(packet[21] / pressureScale, 2);
         }
 
-        public static double getAFR(this byte[] packet)
+        //public static double getAFR(this byte[] packet)
+        public static double getAFR(this byte[] packet, double divisor)
         {
-            return Math.Round(packet[42] / 10.2, 2);
+            //return Math.Round(packet[42] / 10.2, 2);
+            //return Math.Round(packet[42] / 9.99, 2);
+            return Math.Round(packet[42] / divisor, 2);
         }
 
         public static double getSpeedo(this byte[] packet)
