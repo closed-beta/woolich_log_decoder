@@ -66,6 +66,8 @@ namespace WoolichDecoder
 
         public WoolichFileDecoderForm()
         {
+            System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+            System.Globalization.CultureInfo.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
             InitializeComponent();
             cmbExportType.SelectedIndex = 0;
             cmbExportFormat.SelectedIndex = 0;
