@@ -601,11 +601,11 @@ namespace WoolichDecoder
                 else
                 {
                     MessageBox.Show(
-                            "Please provide a column number for analysis",
-                            "No Column Number.",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information
-);
+                        "Please provide a column number for analysis",
+                        "No Column Number.",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information
+                    );
                     return;
                 }
             }
@@ -667,7 +667,8 @@ namespace WoolichDecoder
 
                         var packets = exportItem.GetPackets();
                         int totalPackets = packets.Count;
-                        int processedPackets = 0;
+                        int processedPackets = 0; 
+                        const int updateFrequency = 10000; 
 
                         foreach (var packet in packets)
                         {
@@ -676,9 +677,13 @@ namespace WoolichDecoder
                             outputFile.Flush();
 
                             processedPackets++;
-                            int progressPercentage = (processedPackets * 100) / totalPackets;
-                            Invoke(new Action(() => progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum)));
-                            Invoke(new Action(() => UpdateProgressLabel($"Exporting... {progressPercentage}% completed")));
+
+                            if (processedPackets % updateFrequency == 0)
+                            {
+                                int progressPercentage = (processedPackets * 100) / totalPackets;
+                                Invoke(new Action(() => progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum)));
+                                Invoke(new Action(() => UpdateProgressLabel($"Exporting... {progressPercentage}% completed")));
+                            }
 
                             count++;
 
@@ -795,6 +800,7 @@ namespace WoolichDecoder
 
                 await Task.Run(() =>
                 {
+                    int updateFrequency = 5000; // Update every 5000 packets
                     foreach (var packet in packets)
                     {
                         try
@@ -826,13 +832,17 @@ namespace WoolichDecoder
                             feedbackBuffer.AppendLine($"Error processing column {columnNumber}: {ex.Message}");
                         }
 
-                        int progressPercentage = (processedPackets * 100) / totalPackets;
-
-                        this.Invoke(new Action(() =>
+                        // Update progress every 5000 processed packets
+                        if (processedPackets % updateFrequency == 0)
                         {
-                            progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum);
-                            UpdateProgressLabel($"Analyzing... {progressPercentage}% completed");
-                        }));
+                            int progressPercentage = (processedPackets * 100) / totalPackets;
+
+                            this.Invoke(new Action(() =>
+                            {
+                                progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum);
+                                UpdateProgressLabel($"Analyzing... {progressPercentage}% completed");
+                            }));
+                        }
 
                         Application.DoEvents();
                     }
@@ -1189,7 +1199,7 @@ namespace WoolichDecoder
 
                     lblFileName.Text = Path.GetFileName(filename);
                     lblDirName.Text = Path.GetDirectoryName(filename);
-                    cmbExportType.SelectedIndex = 3;
+                    cmbExportType.SelectedIndex = 0;
                 }
                 else
                 {
