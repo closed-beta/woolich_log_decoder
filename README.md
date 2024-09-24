@@ -55,3 +55,32 @@ I hope my log files help. I hope ive done this correct.. AND Thank you, my first
 There are lots we can discuss, lots to change i mean FIX!
 Best regards
 Omega Alpha
+
+
+*****************************************************************************************************************************************************************************
+
+# Changelog
+
+## Added
+- Selection of Mode: File, Directory.
+- Selection of Type: Export, Analysis Only, CRC, Autotune.
+- Selection of Format: CSV, TSV, WRL.
+- Repair functionality for WRL files with prefixes 01 02 5D 01.
+- RPM configuration for idle, minimum, and maximum settings for Autotune filter.
+- Option to choose log file save location: work directory or application folder.
+- Selection of Autotune filter file name format: default and binary.
+- File deletion capability for Bin (works in Directory mode).
+- Added TSV format.
+- AFR calibration for CSV/TSV files between WRT and Decoder.
+- Definition of CRC size, indicating the number of packets to export in Type: CRC.
+- Bulk conversion mode to CSV and TSV formats.
+- Bulk autotune filtering mode for WRL files.
+- Progress bars.
+- Analysis statistics.
+- Processed files statistics.
+
+## Changed
+- Updated packet analysis method.
+- Searching for min/max values in defined columns for one or multiple files in a directory.
+- Most functions and methods used in this application
+- Removed buttons
