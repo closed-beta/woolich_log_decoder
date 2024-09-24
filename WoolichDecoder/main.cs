@@ -104,7 +104,7 @@ namespace WoolichDecoder
         public void CompareAFR_Click(object sender, EventArgs e)
         {
             var result = MessageBox.Show(
-                "This function compares AFR from Woolich Racing Tuned and Woolich File Decoder.\n\nTo proceed, you need two CSV files converted from the same WRL file in the Woolich Racing Tuned software and this application.",
+                "This function compares AFR(for Yamaha bikes) from Woolich Racing Tuned and Woolich File Decoder.\n\nTo proceed, you need two CSV files converted from the same WRL file in the Woolich Racing Tuned software and this application.",
                 "Information",
                 MessageBoxButtons.OKCancel,
                 MessageBoxIcon.Information);
@@ -117,7 +117,7 @@ namespace WoolichDecoder
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
                 Filter = "CSV files (*.csv)|*.csv",
-                Title = "Select CSV File from Woolich Racing Tuned"
+                Title = "Select CSV File from Woolich Racing Tuned software"
             };
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
