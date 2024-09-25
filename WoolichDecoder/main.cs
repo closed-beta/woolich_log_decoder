@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using WoolichDecoder.Models;
 using WoolichDecoder.Settings;
-using System.Drawing; // for Size, Font, FontStyle
+//using System.Drawing;
 
 
 
@@ -78,13 +78,15 @@ namespace WoolichDecoder
             cmbExportType.SelectedIndexChanged += cmbExportType_Change;
             cmbExportMode.SelectedIndexChanged += cmbExportMode_Change;
             lblTotalPacketsCount.Text = "0";
-            btnAnalyse.MouseEnter += (s, e) => {
-                cmbExportType.SelectedIndex = 1;   
-                cmbExportFormat.Enabled = false;   
+            btnAnalyse.MouseEnter += (s, e) =>
+            {
+                cmbExportType.SelectedIndex = 1;
+                cmbExportFormat.Enabled = false;
             };
-            btnAnalyse.MouseLeave += (s, e) => {
+            btnAnalyse.MouseLeave += (s, e) =>
+            {
                 //cmbExportType.SelectedIndex = 0;
-                cmbExportFormat.Enabled = true;  
+                cmbExportFormat.Enabled = true;
             };
         }
         private bool IsFileLoaded()
@@ -100,6 +102,116 @@ namespace WoolichDecoder
         {
             private static readonly string DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
             public static string Prefix => $"{DateTime.Now.ToString(DateTimeFormat)} -- ";
+        }
+
+        public void FindRepeatedPatternsInFile(string filename, int patternLength, int minDistance, int maxDistance)
+        {
+            DateTime startTime = DateTime.Now;
+            Log($"Analysis started at: {startTime}");
+
+            // Dictionary to store patterns and their occurrence counts
+            Dictionary<string, List<long>> patternOccurrences = new Dictionary<string, List<long>>();
+
+            int minRepetitions = 10000; // Minimum repetitions default
+
+            using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
+            using (var binaryReader = new BinaryReader(fileStream))
+            {
+                long fileSize = fileStream.Length;
+                byte[] buffer = new byte[fileSize]; // Read entire file into a buffer
+                binaryReader.Read(buffer, 0, (int)fileSize); // Read the file once into memory
+
+                // Calculate minimum repetitions based on file size (14,000 per MB)
+                minRepetitions = Math.Max(10000, (int)(fileSize / (1024 * 1024)) * 10000); // Ensure it's at least 14000
+
+                // Read patterns in a sliding window manner
+                for (long i = 0; i <= fileSize - patternLength; i++)
+                {
+                    byte[] pattern = new byte[patternLength];
+                    Array.Copy(buffer, i, pattern, 0, patternLength);
+                    string patternHex = BitConverter.ToString(pattern).Replace("-", " ");
+
+                    // Skip patterns that are all zeros
+                    if (pattern.All(b => b == 0))
+                    {
+                        continue;
+                    }
+
+                    // Add the current position to the list of occurrences for this pattern
+                    if (!patternOccurrences.ContainsKey(patternHex))
+                    {
+                        patternOccurrences[patternHex] = new List<long>();
+                    }
+                    patternOccurrences[patternHex].Add(i);
+                }
+            }
+
+            // Analyzing the occurrences for each pattern
+            foreach (var entry in patternOccurrences)
+            {
+                string pattern = entry.Key;
+                List<long> positions = entry.Value;
+
+                // Check if this pattern has enough occurrences
+                if (positions.Count < minRepetitions)
+                {
+                    //Log($"Pattern: {pattern} skipped, not enough occurrences: {positions.Count}");
+                    continue; // Skip patterns that don't meet the minimum repetitions
+                }
+
+                // Count the number of valid repetitions based on the distance criteria
+                Dictionary<long, int> distanceCounts = new Dictionary<long, int>();
+                int totalValidRepetitions = 0;
+
+                // Calculate distances
+                for (int j = 0; j < positions.Count - 1; j++)
+                {
+                    long firstOccurrence = positions[j];
+
+                    for (int k = j + 1; k < positions.Count; k++)
+                    {
+                        long secondOccurrence = positions[k];
+                        long distance = secondOccurrence - firstOccurrence;
+
+                        // Check if the distance is within the specified range
+                        if (distance > maxDistance)
+                        {
+                            break; // No need to check further if the distance exceeds maxDistance
+                        }
+
+                        if (distance >= minDistance)
+                        {
+                            // Increment the count for this distance
+                            if (distanceCounts.ContainsKey(distance))
+                            {
+                                distanceCounts[distance]++;
+                            }
+                            else
+                            {
+                                distanceCounts[distance] = 1;
+                            }
+                            totalValidRepetitions++;
+                        }
+                    }
+                }
+
+                // Log results only if there are valid repetitions and distances
+                if (totalValidRepetitions > 0)
+                {
+                    foreach (var kvp in distanceCounts)
+                    {
+                        if (totalValidRepetitions >= minRepetitions)
+                        {
+                            Log($"Pattern: {pattern}, Distance: {kvp.Key}, Count: {kvp.Value}");
+                        }
+                    }
+                }
+                else
+                {
+                    Log($"Pattern: {pattern} found but no valid repetitions.");
+                }
+            }
+
         }
         public void CompareAFR_Click(object sender, EventArgs e)
         {
@@ -158,13 +270,13 @@ namespace WoolichDecoder
                         {
                             string timestamp = wrtLine[0];
 
-                            for (int j = 1; j < woolichLines.Length; j++) 
+                            for (int j = 1; j < woolichLines.Length; j++)
                             {
                                 var woolichLine = woolichLines[j].Split(',');
                                 if (timestamp == woolichLine[0] && double.TryParse(woolichLine[9], out double woolichAFR))
                                 {
                                     comparisons.Add((timestamp, wrtAFR, woolichAFR));
-                                    break; 
+                                    break;
                                 }
                             }
                         }
@@ -384,11 +496,11 @@ namespace WoolichDecoder
             }
 
             this.aTFCheckedListBox.Items.AddRange(autoTuneFilterOptions.ToArray());
-            
+
             AFRdivisor.Text = userSettings.AFRdivisor;
-            idleRPM.Text = userSettings.idleRPM; 
-            minRPM.Text = userSettings.minRPM; 
-            maxRPM.Text = userSettings.maxRPM; 
+            idleRPM.Text = userSettings.idleRPM;
+            minRPM.Text = userSettings.minRPM;
+            maxRPM.Text = userSettings.maxRPM;
 
             for (int i = 0; i < this.aTFCheckedListBox.Items.Count; i++)
             {
@@ -415,106 +527,6 @@ namespace WoolichDecoder
 
             // save the user settings.
             userSettings.Save();
-        }
-        private List<int> FindPrefixes(byte[] data, byte[] prefix, int interval)
-        {
-            List<int> offsets = new List<int>();
-            int prefixLength = prefix.Length;
-            int offset = 0;
-
-            while (offset <= (data.Length - prefixLength))
-            {
-                bool match = true;
-                for (int i = 0; i < prefixLength; i++)
-                {
-                    if (data[offset + i] != prefix[i])
-                    {
-                        match = false;
-                        break;
-                    }
-                }
-                if (match)
-                {
-                    offsets.Add(offset);
-                    offset += interval;
-                }
-                else
-                {
-                    offset += 1;
-                }
-            }
-
-            return offsets;
-        }
-        private byte[] FixPackets(byte[] data, List<int> offsets, int prefixLength, int interval, out bool needsRepair)
-        {
-            needsRepair = false;
-
-            using (MemoryStream recoveredDataStream = new MemoryStream())
-            {
-                int headerLength = logs.PrimaryHeaderLength + 1;
-                byte[] header = new byte[headerLength];
-                Array.Copy(data, 0, header, 0, headerLength);
-
-                recoveredDataStream.Write(header, 0, header.Length);
-
-                int previousOffset = -1;
-
-                foreach (int currentOffset in offsets)
-                {
-                    if (previousOffset != -1)
-                    {
-                        int distance = currentOffset - previousOffset;
-                        if (distance != interval)
-                        {
-                            Log($"{LogPrefix.Prefix}Gap of {distance} bytes, offsets {previousOffset} - {currentOffset}. Fixed");
-                            needsRepair = true;
-                            previousOffset = currentOffset;
-                        }
-                    }
-
-                    if (currentOffset >= headerLength)
-                    {
-                        int packetLength = Math.Min(interval, data.Length - currentOffset);
-                        byte[] packetData = new byte[packetLength];
-                        Array.Copy(data, currentOffset, packetData, 0, packetLength);
-                        if (packetLength == interval)
-                        {
-                            recoveredDataStream.Write(packetData, 0, packetData.Length);
-                            previousOffset = currentOffset;
-                        }
-                    }
-                }
-
-                return recoveredDataStream.ToArray();
-            }
-        }
-        private long FindPattern(string filePath, byte[] pattern)
-        {
-            using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            {
-                byte[] buffer = new byte[fs.Length];
-                fs.Read(buffer, 0, buffer.Length);
-
-                for (long i = 0; i < buffer.Length - pattern.Length; i++)
-                {
-                    bool match = true;
-                    for (int j = 0; j < pattern.Length; j++)
-                    {
-                        if (buffer[i + j] != pattern[j])
-                        {
-                            match = false;
-                            break;
-                        }
-                    }
-
-                    if (match)
-                    {
-                        return i;
-                    }
-                }
-            }
-            return -1;
         }
         private void ClearBoxAndPackets()
         {
@@ -770,7 +782,7 @@ namespace WoolichDecoder
             progressLabel.Visible = true;
             UpdateProgressLabel("Starting export...");
 
-            
+
             double divisor = double.Parse(AFRdivisor.Text);
             if (double.TryParse(AFRdivisor.Text, out double parsedDivisor) && parsedDivisor >= 5 && parsedDivisor <= 20)
             {
@@ -1156,54 +1168,18 @@ namespace WoolichDecoder
             Log($"{LogPrefix.Prefix}Failed to process: {failed}");
             if (duration != null) { Log($"{LogPrefix.Prefix}Total processing time: {duration}"); }
         }
-        private void RepairWRL(string inputFileName)
-        {
-            string directory = Path.GetDirectoryName(inputFileName);
-
-            string outputFileName = Path.Combine(directory, Path.GetFileNameWithoutExtension(inputFileName) + "_fixed.WRL");
-
-            try
-            {
-                byte[] data = File.ReadAllBytes(inputFileName);
-                Log($"{LogPrefix.Prefix}Read data from file. Size: {data.Length} bytes."); // Log the size of the read data
-
-                byte[] prefix = yamaha.MT09Pattern;
-                int prefixLength = prefix.Length; // Length of the prefix
-                int interval = yamaha.MT09Packet; // Define an interval for processing
-
-                List<int> offsets = FindPrefixes(data, prefix, interval);
-                Log($"{LogPrefix.Prefix}Total number of prefixes found: {offsets.Count}."); // Log the number of prefixes found
-
-                bool needsRepair;
-                byte[] recoveredData = FixPackets(data, offsets, prefixLength, interval, out needsRepair);
-
-                if (needsRepair)
-                {
-                    File.WriteAllBytes(outputFileName, recoveredData);
-                    Log($"{LogPrefix.Prefix}File repaired and saved to:{Environment.NewLine}{outputFileName}."); // Log completion and file save information
-                }
-                else
-                {
-                    Log($"{LogPrefix.Prefix}No repair needed for file: {Path.GetFileName(inputFileName)}.");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"An error occurred during repair: {ex.Message}", "Repair Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
         private void Repair_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.Filter = "WRL files (*.WRL)|*.WRL|All files (*.*)|*.*"; // Filter for WRL files and all files
-                openFileDialog.Title = "Select a WRL File"; // Title of the dialog
+                openFileDialog.InitialDirectory = "C:\\"; 
+                openFileDialog.Filter = "WRL files (*.wrl)|*.wrl|All files (*.*)|*.*";
+                openFileDialog.Title = "Select WRL file to repair";
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    string inputFileName = openFileDialog.FileName;
-
-                    RepairWRL(inputFileName);
+                    string selectedFileName = openFileDialog.FileName;
+                    RepairWRL(selectedFileName);
                 }
             }
         }
@@ -1382,98 +1358,6 @@ namespace WoolichDecoder
                 MessageBox.Show($"An unexpected error occurred: {ex.Message}\n\n Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private bool LoadFile(string filename)
-        {
-            try
-            {
-                logs.ClearPackets();
-                Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
-                Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
-
-                if (!File.Exists(filename))
-                {
-                    lblFileName.Text = "Error: File Not Found";
-                    return false;
-                }
-
-                logFolder = Path.GetDirectoryName(filename);
-                openWRLFileDialog.InitialDirectory = logFolder;
-
-                string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(filename) + ".bin");
-                lblFileName.Text = Path.GetFileName(filename);
-                lblDirName.Text = Path.GetDirectoryName(filename);
-
-                using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
-                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
-                {
-                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
-
-                    byte[] searchPattern = yamaha.MT09Pattern;
-                    long position = FindPattern(filename, searchPattern);
-
-                    if (position >= 0)
-                    {
-                        Log($"{LogPrefix.Prefix}File loaded: " + Path.GetFileName(filename));
-                        Log($"{LogPrefix.Prefix}Header size: {position} bytes.");
-
-                        if (position != logs.PrimaryHeaderLength + 1)
-                        {
-                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                        }
-                    }
-                    else
-                    {
-                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                    }
-
-                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
-
-                    while (true)
-                    {
-                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
-                        if (packetPrefixBytes.Length < 5)
-                            break;
-
-                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
-                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
-
-                        if (packetBytes.Length < remainingPacketBytes)
-                            break;
-
-                        int totalPacketLength = packetPrefixBytes[3] + 3;
-                        logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, packetPrefixBytes[4]);
-                    }
-
-                    Log($"{LogPrefix.Prefix}Packets: {logs.GetPacketCount()}.");
-                    lblTotalPacketsCount.Text = logs.GetPacketCount().ToString();
-                }
-
-                using (var fileStream = new FileStream(binOutputFileName, FileMode.Create))
-                using (var binWriter = new BinaryWriter(fileStream))
-                {
-                    foreach (var packet in logs.GetPackets())
-                    {
-                        binWriter.Write(packet.Value);
-                    }
-                }
-
-                string fileName = Path.GetFileName(binOutputFileName);
-                Log($"{LogPrefix.Prefix}Bin file created.");
-                return true;
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                Log($"{LogPrefix.Prefix}File is corrupted: {filename}.");
-                return false;
-            }
-            catch (Exception)
-            {
-                Log($"{LogPrefix.Prefix}An unexpected error occurred with file {filename}.");
-                return false;
-            }
-        }
         private void ExportToAutoTune()
         {
             if (!IsFileLoaded())
@@ -1597,81 +1481,6 @@ namespace WoolichDecoder
             catch (Exception ex)
             {
                 Log($"{LogPrefix.Prefix}Autotune WRL File saving error: {ex.Message}");
-            }
-        }
-        private void ConvertWRLToBIN(string wrlFileName, string binFileName, List<string> successfulConversions, List<string> failedConversions)
-        {
-            bool conversionSuccessful = false;
-
-            try
-            {
-                using (var fileStream = new FileStream(wrlFileName, FileMode.Open, FileAccess.Read))
-                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
-                using (var binFileStream = new FileStream(binFileName, FileMode.Create))
-                using (var binWriter = new BinaryWriter(binFileStream))
-                {
-                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
-
-                    byte[] searchPattern = yamaha.MT09Pattern;
-                    long position = FindPattern(wrlFileName, searchPattern);
-
-                    if (position >= 0)
-                    {
-                        if (position != logs.PrimaryHeaderLength + 1)
-                        {
-                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                        }
-                    }
-                    else
-                    {
-                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                    }
-
-                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
-
-                    while (true)
-                    {
-                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
-                        if (packetPrefixBytes.Length < logs.PacketPrefixLength)
-                            break;
-
-                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
-                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
-
-                        if (packetBytes.Length < remainingPacketBytes)
-                            break;
-
-                        byte[] packet = packetPrefixBytes.Concat(packetBytes).ToArray();
-                        binWriter.Write(packet);
-                    }
-
-                    conversionSuccessful = true;
-                }
-
-                if (conversionSuccessful)
-                {
-                    successfulConversions.Add(binFileName);
-                }
-            }
-            catch (Exception)
-            {
-                Feedback($"Error converting file: {Path.GetFileName(wrlFileName)}");
-
-                failedConversions.Add(wrlFileName);
-
-                if (File.Exists(binFileName))
-                {
-                    try
-                    {
-                        File.Delete(binFileName);
-                    }
-                    catch (Exception deleteEx)
-                    {
-                        Feedback($"Failed to delete corrupted BIN file {binFileName}: {deleteEx.Message}");
-                    }
-                }
             }
         }
         private void ExportDirToAutoTune()
@@ -1912,5 +1721,518 @@ namespace WoolichDecoder
                 Log($"{LogPrefix.Prefix}Deletion not enabled. Setting is on: {cmbBinDelete.Text}"); // Debug Log
             }
         }
+        private List<int> FindPrefixes(byte[] data, byte[] prefix, int interval)
+        {
+            List<int> offsets = new List<int>();
+            int prefixLength = prefix.Length;
+            int offset = 0;
+
+            while (offset <= (data.Length - prefixLength))
+            {
+                bool match = true;
+                for (int i = 0; i < prefixLength; i++)
+                {
+                    if (data[offset + i] != prefix[i])
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match)
+                {
+                    offsets.Add(offset);
+                    offset += interval;
+                }
+                else
+                {
+                    offset += 1;
+                }
+            }
+
+            return offsets;
+        }
+        private byte[] FixPackets(byte[] data, List<int> offsets, int prefixLength, int interval, out bool needsRepair)
+        {
+            needsRepair = false;
+
+            using (MemoryStream recoveredDataStream = new MemoryStream())
+            {
+                int headerLength = logs.PrimaryHeaderLength;
+                byte[] header = new byte[headerLength];
+                Array.Copy(data, 0, header, 0, headerLength);
+
+                recoveredDataStream.Write(header, 0, header.Length);
+
+                int previousOffset = -1;
+
+                foreach (int currentOffset in offsets)
+                {
+                    if (previousOffset != -1)
+                    {
+                        int distance = currentOffset - previousOffset;
+                        if (distance != interval)
+                        {
+                            Log($"{LogPrefix.Prefix}Gap of {distance} bytes, offsets {previousOffset} - {currentOffset}. Fixed");
+                            needsRepair = true;
+                            previousOffset = currentOffset;
+                        }
+                    }
+
+                    if (currentOffset >= headerLength)
+                    {
+                        int packetLength = Math.Min(interval, data.Length - currentOffset);
+                        byte[] packetData = new byte[packetLength];
+                        Array.Copy(data, currentOffset, packetData, 0, packetLength);
+                        if (packetLength == interval)
+                        {
+                            recoveredDataStream.Write(packetData, 0, packetData.Length);
+                            previousOffset = currentOffset;
+                        }
+                    }
+                }
+
+                return recoveredDataStream.ToArray();
+            }
+        }
+        private long FindPattern(string filePath, byte[] pattern)
+        {
+            using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                byte[] buffer = new byte[fs.Length];
+                fs.Read(buffer, 0, buffer.Length);
+
+                for (long i = 0; i < buffer.Length - pattern.Length; i++)
+                {
+                    bool match = true;
+                    for (int j = 0; j < pattern.Length; j++)
+                    {
+                        if (buffer[i + j] != pattern[j])
+                        {
+                            match = false;
+                            break;
+                        }
+                    }
+
+                    if (match)
+                    {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
+        private void RepairWRL(string inputFileName)
+        {
+            string directory = Path.GetDirectoryName(inputFileName);
+
+            string outputFileName = Path.Combine(directory, Path.GetFileNameWithoutExtension(inputFileName) + "_fixed.WRL");
+
+            try
+            {
+                byte[] data = File.ReadAllBytes(inputFileName);
+                Log($"{LogPrefix.Prefix}Read data from file. Size: {data.Length} bytes."); // Log the size of the read data
+
+                byte[] prefix = yamaha.MT09Pattern;
+                int prefixLength = prefix.Length; // Length of the prefix
+                int interval = yamaha.MT09Packet; // Define an interval for processing
+
+                List<int> offsets = FindPrefixes(data, prefix, interval);
+                Log($"{LogPrefix.Prefix}Total number of prefixes found: {offsets.Count}."); // Log the number of prefixes found
+
+                bool needsRepair;
+                byte[] recoveredData = FixPackets(data, offsets, prefixLength, interval, out needsRepair);
+
+                if (needsRepair)
+                {
+                    File.WriteAllBytes(outputFileName, recoveredData);
+                    Log($"{LogPrefix.Prefix}File repaired and saved to:{Environment.NewLine}{outputFileName}."); // Log completion and file save information
+                }
+                else
+                {
+                    Log($"{LogPrefix.Prefix}No repair needed for file: {Path.GetFileName(inputFileName)}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred during repair: {ex.Message}", "Repair Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        /*
+
+        private bool LoadFile(string filename)
+        {
+            try
+            {
+                logs.ClearPackets();
+                Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
+                Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
+
+                if (!File.Exists(filename))
+                {
+                    lblFileName.Text = "Error: File Not Found";
+                    return false;
+                }
+
+                logFolder = Path.GetDirectoryName(filename);
+                openWRLFileDialog.InitialDirectory = logFolder;
+
+                string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(filename) + ".bin");
+                lblFileName.Text = Path.GetFileName(filename);
+                lblDirName.Text = Path.GetDirectoryName(filename);
+
+                using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
+                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
+                {
+                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
+
+                    byte[] searchPattern = yamaha.MT09Pattern;
+                    long position = -1;
+
+                    // First attempt to find the pattern starting from byte 353
+                    position = FindPattern(filename, searchPattern);
+
+                    // If no position found, attempt to find it starting from byte 517
+                    if (position < 0)
+                    {
+                        // Manually seek to the 517th byte and read again
+                        fileStream.Seek(logs.PrimaryHeaderLength + logs.SecondaryHeaderLength, SeekOrigin.Begin);
+                        position = FindPattern(filename, searchPattern);
+                    }
+
+                    // Proceed with loading data based on the found position
+                    if (position >= 0)
+                    {
+                        Log($"{LogPrefix.Prefix}File loaded: " + Path.GetFileName(filename));
+                        Log($"{LogPrefix.Prefix}Header size: {position} bytes.");
+
+                        if (position != logs.PrimaryHeaderLength)
+                        {
+                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                        }
+                    }
+                    else
+                    {
+                        // If no pattern was found in both attempts, read the secondary header
+                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                        Log($"Other bike WRL?");
+                    }
+
+                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
+
+                    // Read packets from the binary file
+                    while (true)
+                    {
+                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
+                        if (packetPrefixBytes.Length < 5)
+                            break;
+
+                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
+                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
+
+                        if (packetBytes.Length < remainingPacketBytes)
+                            break;
+
+                        int totalPacketLength = packetPrefixBytes[3] + 3;
+                        logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, packetPrefixBytes[4]);
+                    }
+
+                    Log($"{LogPrefix.Prefix}Packets: {logs.GetPacketCount()}.");
+                    lblTotalPacketsCount.Text = logs.GetPacketCount().ToString();
+                }
+
+                // Write packets to the output binary file
+                using (var fileStream = new FileStream(binOutputFileName, FileMode.Create))
+                using (var binWriter = new BinaryWriter(fileStream))
+                {
+                    foreach (var packet in logs.GetPackets())
+                    {
+                        binWriter.Write(packet.Value);
+                    }
+                }
+
+                string fileName = Path.GetFileName(binOutputFileName);
+                Log($"{LogPrefix.Prefix}Bin file created.");
+                return true;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Log($"{LogPrefix.Prefix}File is corrupted: {filename}.");
+                return false;
+            }
+            catch (Exception)
+            {
+                Log($"{LogPrefix.Prefix}An unexpected error occurred with file {filename}.");
+                return false;
+            }
+        }
+
+
+        private void ConvertWRLToBIN(string wrlFileName, string binFileName, List<string> successfulConversions, List<string> failedConversions)
+        {
+            bool conversionSuccessful = false;
+
+            try
+            {
+                // Clear previous logs and reset header data
+                logs.ClearPackets();
+                Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
+                Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
+
+                // Ensure the WRL file exists
+                if (!File.Exists(wrlFileName))
+                {
+                    Feedback($"Error: File Not Found - {Path.GetFileName(wrlFileName)}");
+                    failedConversions.Add(wrlFileName);
+                    return;
+                }
+
+                using (var fileStream = new FileStream(wrlFileName, FileMode.Open, FileAccess.Read))
+                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
+                using (var binFileStream = new FileStream(binFileName, FileMode.Create))
+                using (var binWriter = new BinaryWriter(binFileStream))
+                {
+                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
+
+                    byte[] searchPattern = yamaha.MT09Pattern;
+                    long position = FindPattern(wrlFileName, searchPattern);
+
+                    // If no position found, seek manually
+                    if (position < 0)
+                    {
+                        fileStream.Seek(logs.PrimaryHeaderLength + logs.SecondaryHeaderLength, SeekOrigin.Begin);
+                        position = FindPattern(wrlFileName, searchPattern);
+                    }
+
+                    // Read secondary header based on the found position
+                    if (position >= 0)
+                    {
+                        if (position != logs.PrimaryHeaderLength)
+                        {
+                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                        }
+                    }
+                    else
+                    {
+                        logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                        exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                    }
+
+                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
+
+                    // Read packets from the WRL file
+                    while (true)
+                    {
+                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
+                        if (packetPrefixBytes.Length < logs.PacketPrefixLength)
+                            break;
+
+                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
+                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
+
+                        if (packetBytes.Length < remainingPacketBytes)
+                            break;
+
+                        byte[] packet = packetPrefixBytes.Concat(packetBytes).ToArray();
+                        binWriter.Write(packet);
+                    }
+
+                    conversionSuccessful = true;
+                }
+
+                if (conversionSuccessful)
+                {
+                    successfulConversions.Add(binFileName);
+                    Log($"{LogPrefix.Prefix}Conversion successful: {binFileName}");
+                }
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Feedback($"File is corrupted: {Path.GetFileName(wrlFileName)}.");
+                failedConversions.Add(wrlFileName);
+            }
+            catch (Exception ex)
+            {
+                Feedback($"Error converting file: {Path.GetFileName(wrlFileName)}. Exception: {ex.Message}");
+                failedConversions.Add(wrlFileName);
+
+                if (File.Exists(binFileName))
+                {
+                    try
+                    {
+                        File.Delete(binFileName);
+                    }
+                    catch (Exception deleteEx)
+                    {
+                        Feedback($"Failed to delete corrupted BIN file {binFileName}: {deleteEx.Message}");
+                    }
+                }
+            }
+        }
+
+
+        */
+        private bool LoadAndProcessFile(string filename, string binOutputFileName, List<string> failedConversions = null)
+        {
+            try
+            {
+                logs.ClearPackets();
+                Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
+                Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
+
+                using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
+                using (var binReader = new BinaryReader(fileStream, Encoding.ASCII))
+                {
+                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
+
+                    byte[] searchPattern = yamaha.MT09Pattern;
+                    long position = FindPattern(filename, searchPattern);
+
+                    if (position < 0)
+                    {
+                        fileStream.Seek(logs.PrimaryHeaderLength + logs.SecondaryHeaderLength, SeekOrigin.Begin);
+                        position = FindPattern(filename, searchPattern);
+                    }
+
+                    if (position >= 0)
+                    {
+                        Log($"{LogPrefix.Prefix}File loaded: " + Path.GetFileName(filename));
+                        Log($"{LogPrefix.Prefix}Header size: {position} bytes.");
+
+                        if (position != logs.PrimaryHeaderLength)
+                        {
+                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                        }
+                    }
+                    else
+                    {
+                        //logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
+                        //exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
+                        MessageBox.Show("Bike's WRL not supported yet.");
+                        return false;
+                    }
+
+                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
+
+                    while (true)
+                    {
+                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
+                        if (packetPrefixBytes.Length < 5)
+                            break;
+
+                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
+                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
+
+                        if (packetBytes.Length < remainingPacketBytes)
+                            break;
+
+                        int totalPacketLength = packetPrefixBytes[3] + 3;
+                        logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, packetPrefixBytes[4]);
+                    }
+
+                    Log($"{LogPrefix.Prefix}Packets: {logs.GetPacketCount()}.");
+
+                    // Write packets to the output binary file
+                    using (var binFileStream = new FileStream(binOutputFileName, FileMode.Create))
+                    using (var binWriter = new BinaryWriter(binFileStream))
+                    {
+                        foreach (var packet in logs.GetPackets())
+                        {
+                            binWriter.Write(packet.Value);
+                        }
+                    }
+
+                    Log($"{LogPrefix.Prefix}Bin file created.");
+                    return true;
+                }
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Log($"{LogPrefix.Prefix}File is corrupted: {filename}.");
+                if (failedConversions != null)
+                {
+                    failedConversions.Add(filename);
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Log($"{LogPrefix.Prefix}An unexpected error occurred with file {filename}: {ex.Message}.");
+                if (failedConversions != null)
+                {
+                    failedConversions.Add(filename);
+                }
+                return false;
+            }
+        }
+        private bool LoadFile(string filename)
+        {
+            try
+            {
+                if (!File.Exists(filename))
+                {
+                    lblFileName.Text = "Error: File Not Found";
+                    return false;
+                }
+
+                logFolder = Path.GetDirectoryName(filename);
+                openWRLFileDialog.InitialDirectory = logFolder;
+
+                string binOutputFileName = Path.Combine(logFolder, Path.GetFileNameWithoutExtension(filename) + ".bin");
+                lblFileName.Text = Path.GetFileName(filename);
+                lblDirName.Text = Path.GetDirectoryName(filename);
+
+                return LoadAndProcessFile(filename, binOutputFileName);
+            }
+            catch (Exception ex)
+            {
+                Log($"An unexpected error occurred: {ex.Message}");
+                return false;
+            }
+        }
+        private void ConvertWRLToBIN(string wrlFileName, string binFileName, List<string> successfulConversions, List<string> failedConversions)
+        {
+            bool conversionSuccessful = false;
+
+            try
+            {
+                if (!File.Exists(wrlFileName))
+                {
+                    Feedback($"Error: File Not Found - {Path.GetFileName(wrlFileName)}");
+                    failedConversions.Add(wrlFileName);
+                    return;
+                }
+
+                conversionSuccessful = LoadAndProcessFile(wrlFileName, binFileName, failedConversions);
+
+                if (conversionSuccessful)
+                {
+                    successfulConversions.Add(binFileName);
+                    //Log($"{LogPrefix.Prefix}Conversion successful: {binFileName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Feedback($"Error converting file: {Path.GetFileName(wrlFileName)}. Exception: {ex.Message}");
+                failedConversions.Add(wrlFileName);
+
+                if (File.Exists(binFileName))
+                {
+                    try
+                    {
+                        File.Delete(binFileName);
+                    }
+                    catch (Exception deleteEx)
+                    {
+                        Feedback($"Failed to delete corrupted BIN file {binFileName}: {deleteEx.Message}");
+                    }
+                }
+            }
+        }
+
     }
 }
+

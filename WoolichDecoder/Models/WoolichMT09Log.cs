@@ -7,7 +7,7 @@ namespace WoolichDecoder.Models
     public class WoolichMT09Log
     {
         // Header Marker for MT-09, MT-10 and R1
-        public byte[] MT09Pattern { get; } = new byte[] { 0x01, 0x02, 0x5D, 0x01 };
+        public byte[] MT09Pattern { get; } = new byte[] { 0x00, 0x01, 0x02, 0x5D, 0x01 };
  
         // Packet size for MT-09, MT-10 and R1
         public int MT09Packet { get; } = 96;
