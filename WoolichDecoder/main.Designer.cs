@@ -284,7 +284,7 @@
             // 
             this.lblAnalysisCol.AutoSize = true;
             this.lblAnalysisCol.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblAnalysisCol.Location = new System.Drawing.Point(108, 44);
+            this.lblAnalysisCol.Location = new System.Drawing.Point(118, 17);
             this.lblAnalysisCol.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblAnalysisCol.Name = "lblAnalysisCol";
             this.lblAnalysisCol.Size = new System.Drawing.Size(86, 13);
@@ -295,7 +295,7 @@
             // 
             this.txtBreakOnChange.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtBreakOnChange.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.txtBreakOnChange.Location = new System.Drawing.Point(202, 41);
+            this.txtBreakOnChange.Location = new System.Drawing.Point(212, 14);
             this.txtBreakOnChange.Margin = new System.Windows.Forms.Padding(2);
             this.txtBreakOnChange.Name = "txtBreakOnChange";
             this.txtBreakOnChange.Size = new System.Drawing.Size(48, 20);
@@ -311,7 +311,7 @@
             this.btnAnalyse.Location = new System.Drawing.Point(13, 9);
             this.btnAnalyse.Margin = new System.Windows.Forms.Padding(2);
             this.btnAnalyse.Name = "btnAnalyse";
-            this.btnAnalyse.Size = new System.Drawing.Size(237, 28);
+            this.btnAnalyse.Size = new System.Drawing.Size(82, 28);
             this.btnAnalyse.TabIndex = 15;
             this.btnAnalyse.Text = "Analyse";
             this.toolTip1.SetToolTip(this.btnAnalyse, "Analyse single file or directory depends on Mode settigs in Export and Convert.");
@@ -363,9 +363,9 @@
             this.label3.Location = new System.Drawing.Point(10, 488);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(390, 13);
+            this.label3.Size = new System.Drawing.Size(386, 13);
             this.label3.TabIndex = 20;
-            this.label3.Text = "Log File Analysis Functions (To analyse a particular packet column)";
+            this.label3.Text = "log File Analysis Functions (To analyse a particular packet column)";
             // 
             // aTFCheckedListBox
             // 
@@ -398,9 +398,9 @@
             this.label5.Location = new System.Drawing.Point(873, 41);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(39, 15);
+            this.label5.Size = new System.Drawing.Size(35, 15);
             this.label5.TabIndex = 19;
-            this.label5.Text = "Log: ";
+            this.label5.Text = "log: ";
             // 
             // label6
             // 
@@ -678,7 +678,7 @@
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(77, 15);
             this.label17.TabIndex = 37;
-            this.label17.Text = "Feedback: ";
+            this.label17.Text = "feedback: ";
             // 
             // label19
             // 
