@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -102,116 +103,6 @@ namespace WoolichDecoder
         {
             private static readonly string DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
             public static string Prefix => $"{DateTime.Now.ToString(DateTimeFormat)} -- ";
-        }
-
-        public void FindRepeatedPatternsInFile(string filename, int patternLength, int minDistance, int maxDistance)
-        {
-            DateTime startTime = DateTime.Now;
-            log($"Analysis started at: {startTime}");
-
-            // Dictionary to store patterns and their occurrence counts
-            Dictionary<string, List<long>> patternOccurrences = new Dictionary<string, List<long>>();
-
-            int minRepetitions = 10000; // Minimum repetitions default
-
-            using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
-            using (var binaryReader = new BinaryReader(fileStream))
-            {
-                long fileSize = fileStream.Length;
-                byte[] buffer = new byte[fileSize]; // Read entire file into a buffer
-                binaryReader.Read(buffer, 0, (int)fileSize); // Read the file once into memory
-
-                // Calculate minimum repetitions based on file size (14,000 per MB)
-                minRepetitions = Math.Max(10000, (int)(fileSize / (1024 * 1024)) * 10000); // Ensure it's at least 14000
-
-                // Read patterns in a sliding window manner
-                for (long i = 0; i <= fileSize - patternLength; i++)
-                {
-                    byte[] pattern = new byte[patternLength];
-                    Array.Copy(buffer, i, pattern, 0, patternLength);
-                    string patternHex = BitConverter.ToString(pattern).Replace("-", " ");
-
-                    // Skip patterns that are all zeros
-                    if (pattern.All(b => b == 0))
-                    {
-                        continue;
-                    }
-
-                    // Add the current position to the list of occurrences for this pattern
-                    if (!patternOccurrences.ContainsKey(patternHex))
-                    {
-                        patternOccurrences[patternHex] = new List<long>();
-                    }
-                    patternOccurrences[patternHex].Add(i);
-                }
-            }
-
-            // Analyzing the occurrences for each pattern
-            foreach (var entry in patternOccurrences)
-            {
-                string pattern = entry.Key;
-                List<long> positions = entry.Value;
-
-                // Check if this pattern has enough occurrences
-                if (positions.Count < minRepetitions)
-                {
-                    //log($"Pattern: {pattern} skipped, not enough occurrences: {positions.Count}");
-                    continue; // Skip patterns that don't meet the minimum repetitions
-                }
-
-                // Count the number of valid repetitions based on the distance criteria
-                Dictionary<long, int> distanceCounts = new Dictionary<long, int>();
-                int totalValidRepetitions = 0;
-
-                // Calculate distances
-                for (int j = 0; j < positions.Count - 1; j++)
-                {
-                    long firstOccurrence = positions[j];
-
-                    for (int k = j + 1; k < positions.Count; k++)
-                    {
-                        long secondOccurrence = positions[k];
-                        long distance = secondOccurrence - firstOccurrence;
-
-                        // Check if the distance is within the specified range
-                        if (distance > maxDistance)
-                        {
-                            break; // No need to check further if the distance exceeds maxDistance
-                        }
-
-                        if (distance >= minDistance)
-                        {
-                            // Increment the count for this distance
-                            if (distanceCounts.ContainsKey(distance))
-                            {
-                                distanceCounts[distance]++;
-                            }
-                            else
-                            {
-                                distanceCounts[distance] = 1;
-                            }
-                            totalValidRepetitions++;
-                        }
-                    }
-                }
-
-                // log results only if there are valid repetitions and distances
-                if (totalValidRepetitions > 0)
-                {
-                    foreach (var kvp in distanceCounts)
-                    {
-                        if (totalValidRepetitions >= minRepetitions)
-                        {
-                            log($"Pattern: {pattern}, Distance: {kvp.Key}, Count: {kvp.Value}");
-                        }
-                    }
-                }
-                else
-                {
-                    log($"Pattern: {pattern} found but no valid repetitions.");
-                }
-            }
-
         }
         public void CompareAFR_Click(object sender, EventArgs e)
         {
@@ -846,6 +737,7 @@ namespace WoolichDecoder
                         }
                     }
                     Invoke(new Action(() => log($"{LogPrefix.Prefix}Data exported to {exportFormat.ToUpper()} format: " + Path.GetFileName(exportFileName))));
+                    ProcessFile(exportFileName);
                     Invoke(new Action(() => UpdateProgressLabel("Export completed successfully.")));
                 }
                 catch (Exception ex)
@@ -1250,6 +1142,7 @@ namespace WoolichDecoder
                                 Invoke(new Action(() => UpdateProgressLabel($"Processing file {processedFiles}/{totalFiles}")));
                                 int progressPercentage = (processedFiles * 100) / totalFiles;
                                 Invoke(new Action(() => progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum)));
+                                ProcessFile(exportFileName);
                             }
                             catch (Exception ex)
                             {
@@ -1718,33 +1611,6 @@ namespace WoolichDecoder
                 return recoveredDataStream.ToArray();
             }
         }
-        private long FindPattern(string filePath, byte[] pattern)
-        {
-            using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            {
-                byte[] buffer = new byte[fs.Length];
-                fs.Read(buffer, 0, buffer.Length);
-
-                for (long i = 0; i < buffer.Length - pattern.Length; i++)
-                {
-                    bool match = true;
-                    for (int j = 0; j < pattern.Length; j++)
-                    {
-                        if (buffer[i + j] != pattern[j])
-                        {
-                            match = false;
-                            break;
-                        }
-                    }
-
-                    if (match)
-                    {
-                        return i;
-                    }
-                }
-            }
-            return -1;
-        }
         private void ConvertWRLToBIN(string wrlFileName, string binFileName, List<string> successfulConversions, List<string> failedConversions)
         {
             bool conversionSuccessful = false;
@@ -1820,9 +1686,9 @@ namespace WoolichDecoder
                 byte[] data = File.ReadAllBytes(inputFileName);
                 log($"{LogPrefix.Prefix}Read data from file. Size: {data.Length} bytes."); // log the size of the read data
 
-                byte[] prefix = yamaha.MT09Pattern;
+                byte[] prefix = logs.PacketPattern;
                 int prefixLength = prefix.Length; // Length of the prefix
-                int interval = yamaha.MT09Packet; // Define an interval for processing
+                int interval = logs.PacketPattern[3] + 3; // Define an interval for processing
 
                 List<int> offsets = FindPrefixes(data, prefix, interval);
                 log($"{LogPrefix.Prefix}Total number of prefixes found: {offsets.Count}."); // log the number of prefixes found
@@ -1843,107 +1709,6 @@ namespace WoolichDecoder
             catch (Exception ex)
             {
                 MessageBox.Show($"An error occurred during repair: {ex.Message}", "Repair Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-        private bool LoadAndProcessFile(string filename, string binOutputFileName, List<string> failedConversions = null)
-        {
-            try
-            {
-                logs.ClearPackets();
-                Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
-                Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
-
-                var watch = System.Diagnostics.Stopwatch.StartNew(); 
-
-                using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
-                using (var bufferedStream = new BufferedStream(fileStream, 81920)) 
-                using (var binReader = new BinaryReader(bufferedStream, Encoding.ASCII))
-                {
-                    
-                    logs.PrimaryHeaderData = binReader.ReadBytes(logs.PrimaryHeaderLength);
-
-                    byte[] searchPattern = yamaha.MT09Pattern;
-                    long position = FindPattern(filename, searchPattern);
-                    //log($"Search pattern position: {position}");
-
-                    if (position < 0)
-                    {
-                        fileStream.Seek(logs.PrimaryHeaderLength + logs.SecondaryHeaderLength, SeekOrigin.Begin);
-                        position = FindPattern(filename, searchPattern);
-                        log($"Search pattern position after seeking: {position}");
-                    }
-
-                    if (position >= 0)
-                    {
-                        log($"{LogPrefix.Prefix}Loading file: " + Path.GetFileName(filename));
-                        log($"{LogPrefix.Prefix}Header size: {position} bytes.");
-
-                        if (position != logs.PrimaryHeaderLength)
-                        {
-                            logs.SecondaryHeaderData = binReader.ReadBytes(logs.SecondaryHeaderLength);
-                            exportLogs.SecondaryHeaderData = logs.SecondaryHeaderData;
-                            //log($"Secondary header read. Length: {logs.SecondaryHeaderLength}");
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Bike's WRL not supported yet.");
-                        return false;
-                    }
-
-                    exportLogs.PrimaryHeaderData = logs.PrimaryHeaderData;
-
-                    while (true)
-                    {
-                        byte[] packetPrefixBytes = binReader.ReadBytes(logs.PacketPrefixLength);
-                        if (packetPrefixBytes.Length < 5)
-                            break;
-
-                        int remainingPacketBytes = packetPrefixBytes[3] - 2;
-                        byte[] packetBytes = binReader.ReadBytes(remainingPacketBytes);
-
-                        if (packetBytes.Length < remainingPacketBytes)
-                            break;
-
-                        int totalPacketLength = packetPrefixBytes[3] + 3;
-                        logs.AddPacket(packetPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, packetPrefixBytes[4]);
-                    }
-
-                    log($"{LogPrefix.Prefix}Packets: {logs.GetPacketCount()}.");
-
-                    
-                    using (var binFileStream = new FileStream(binOutputFileName, FileMode.Create))
-                    using (var binWriter = new BinaryWriter(binFileStream))
-                    {
-                        foreach (var packet in logs.GetPackets())
-                        {
-                            binWriter.Write(packet.Value);
-                        }
-                    }
-
-                    watch.Stop(); 
-                    log($"{LogPrefix.Prefix}Processing time: {watch.ElapsedMilliseconds} ms"); 
-                    log($"{LogPrefix.Prefix}Bin file created.");
-                    return true;
-                }
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                log($"{LogPrefix.Prefix}File is corrupted: {filename}.");
-                if (failedConversions != null)
-                {
-                    failedConversions.Add(filename);
-                }
-                return false;
-            }
-            catch (Exception ex)
-            {
-                log($"{LogPrefix.Prefix}An unexpected error occurred with file {filename}: {ex.Message}.");
-                if (failedConversions != null)
-                {
-                    failedConversions.Add(filename);
-                }
-                return false;
             }
         }
         private void OpenFile_Click(object sender, EventArgs e)
@@ -2050,7 +1815,191 @@ namespace WoolichDecoder
                 MessageBox.Show($"An unexpected error occurred: {ex.Message}\n\n Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        private bool LoadAndProcessFile(string filename, string binOutputFileName, List<string> failedConversions = null)
+        {
+            try
+            {
+                logs.ClearPackets();
+                Array.Clear(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderData.Length);
+                Array.Clear(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderData.Length);
 
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+
+                using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan))
+                {
+                    logs.PrimaryHeaderData = new byte[logs.PrimaryHeaderLength];
+                    fileStream.Read(logs.PrimaryHeaderData, 0, logs.PrimaryHeaderLength);
+                    long currentOffset = logs.PrimaryHeaderLength;
+                    log($"{LogPrefix.Prefix}Loading file: " + Path.GetFileName(filename));
+                    log($"{LogPrefix.Prefix}Primary header read. Length: {logs.PrimaryHeaderLength} bytes."); // Current offset: {currentOffset} (dec)");
+
+                    byte[] validationBytes = new byte[5];
+                    fileStream.Read(validationBytes, 0, 5);
+                    currentOffset += 5;
+                    //log($"{LogPrefix.Prefix}Next bytes read for validation: {BitConverter.ToString(validationBytes)}. Current offset: {currentOffset} (dec)");
+
+                    bool secondHeaderDetected = validationBytes.All(b => b == 0x00) || validationBytes.All(b => b == 0xFF);
+
+                    if (secondHeaderDetected)
+                    {
+                        //log($"{LogPrefix.Prefix}Second header detected. All 5 bytes are 00 or FF. Current offset: {currentOffset} (dec)");
+
+                        fileStream.Seek(-5, SeekOrigin.Current);
+                        logs.SecondaryHeaderData = new byte[logs.SecondaryHeaderLength];
+                        fileStream.Read(logs.SecondaryHeaderData, 0, logs.SecondaryHeaderLength);
+                        currentOffset += logs.SecondaryHeaderLength;
+                        log($"{LogPrefix.Prefix}Secondary header read. Length: {logs.SecondaryHeaderLength} bytes."); //  Current offset: {currentOffset} (dec)");
+                    }
+                    else
+                    {
+                        //log($"{LogPrefix.Prefix}No second header detected. Current offset: {currentOffset} (dec)");
+                        fileStream.Seek(-5, SeekOrigin.Current);
+                        currentOffset -= 5; 
+                    }
+
+                    byte[] packetBuffer = new byte[8192]; 
+                    int bytesRead;
+
+                    int packetCount = 0; 
+
+                    while (true)
+                    {
+                        byte[] currentPacketPrefixBytes = new byte[logs.PacketPrefixLength];
+                        bytesRead = fileStream.Read(currentPacketPrefixBytes, 0, logs.PacketPrefixLength);
+
+                        if (bytesRead < logs.PacketPrefixLength)
+                            break; 
+
+                        bool isHeaderValid = true; 
+                        for (int i = 0; i < logs.PacketPattern.Length; i++)
+                        {
+                            if (i >= currentPacketPrefixBytes.Length || currentPacketPrefixBytes[i] != logs.PacketPattern[i])
+                            {
+                                isHeaderValid = false; 
+                                break; 
+                            }
+                        }
+
+                        if (isHeaderValid)
+                        {
+                            if (logs.PacketPattern == null || logs.PacketPattern.Length == 0)
+                            {
+                                logs.PacketPattern = currentPacketPrefixBytes.Take(5).ToArray();                                log($"{LogPrefix.Prefix}Packet pattern saved: {BitConverter.ToString(logs.PacketPattern)}");
+                            }
+
+                            int remainingPacketBytes = currentPacketPrefixBytes[3] - 2;  
+                            byte[] packetBytes = new byte[remainingPacketBytes];
+                            bytesRead = fileStream.Read(packetBytes, 0, remainingPacketBytes);
+
+                            if (bytesRead < remainingPacketBytes)
+                                break;
+
+                            int totalPacketLength = currentPacketPrefixBytes[3] + 3;
+                            logs.AddPacket(currentPacketPrefixBytes.Concat(packetBytes).ToArray(), totalPacketLength, currentPacketPrefixBytes[4]);
+                            packetCount++;
+                        }
+                        else
+                        {
+                            long currentPosition = fileStream.Position; 
+                            if (currentPosition < fileStream.Length) 
+                            {
+                                fileStream.Seek(1, SeekOrigin.Current); 
+                            }
+                            else
+                            {
+                                
+                                break;
+                            }
+                        }
+                    }
+
+                    using (var binFileStream = new FileStream(binOutputFileName, FileMode.Create, FileAccess.Write, FileShare.None, 4096))
+                    using (var binWriter = new BinaryWriter(binFileStream))
+                    {
+                        foreach (var packet in logs.GetPackets())
+                        {
+                            binWriter.Write(packet.Value);
+                        }
+                    }
+
+                    //log($"{LogPrefix.Prefix}Summary of headers and packets:");
+                    //log($"{LogPrefix.Prefix}Primary Header: {BitConverter.ToString(logs.PrimaryHeaderData)}");
+                    if (logs.SecondaryHeaderData.Length > 0)
+                    {
+                        //log($"{LogPrefix.Prefix}Secondary Header: {BitConverter.ToString(logs.SecondaryHeaderData)}");
+                    }
+                    log($"{LogPrefix.Prefix}Found {packetCount} packets.");
+
+                    watch.Stop();
+                    log($"{LogPrefix.Prefix}Processing time: {watch.ElapsedMilliseconds} ms");
+                    log($"{LogPrefix.Prefix}Bin file created."); //: {binOutputFileName}");
+                    return true;
+                }
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                log($"{LogPrefix.Prefix}File is corrupted: {filename}.");
+                failedConversions?.Add(filename);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                log($"{LogPrefix.Prefix}An unexpected error occurred with file {filename}: {ex.Message}.");
+                failedConversions?.Add(filename);
+                return false;
+            }
+        }
+        public void ProcessFile(string filePath)
+        {
+            // Check if the file exists
+            if (!File.Exists(filePath))
+            {
+                log($"Error: The file does not exist: {filePath}");
+                return;
+            }
+
+            // Determine the separator based on the file extension
+            char separator = Path.GetExtension(filePath).Equals(".csv", StringComparison.OrdinalIgnoreCase) ? ',' : '\t';
+
+            // Read all lines from the file
+            var lines = File.ReadAllLines(filePath).ToList();
+
+            // Check the value of cmbTextFilter
+            if (cmbTextFilter.SelectedIndex == 1) // Assuming '1' is the index where no operations are performed
+            {
+                //log("Info: No operations performed as cmbTextFilter is set to 1.");
+                return;
+            }
+
+            // Columns to remove (indexes start from 1) - Yamaha  for time being only
+            var columnsToRemove = new List<int> { 4, 13, 14, 15, 16, 18, 21, 23, 27, 28, 31, 32, 33, 35, 36, 37, 38, 39, 40, 41 };
+
+            // Remove headers and corresponding data
+            var processedLines = new List<string>();
+            foreach (var line in lines)
+            {
+                var columns = line.Split(separator).ToList();
+
+                // Remove specified columns
+                for (int i = columnsToRemove.Count - 1; i >= 0; i--)
+                {
+                    int columnIndex = columnsToRemove[i] - 1; // Change to 0-indexed
+                    if (columnIndex < columns.Count)
+                    {
+                        columns.RemoveAt(columnIndex);
+                    }
+                }
+
+                processedLines.Add(string.Join(separator.ToString(), columns));
+            }
+
+            // Save the processed data to a new file
+            //string newFilePath = Path.ChangeExtension(filePath, "_processed" + Path.GetExtension(filePath));
+            File.WriteAllLines(filePath, processedLines);
+            //File.WriteAllLines(newFilePath, processedLines);
+
+            //log($"Info: Processed the file. Saved as: {newFilePath}");
+        }
     }
 }
 

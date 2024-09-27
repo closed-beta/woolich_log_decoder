@@ -62,6 +62,7 @@
             this.cmbATFileName = new System.Windows.Forms.ComboBox();
             this.btnAFR = new System.Windows.Forms.Button();
             this.AFRdivisor = new System.Windows.Forms.TextBox();
+            this.cmbTextFilter = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.idleRPM = new System.Windows.Forms.TextBox();
@@ -91,6 +92,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.panel6 = new System.Windows.Forms.Panel();
             this.label10 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -426,7 +428,7 @@
             this.cmbLogsLocation.Items.AddRange(new object[] {
             "Default",
             "Work Directory"});
-            this.cmbLogsLocation.Location = new System.Drawing.Point(94, 6);
+            this.cmbLogsLocation.Location = new System.Drawing.Point(90, 3);
             this.cmbLogsLocation.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cmbLogsLocation.Name = "cmbLogsLocation";
             this.cmbLogsLocation.Size = new System.Drawing.Size(101, 21);
@@ -454,7 +456,7 @@
             this.cmbBinDelete.Items.AddRange(new object[] {
             "Save",
             "Delete"});
-            this.cmbBinDelete.Location = new System.Drawing.Point(359, 285);
+            this.cmbBinDelete.Location = new System.Drawing.Point(90, 57);
             this.cmbBinDelete.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cmbBinDelete.Name = "cmbBinDelete";
             this.cmbBinDelete.Size = new System.Drawing.Size(101, 21);
@@ -471,7 +473,7 @@
             this.cmbATFileName.Items.AddRange(new object[] {
             "Default",
             "Binary"});
-            this.cmbATFileName.Location = new System.Drawing.Point(94, 41);
+            this.cmbATFileName.Location = new System.Drawing.Point(90, 30);
             this.cmbATFileName.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cmbATFileName.Name = "cmbATFileName";
             this.cmbATFileName.Size = new System.Drawing.Size(101, 21);
@@ -506,6 +508,23 @@
             this.AFRdivisor.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.toolTip1.SetToolTip(this.AFRdivisor, "AFR Divisor");
             this.AFRdivisor.TextChanged += new System.EventHandler(this.AFRdivisor_TextChanged);
+            // 
+            // cmbTextFilter
+            // 
+            this.cmbTextFilter.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.cmbTextFilter.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.cmbTextFilter.FormattingEnabled = true;
+            this.cmbTextFilter.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.cmbTextFilter.Items.AddRange(new object[] {
+            "Minimal",
+            "Full"});
+            this.cmbTextFilter.Location = new System.Drawing.Point(90, 84);
+            this.cmbTextFilter.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.cmbTextFilter.Name = "cmbTextFilter";
+            this.cmbTextFilter.Size = new System.Drawing.Size(101, 21);
+            this.cmbTextFilter.TabIndex = 50;
+            this.cmbTextFilter.Text = "Minimal";
+            this.toolTip1.SetToolTip(this.cmbTextFilter, "Delete BIN files in Directory Mode.");
             // 
             // label7
             // 
@@ -676,7 +695,7 @@
             this.label17.Location = new System.Drawing.Point(468, 42);
             this.label17.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(77, 15);
+            this.label17.Size = new System.Drawing.Size(73, 15);
             this.label17.TabIndex = 37;
             this.label17.Text = "feedback: ";
             // 
@@ -706,7 +725,7 @@
             // 
             this.lblLogsLocation.AutoSize = true;
             this.lblLogsLocation.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblLogsLocation.Location = new System.Drawing.Point(12, 8);
+            this.lblLogsLocation.Location = new System.Drawing.Point(12, 6);
             this.lblLogsLocation.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblLogsLocation.Name = "lblLogsLocation";
             this.lblLogsLocation.Size = new System.Drawing.Size(70, 13);
@@ -787,7 +806,7 @@
             // 
             this.lblBinDelete.AutoSize = true;
             this.lblBinDelete.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblBinDelete.Location = new System.Drawing.Point(38, 72);
+            this.lblBinDelete.Location = new System.Drawing.Point(36, 60);
             this.lblBinDelete.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblBinDelete.Name = "lblBinDelete";
             this.lblBinDelete.Size = new System.Drawing.Size(46, 13);
@@ -798,7 +817,7 @@
             // 
             this.lblATFileName.AutoSize = true;
             this.lblATFileName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblATFileName.Location = new System.Drawing.Point(16, 46);
+            this.lblATFileName.Location = new System.Drawing.Point(16, 33);
             this.lblATFileName.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblATFileName.Name = "lblATFileName";
             this.lblATFileName.Size = new System.Drawing.Size(66, 13);
@@ -808,6 +827,9 @@
             // panel5
             // 
             this.panel5.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel5.Controls.Add(this.cmbTextFilter);
+            this.panel5.Controls.Add(this.label15);
+            this.panel5.Controls.Add(this.cmbBinDelete);
             this.panel5.Controls.Add(this.lblATFileName);
             this.panel5.Controls.Add(this.cmbATFileName);
             this.panel5.Controls.Add(this.lblLogsLocation);
@@ -815,7 +837,7 @@
             this.panel5.Controls.Add(this.cmbLogsLocation);
             this.panel5.Location = new System.Drawing.Point(265, 214);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(201, 97);
+            this.panel5.Size = new System.Drawing.Size(201, 115);
             this.panel5.TabIndex = 32;
             // 
             // label2
@@ -851,6 +873,17 @@
             this.label10.TabIndex = 49;
             this.label10.Text = "AFR Divisor:";
             // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label15.Location = new System.Drawing.Point(28, 87);
+            this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(54, 13);
+            this.label15.TabIndex = 48;
+            this.label15.Text = "CSV/TSV";
+            // 
             // WoolichFileDecoderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
@@ -858,7 +891,6 @@
             this.ClientSize = new System.Drawing.Size(1284, 586);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.cmbBinDelete);
             this.Controls.Add(this.lblCRCsize);
             this.Controls.Add(this.CRCsize);
             this.Controls.Add(this.label1);
@@ -973,6 +1005,8 @@
         private System.Windows.Forms.TextBox AFRdivisor;
         private System.Windows.Forms.Panel panel6;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.ComboBox cmbTextFilter;
     }
 }
 
