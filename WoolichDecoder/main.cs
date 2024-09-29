@@ -904,6 +904,15 @@ namespace WoolichDecoder
         }
         private void Repair_Click(object sender, EventArgs e)
         {
+            byte[] prefix = logs.PacketPattern;
+
+            // Check if packet pattern exists
+            if (prefix == null || prefix.Length == 0)
+            {
+                MessageBox.Show("Please load a valid file to obtain the packet pattern.", "Missing Packet Pattern", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return; // Exit if there is no packet pattern
+            }
+
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.InitialDirectory = "C:\\";
@@ -1520,20 +1529,39 @@ namespace WoolichDecoder
         private void RepairWRL(string inputFileName)
         {
             string directory = Path.GetDirectoryName(inputFileName);
-
             string outputFileName = Path.Combine(directory, Path.GetFileNameWithoutExtension(inputFileName) + "_fixed.WRL");
 
             try
             {
                 byte[] data = File.ReadAllBytes(inputFileName);
-                log($"{LogPrefix.Prefix}Read data from file. Size: {data.Length} bytes."); // log the size of the read data
+                log($"{LogPrefix.Prefix}Loading file: " + Path.GetFileName(inputFileName));
+                log($"{LogPrefix.Prefix}Read data from file. Size: {data.Length} bytes."); // Log the size of the read data
 
                 byte[] prefix = logs.PacketPattern;
+
                 int prefixLength = prefix.Length; // Length of the prefix
                 int interval = logs.PacketPattern[3] + 3; // Define an interval for processing
 
                 List<int> offsets = FindPrefixes(data, prefix, interval);
-                log($"{LogPrefix.Prefix}Total number of prefixes found: {offsets.Count}."); // log the number of prefixes found
+                log($"{LogPrefix.Prefix}Total number of prefixes found: {offsets.Count}."); // Log the number of prefixes found
+
+                // Check if any prefixes were found
+                if (offsets.Count == 0)
+                {
+                    MessageBox.Show("No valid packet patterns found.\n\nThe file is either:\n- from different motorcycle model\n- too damaged to be repaired",
+                        "Repair Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return; // Exit if no prefixes are found
+                }
+
+                // Ask for confirmation about the motorcycle model
+                DialogResult result = MessageBox.Show("The packet pattern is available.\n\nDo you confirm that the file you want to repair is from the same motorcycle model?",
+                    "Confirm Motorcycle Model", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (result == DialogResult.No)
+                {
+                    log($"{LogPrefix.Prefix}File repair cancelled by the user."); // Log completion and file save information
+                    return; // Exit if the user cancels
+                }
 
                 bool needsRepair;
                 byte[] recoveredData = FixPackets(data, offsets, prefixLength, interval, out needsRepair);
@@ -1541,7 +1569,7 @@ namespace WoolichDecoder
                 if (needsRepair)
                 {
                     File.WriteAllBytes(outputFileName, recoveredData);
-                    log($"{LogPrefix.Prefix}File repaired and saved to:{Environment.NewLine}{outputFileName}."); // log completion and file save information
+                    log($"{LogPrefix.Prefix}File repaired and saved to:{Environment.NewLine}{outputFileName}."); // Log completion and file save information
                 }
                 else
                 {
@@ -1553,6 +1581,7 @@ namespace WoolichDecoder
                 MessageBox.Show($"An error occurred during repair: {ex.Message}", "Repair Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
         private void OpenFile_Click(object sender, EventArgs e)
         {
             try
