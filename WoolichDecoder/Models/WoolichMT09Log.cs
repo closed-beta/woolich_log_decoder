@@ -6,10 +6,8 @@ namespace WoolichDecoder.Models
 {
     public class WoolichMT09Log
     {
-        // Header Marker for MT-09, MT-10 and R1
-        //public byte[] PacketPattern { get; set; } = new byte[] { 0x00, 0x01, 0x02, 0x5D, 0x01 };
-        public byte[] PacketPattern { get; set; } = new byte[] {};
-      
+        public byte[] PacketPattern { get; set; } = new byte[] { };
+
         /// PrimaryHeaderLength I expect this identifies the source of the log data. What collected it.
         public int PrimaryHeaderLength { get; set; } = 352;
 

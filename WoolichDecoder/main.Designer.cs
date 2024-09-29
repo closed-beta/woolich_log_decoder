@@ -365,9 +365,9 @@
             this.label3.Location = new System.Drawing.Point(10, 488);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(386, 13);
+            this.label3.Size = new System.Drawing.Size(390, 13);
             this.label3.TabIndex = 20;
-            this.label3.Text = "log File Analysis Functions (To analyse a particular packet column)";
+            this.label3.Text = "Log File Analysis Functions (To analyse a particular packet column)";
             // 
             // aTFCheckedListBox
             // 
