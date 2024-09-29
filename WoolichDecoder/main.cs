@@ -97,10 +97,19 @@ namespace WoolichDecoder
         {
             if (string.IsNullOrEmpty(OpenFileName))
             {
-                MessageBox.Show("Please open a file before proceeding.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return false;
+                var result = MessageBox.Show("Please open a WRL file before proceeding. Would you like to select a file now?",
+                                              "Information",
+                                              MessageBoxButtons.OKCancel,
+                                              MessageBoxIcon.Information);
+
+                if (result == DialogResult.OK)
+                {
+                    OpenFile_Click(this, EventArgs.Empty);
+                    return !string.IsNullOrEmpty(OpenFileName);
+                }
+                return false; 
             }
-            return true;
+            return true; 
         }
         public static class LogPrefix
         {
@@ -614,6 +623,7 @@ namespace WoolichDecoder
             }
 
             double divisor = GetAFRDivisor();
+
 
             int columnNumber;
             try
@@ -1581,7 +1591,6 @@ namespace WoolichDecoder
                 MessageBox.Show($"An error occurred during repair: {ex.Message}", "Repair Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         private void OpenFile_Click(object sender, EventArgs e)
         {
             try
@@ -1839,12 +1848,15 @@ namespace WoolichDecoder
                         }
                     }
 
-                    using (var binFileStream = new FileStream(binOutputFileName, FileMode.Create, FileAccess.Write, FileShare.None, 262144))
-                    using (var binWriter = new BinaryWriter(binFileStream))
+                    if (cmbBinDelete.SelectedIndex != 2) // doesn't work with all functions yet
                     {
-                        foreach (var packet in logs.GetPackets())
+                        using (var binFileStream = new FileStream(binOutputFileName, FileMode.Create, FileAccess.Write, FileShare.None, 262144))
+                        using (var binWriter = new BinaryWriter(binFileStream))
                         {
-                            binWriter.Write(packet.Value);
+                            foreach (var packet in logs.GetPackets())
+                            {
+                                binWriter.Write(packet.Value);
+                            }
                         }
                     }
 

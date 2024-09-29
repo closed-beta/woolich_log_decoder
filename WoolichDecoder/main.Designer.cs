@@ -89,10 +89,10 @@
             this.lblBinDelete = new System.Windows.Forms.Label();
             this.lblATFileName = new System.Windows.Forms.Label();
             this.panel5 = new System.Windows.Forms.Panel();
+            this.label15 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.panel6 = new System.Windows.Forms.Panel();
             this.label10 = new System.Windows.Forms.Label();
-            this.label15 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -455,7 +455,8 @@
             this.cmbBinDelete.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.cmbBinDelete.Items.AddRange(new object[] {
             "Save",
-            "Delete"});
+            "Delete",
+            "Don\'t Save"});
             this.cmbBinDelete.Location = new System.Drawing.Point(90, 57);
             this.cmbBinDelete.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cmbBinDelete.Name = "cmbBinDelete";
@@ -840,6 +841,17 @@
             this.panel5.Size = new System.Drawing.Size(201, 115);
             this.panel5.TabIndex = 32;
             // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label15.Location = new System.Drawing.Point(28, 87);
+            this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(54, 13);
+            this.label15.TabIndex = 48;
+            this.label15.Text = "CSV/TSV";
+            // 
             // label2
             // 
             this.label2.AutoSize = true;
@@ -872,17 +884,6 @@
             this.label10.Size = new System.Drawing.Size(85, 15);
             this.label10.TabIndex = 49;
             this.label10.Text = "AFR Divisor:";
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label15.Location = new System.Drawing.Point(28, 87);
-            this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(54, 13);
-            this.label15.TabIndex = 48;
-            this.label15.Text = "CSV/TSV";
             // 
             // WoolichFileDecoderForm
             // 
