@@ -107,9 +107,9 @@ namespace WoolichDecoder
                     OpenFile_Click(this, EventArgs.Empty);
                     return !string.IsNullOrEmpty(OpenFileName);
                 }
-                return false; 
+                return false;
             }
-            return true; 
+            return true;
         }
         public static class LogPrefix
         {
@@ -622,8 +622,13 @@ namespace WoolichDecoder
                 return;
             }
 
-            double divisor = GetAFRDivisor();
+            if (cmbBinDelete.SelectedIndex == 2 && cmbExportMode.SelectedIndex == 1)
+            {
+                MessageBox.Show("This option is not available yet.", "Option Unavailable", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
 
+            double divisor = GetAFRDivisor();
 
             int columnNumber;
             try
@@ -1003,7 +1008,7 @@ namespace WoolichDecoder
                                 Invoke(new Action(() => UpdateProgressLabel($"Processing file {processedFiles}/{totalFiles}")));
                                 int progressPercentage = (processedFiles * 100) / totalFiles;
                                 Invoke(new Action(() => progressBar.Value = Math.Min(progressPercentage, progressBar.Maximum)));
-                                ProcessFile(exportFileName);
+                                ExcelMinimal(exportFileName);
                             }
                             catch (Exception ex)
                             {
@@ -1399,18 +1404,18 @@ namespace WoolichDecoder
                 log($"{LogPrefix.Prefix}Deletion not enabled. Setting is on: {cmbBinDelete.Text}"); // Debug log
             }
         }
-        private List<int> FindPrefixes(byte[] data, byte[] prefix, int interval)
+        private List<int> FindPattern(byte[] data, byte[] pattern, int length)
         {
             List<int> offsets = new List<int>();
-            int prefixLength = prefix.Length;
+            int patternLength = pattern.Length;
             int offset = 0;
 
-            while (offset <= (data.Length - prefixLength))
+            while (offset <= (data.Length - patternLength))
             {
                 bool match = true;
-                for (int i = 0; i < prefixLength; i++)
+                for (int i = 0; i < patternLength; i++)
                 {
-                    if (data[offset + i] != prefix[i])
+                    if (data[offset + i] != pattern[i])
                     {
                         match = false;
                         break;
@@ -1419,7 +1424,7 @@ namespace WoolichDecoder
                 if (match)
                 {
                     offsets.Add(offset);
-                    offset += interval;
+                    offset += length;
                 }
                 else
                 {
@@ -1547,12 +1552,12 @@ namespace WoolichDecoder
                 log($"{LogPrefix.Prefix}Loading file: " + Path.GetFileName(inputFileName));
                 log($"{LogPrefix.Prefix}Read data from file. Size: {data.Length} bytes."); // Log the size of the read data
 
-                byte[] prefix = logs.PacketPattern;
+                byte[] pattern = logs.PacketPattern;
 
-                int prefixLength = prefix.Length; // Length of the prefix
-                int interval = logs.PacketPattern[3] + 3; // Define an interval for processing
+                int patternLength = pattern.Length; // Length of the pattern
+                int length = logs.PacketPattern[3] + 3; // Define an length for processing
 
-                List<int> offsets = FindPrefixes(data, prefix, interval);
+                List<int> offsets = FindPattern(data, pattern, length);
                 log($"{LogPrefix.Prefix}Total number of prefixes found: {offsets.Count}."); // Log the number of prefixes found
 
                 // Check if any prefixes were found
@@ -1574,7 +1579,7 @@ namespace WoolichDecoder
                 }
 
                 bool needsRepair;
-                byte[] recoveredData = FixPackets(data, offsets, prefixLength, interval, out needsRepair);
+                byte[] recoveredData = FixPackets(data, offsets, patternLength, length, out needsRepair);
 
                 if (needsRepair)
                 {
@@ -1695,7 +1700,7 @@ namespace WoolichDecoder
                 MessageBox.Show($"An unexpected error occurred: {ex.Message}\n\n Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        public void ProcessFile(string filePath)
+        public void ExcelMinimal(string filePath)
         {
             // Check if the file exists
             if (!File.Exists(filePath))
@@ -1848,7 +1853,11 @@ namespace WoolichDecoder
                         }
                     }
 
-                    if (cmbBinDelete.SelectedIndex != 2) // doesn't work with all functions yet
+                    log($"{LogPrefix.Prefix}Found {packetCount} packets.");
+                    watch.Stop();
+                    log($"{LogPrefix.Prefix}Processing time: {watch.ElapsedMilliseconds} ms");
+
+                    if (cmbBinDelete.SelectedIndex != 2)
                     {
                         using (var binFileStream = new FileStream(binOutputFileName, FileMode.Create, FileAccess.Write, FileShare.None, 262144))
                         using (var binWriter = new BinaryWriter(binFileStream))
@@ -1857,13 +1866,11 @@ namespace WoolichDecoder
                             {
                                 binWriter.Write(packet.Value);
                             }
+                            log($"{LogPrefix.Prefix}Bin file created.");
                         }
+                        return true;
                     }
 
-                    log($"{LogPrefix.Prefix}Found {packetCount} packets.");
-                    watch.Stop();
-                    log($"{LogPrefix.Prefix}Processing time: {watch.ElapsedMilliseconds} ms");
-                    log($"{LogPrefix.Prefix}Bin file created.");
                     return true;
                 }
             }
@@ -2022,7 +2029,7 @@ namespace WoolichDecoder
                     }
 
                     Invoke(new Action(() => log($"{LogPrefix.Prefix}Data exported to {exportFormat.ToUpper()} format: " + Path.GetFileName(exportFileName))));
-                    ProcessFile(exportFileName);
+                    ExcelMinimal(exportFileName);
                     Invoke(new Action(() => UpdateProgressLabel("Export completed successfully.")));
                 }
                 catch (Exception ex)
