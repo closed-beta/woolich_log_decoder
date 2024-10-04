@@ -1802,6 +1802,9 @@ namespace WoolichDecoder
                     }
 
                     int packetCount = 0;
+                    int offsetShifts = 0;
+                    int successfulRecoveredHeaders = 0;
+                    bool lastHeaderRecovered = false;
 
                     while (true)
                     {
@@ -1823,6 +1826,12 @@ namespace WoolichDecoder
 
                         if (isHeaderValid)
                         {
+                            if (!lastHeaderRecovered)
+                            {
+                                successfulRecoveredHeaders++;
+                                lastHeaderRecovered = true;
+                            }
+
                             if (logs.PacketPrefixPattern == null || logs.PacketPrefixPattern.Length == 0)
                             {
                                 logs.PacketPrefixPattern = currentPacketPrefixBytes.Take(5).ToArray();
@@ -1854,7 +1863,9 @@ namespace WoolichDecoder
                             long currentPosition = fileStream.Position;
                             if (currentPosition < fileStream.Length)
                             {
-                                fileStream.Seek(-logs.PacketPrefixLength + 1, SeekOrigin.Current);
+                                fileStream.Seek(-logs.PacketPrefixLength + 2, SeekOrigin.Current);
+                                offsetShifts++;
+                                lastHeaderRecovered = false;
                             }
                             else
                             {
@@ -1863,6 +1874,8 @@ namespace WoolichDecoder
                         }
                     }
 
+                    if (offsetShifts > 0) log($"{LogPrefix.Prefix}Attempted to recover packets {offsetShifts} times.");
+                    if (offsetShifts > 0) log($"{LogPrefix.Prefix}Successful recovered {successfulRecoveredHeaders} packets.");
                     log($"{LogPrefix.Prefix}Found {packetCount} packets.");
                     watch.Stop();
                     log($"{LogPrefix.Prefix}Processing time: {watch.ElapsedMilliseconds} ms");
