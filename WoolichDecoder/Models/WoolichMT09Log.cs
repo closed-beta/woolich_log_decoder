@@ -6,7 +6,7 @@ namespace WoolichDecoder.Models
 {
     public class WoolichMT09Log
     {
-        public byte[] PacketPattern { get; set; } = new byte[] { };
+        public byte[] PacketPrefixPattern { get; set; } = new byte[] { };
 
         /// PrimaryHeaderLength I expect this identifies the source of the log data. What collected it.
         public int PrimaryHeaderLength { get; set; } = 352;
@@ -83,7 +83,7 @@ namespace WoolichDecoder.Models
         public void ClearPackets()
         {
             this.logData.Clear();
-            PacketPattern = new byte[] { };
+            PacketPrefixPattern = new byte[] { };
             Array.Clear(PrimaryHeaderData, 0, PrimaryHeaderData.Length);
             Array.Clear(SecondaryHeaderData, 0, SecondaryHeaderData.Length);
         }

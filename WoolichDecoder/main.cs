@@ -919,7 +919,7 @@ namespace WoolichDecoder
         }
         private void Repair_Click(object sender, EventArgs e)
         {
-            byte[] prefix = logs.PacketPattern;
+            byte[] prefix = logs.PacketPrefixPattern;
 
             // Check if packet pattern exists
             if (prefix == null || prefix.Length == 0)
@@ -1552,10 +1552,10 @@ namespace WoolichDecoder
                 log($"{LogPrefix.Prefix}Loading file: " + Path.GetFileName(inputFileName));
                 log($"{LogPrefix.Prefix}Read data from file. Size: {data.Length} bytes."); // Log the size of the read data
 
-                byte[] pattern = logs.PacketPattern;
+                byte[] pattern = logs.PacketPrefixPattern;
 
                 int patternLength = pattern.Length; // Length of the pattern
-                int length = logs.PacketPattern[3] + 3; // Define an length for processing
+                int length = logs.PacketPrefixPattern[3] + 3; // Define an length for processing
 
                 List<int> offsets = FindPattern(data, pattern, length);
                 log($"{LogPrefix.Prefix}Total number of prefixes found: {offsets.Count}."); // Log the number of prefixes found
@@ -1802,9 +1802,9 @@ namespace WoolichDecoder
                             break;
 
                         bool isHeaderValid = true;
-                        for (int i = 0; i < logs.PacketPattern.Length; i++)
+                        for (int i = 0; i < logs.PacketPrefixPattern.Length; i++)
                         {
-                            if (i >= currentPacketPrefixBytes.Length || currentPacketPrefixBytes[i] != logs.PacketPattern[i])
+                            if (i >= currentPacketPrefixBytes.Length || currentPacketPrefixBytes[i] != logs.PacketPrefixPattern[i])
                             {
                                 isHeaderValid = false;
                                 break;
@@ -1813,10 +1813,10 @@ namespace WoolichDecoder
 
                         if (isHeaderValid)
                         {
-                            if (logs.PacketPattern == null || logs.PacketPattern.Length == 0)
+                            if (logs.PacketPrefixPattern == null || logs.PacketPrefixPattern.Length == 0)
                             {
-                                logs.PacketPattern = currentPacketPrefixBytes.Take(5).ToArray();
-                                log($"{LogPrefix.Prefix}Packet pattern saved: {BitConverter.ToString(logs.PacketPattern)}");
+                                logs.PacketPrefixPattern = currentPacketPrefixBytes.Take(5).ToArray();
+                                log($"{LogPrefix.Prefix}Packet pattern saved: {BitConverter.ToString(logs.PacketPrefixPattern)}");
                             }
 
                             int remainingPacketBytes = currentPacketPrefixBytes[3] - 2;
@@ -1844,7 +1844,7 @@ namespace WoolichDecoder
                             long currentPosition = fileStream.Position;
                             if (currentPosition < fileStream.Length)
                             {
-                                fileStream.Seek(1, SeekOrigin.Current);
+                                fileStream.Seek(-logs.PacketPrefixLength + 1, SeekOrigin.Current);
                             }
                             else
                             {
