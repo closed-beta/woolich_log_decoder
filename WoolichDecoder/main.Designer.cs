@@ -62,7 +62,7 @@ namespace WoolichDecoder
             this.label1 = new System.Windows.Forms.Label();
             this.cmbBinDelete = new System.Windows.Forms.ComboBox();
             this.cmbATFileName = new System.Windows.Forms.ComboBox();
-            this.btnAFR = new System.Windows.Forms.Button();
+            this.btnAFRdivisor = new System.Windows.Forms.Button();
             this.AFRdivisor = new System.Windows.Forms.TextBox();
             this.cmbTextFilter = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
@@ -93,14 +93,14 @@ namespace WoolichDecoder
             this.panel5 = new System.Windows.Forms.Panel();
             this.label15 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.panel6 = new System.Windows.Forms.Panel();
-            this.label10 = new System.Windows.Forms.Label();
+            this.panelAFRdivisor = new System.Windows.Forms.Panel();
+            this.lblAFRdivisor = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
             this.panel5.SuspendLayout();
-            this.panel6.SuspendLayout();
+            this.panelAFRdivisor.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtLogging
@@ -165,10 +165,10 @@ namespace WoolichDecoder
             this.lblExportPacketsCount.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblExportPacketsCount.Enabled = false;
             this.lblExportPacketsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblExportPacketsCount.Location = new System.Drawing.Point(364, 13);
+            this.lblExportPacketsCount.Location = new System.Drawing.Point(345, 13);
             this.lblExportPacketsCount.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblExportPacketsCount.Name = "lblExportPacketsCount";
-            this.lblExportPacketsCount.Size = new System.Drawing.Size(78, 20);
+            this.lblExportPacketsCount.Size = new System.Drawing.Size(101, 20);
             this.lblExportPacketsCount.TabIndex = 9;
             this.lblExportPacketsCount.Text = "0";
             this.lblExportPacketsCount.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -206,16 +206,16 @@ namespace WoolichDecoder
             this.cmbExportType.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.cmbExportType.FormattingEnabled = true;
             this.cmbExportType.Items.AddRange(new object[] {
-            "Export to",
+            "Export",
             "Analysis Only",
-            "CRC",
+            "Export Packets",
             "Autotune"});
             this.cmbExportType.Location = new System.Drawing.Point(102, 19);
             this.cmbExportType.Margin = new System.Windows.Forms.Padding(1);
             this.cmbExportType.Name = "cmbExportType";
             this.cmbExportType.Size = new System.Drawing.Size(160, 21);
             this.cmbExportType.TabIndex = 12;
-            this.cmbExportType.Text = "Export to";
+            this.cmbExportType.Text = "Export";
             // 
             // lblExportType
             // 
@@ -249,7 +249,7 @@ namespace WoolichDecoder
             // 
             this.lblTotalPackets.AutoSize = true;
             this.lblTotalPackets.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.lblTotalPackets.Location = new System.Drawing.Point(282, 44);
+            this.lblTotalPackets.Location = new System.Drawing.Point(263, 44);
             this.lblTotalPackets.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblTotalPackets.Name = "lblTotalPackets";
             this.lblTotalPackets.Size = new System.Drawing.Size(76, 13);
@@ -263,10 +263,10 @@ namespace WoolichDecoder
             this.lblTotalPacketsCount.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblTotalPacketsCount.Enabled = false;
             this.lblTotalPacketsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblTotalPacketsCount.Location = new System.Drawing.Point(364, 40);
+            this.lblTotalPacketsCount.Location = new System.Drawing.Point(345, 40);
             this.lblTotalPacketsCount.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblTotalPacketsCount.Name = "lblTotalPacketsCount";
-            this.lblTotalPacketsCount.Size = new System.Drawing.Size(78, 20);
+            this.lblTotalPacketsCount.Size = new System.Drawing.Size(101, 20);
             this.lblTotalPacketsCount.TabIndex = 37;
             this.lblTotalPacketsCount.Text = "0";
             this.lblTotalPacketsCount.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -277,7 +277,7 @@ namespace WoolichDecoder
             // 
             this.lblPackets.AutoSize = true;
             this.lblPackets.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.lblPackets.Location = new System.Drawing.Point(309, 17);
+            this.lblPackets.Location = new System.Drawing.Point(290, 17);
             this.lblPackets.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblPackets.Name = "lblPackets";
             this.lblPackets.Size = new System.Drawing.Size(49, 13);
@@ -288,7 +288,7 @@ namespace WoolichDecoder
             // 
             this.lblAnalysisCol.AutoSize = true;
             this.lblAnalysisCol.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblAnalysisCol.Location = new System.Drawing.Point(118, 17);
+            this.lblAnalysisCol.Location = new System.Drawing.Point(122, 17);
             this.lblAnalysisCol.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblAnalysisCol.Name = "lblAnalysisCol";
             this.lblAnalysisCol.Size = new System.Drawing.Size(86, 13);
@@ -312,10 +312,10 @@ namespace WoolichDecoder
             // btnAnalyse
             // 
             this.btnAnalyse.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnAnalyse.Location = new System.Drawing.Point(13, 9);
+            this.btnAnalyse.Location = new System.Drawing.Point(2, 9);
             this.btnAnalyse.Margin = new System.Windows.Forms.Padding(2);
             this.btnAnalyse.Name = "btnAnalyse";
-            this.btnAnalyse.Size = new System.Drawing.Size(82, 28);
+            this.btnAnalyse.Size = new System.Drawing.Size(116, 28);
             this.btnAnalyse.TabIndex = 15;
             this.btnAnalyse.Text = "Analyse";
             this.toolTip1.SetToolTip(this.btnAnalyse, "Analyse single file or directory depends on Mode settigs in Export and Convert.");
@@ -326,26 +326,27 @@ namespace WoolichDecoder
             // 
             this.lblCRCsize.AutoSize = true;
             this.lblCRCsize.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblCRCsize.Location = new System.Drawing.Point(5, 383);
+            this.lblCRCsize.Location = new System.Drawing.Point(178, 398);
             this.lblCRCsize.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblCRCsize.Name = "lblCRCsize";
-            this.lblCRCsize.Size = new System.Drawing.Size(69, 15);
+            this.lblCRCsize.Size = new System.Drawing.Size(93, 15);
             this.lblCRCsize.TabIndex = 38;
-            this.lblCRCsize.Text = "CRC size:";
+            this.lblCRCsize.Text = "Packet count:";
+            this.lblCRCsize.Visible = false;
             // 
             // CRCsize
             // 
             this.CRCsize.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.CRCsize.Enabled = false;
             this.CRCsize.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.CRCsize.Location = new System.Drawing.Point(8, 400);
+            this.CRCsize.Location = new System.Drawing.Point(181, 415);
             this.CRCsize.Margin = new System.Windows.Forms.Padding(2);
             this.CRCsize.Name = "CRCsize";
-            this.CRCsize.Size = new System.Drawing.Size(66, 20);
+            this.CRCsize.Size = new System.Drawing.Size(90, 20);
             this.CRCsize.TabIndex = 37;
             this.CRCsize.Text = "100";
             this.CRCsize.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.toolTip1.SetToolTip(this.CRCsize, "How many packets to export.");
+            this.CRCsize.Visible = false;
             // 
             // btnRepair
             // 
@@ -367,9 +368,9 @@ namespace WoolichDecoder
             this.label3.Location = new System.Drawing.Point(10, 488);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(390, 13);
+            this.label3.Size = new System.Drawing.Size(134, 13);
             this.label3.TabIndex = 20;
-            this.label3.Text = "Log File Analysis Functions (To analyse a particular packet column)";
+            this.label3.Text = "File Analysis Function:";
             // 
             // aTFCheckedListBox
             // 
@@ -456,7 +457,7 @@ namespace WoolichDecoder
             this.cmbBinDelete.FormattingEnabled = true;
             this.cmbBinDelete.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.cmbBinDelete.Items.AddRange(new object[] {
-            "Save",
+            "Keep",
             "Delete",
             "Don\'t Save"});
             this.cmbBinDelete.Location = new System.Drawing.Point(90, 57);
@@ -464,7 +465,7 @@ namespace WoolichDecoder
             this.cmbBinDelete.Name = "cmbBinDelete";
             this.cmbBinDelete.Size = new System.Drawing.Size(101, 21);
             this.cmbBinDelete.TabIndex = 45;
-            this.cmbBinDelete.Text = "Default";
+            this.cmbBinDelete.Text = "Keep";
             this.toolTip1.SetToolTip(this.cmbBinDelete, "Delete BIN files in Directory Mode.");
             // 
             // cmbATFileName
@@ -484,28 +485,28 @@ namespace WoolichDecoder
             this.cmbATFileName.Text = "Default";
             this.toolTip1.SetToolTip(this.cmbATFileName, "Autotune Output Filename format.");
             // 
-            // btnAFR
+            // btnAFRdivisor
             // 
-            this.btnAFR.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnAFR.Location = new System.Drawing.Point(2, 3);
-            this.btnAFR.Margin = new System.Windows.Forms.Padding(1);
-            this.btnAFR.Name = "btnAFR";
-            this.btnAFR.Size = new System.Drawing.Size(76, 21);
-            this.btnAFR.TabIndex = 49;
-            this.btnAFR.Text = "Calibrate";
-            this.toolTip1.SetToolTip(this.btnAFR, "Calibrate AFR between Woolich software and Decoder. Mitigate difference in CSV/TS" +
+            this.btnAFRdivisor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.btnAFRdivisor.Location = new System.Drawing.Point(2, 3);
+            this.btnAFRdivisor.Margin = new System.Windows.Forms.Padding(1);
+            this.btnAFRdivisor.Name = "btnAFRdivisor";
+            this.btnAFRdivisor.Size = new System.Drawing.Size(81, 21);
+            this.btnAFRdivisor.TabIndex = 49;
+            this.btnAFRdivisor.Text = "Calibrate";
+            this.toolTip1.SetToolTip(this.btnAFRdivisor, "Calibrate AFR between Woolich software and Decoder. Mitigate difference in CSV/TS" +
         "V files.");
-            this.btnAFR.UseVisualStyleBackColor = true;
-            this.btnAFR.Click += new System.EventHandler(this.CompareAFR_Click);
+            this.btnAFRdivisor.UseVisualStyleBackColor = true;
+            this.btnAFRdivisor.Click += new System.EventHandler(this.CompareAFR_Click);
             // 
             // AFRdivisor
             // 
             this.AFRdivisor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.AFRdivisor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.AFRdivisor.Location = new System.Drawing.Point(81, 3);
+            this.AFRdivisor.Location = new System.Drawing.Point(90, 4);
             this.AFRdivisor.Margin = new System.Windows.Forms.Padding(1);
             this.AFRdivisor.Name = "AFRdivisor";
-            this.AFRdivisor.Size = new System.Drawing.Size(55, 20);
+            this.AFRdivisor.Size = new System.Drawing.Size(46, 20);
             this.AFRdivisor.TabIndex = 50;
             this.AFRdivisor.Text = "10.2";
             this.AFRdivisor.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -865,34 +866,36 @@ namespace WoolichDecoder
             this.label2.TabIndex = 48;
             this.label2.Text = "File settings:";
             // 
-            // panel6
+            // panelAFRdivisor
             // 
-            this.panel6.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel6.Controls.Add(this.AFRdivisor);
-            this.panel6.Controls.Add(this.btnAFR);
-            this.panel6.Location = new System.Drawing.Point(10, 329);
-            this.panel6.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
-            this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(144, 29);
-            this.panel6.TabIndex = 32;
+            this.panelAFRdivisor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelAFRdivisor.Controls.Add(this.AFRdivisor);
+            this.panelAFRdivisor.Controls.Add(this.btnAFRdivisor);
+            this.panelAFRdivisor.Location = new System.Drawing.Point(132, 406);
+            this.panelAFRdivisor.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.panelAFRdivisor.Name = "panelAFRdivisor";
+            this.panelAFRdivisor.Size = new System.Drawing.Size(139, 29);
+            this.panelAFRdivisor.TabIndex = 32;
+            this.panelAFRdivisor.Visible = false;
             // 
-            // label10
+            // lblAFRdivisor
             // 
-            this.label10.AutoSize = true;
-            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label10.Location = new System.Drawing.Point(10, 314);
-            this.label10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(85, 15);
-            this.label10.TabIndex = 49;
-            this.label10.Text = "AFR Divisor:";
+            this.lblAFRdivisor.AutoSize = true;
+            this.lblAFRdivisor.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.lblAFRdivisor.Location = new System.Drawing.Point(133, 388);
+            this.lblAFRdivisor.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblAFRdivisor.Name = "lblAFRdivisor";
+            this.lblAFRdivisor.Size = new System.Drawing.Size(85, 15);
+            this.lblAFRdivisor.TabIndex = 49;
+            this.lblAFRdivisor.Text = "AFR Divisor:";
+            this.lblAFRdivisor.Visible = false;
             // 
             // WoolichFileDecoderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1284, 586);
-            this.Controls.Add(this.label10);
+            this.Controls.Add(this.lblAFRdivisor);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.lblCRCsize);
             this.Controls.Add(this.CRCsize);
@@ -919,17 +922,14 @@ namespace WoolichDecoder
             this.Controls.Add(this.aTFCheckedListBox);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel5);
-            this.Controls.Add(this.panel6);
+            this.Controls.Add(this.panelAFRdivisor);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(2);
             this.MaximumSize = new System.Drawing.Size(1300, 625);
             this.MinimumSize = new System.Drawing.Size(1300, 625);
             this.Name = "WoolichFileDecoderForm";
-            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            string version = assembly.GetName().Version.ToString();
-            string fileVersion = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
-            this.Text = $"Woolich File Decoder {fileVersion}";
+            this.Text = "Woolich File Decoder";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.App_Close);
             this.Load += new System.EventHandler(this.App_Load);
             this.panel1.ResumeLayout(false);
@@ -942,8 +942,8 @@ namespace WoolichDecoder
             this.panel4.PerformLayout();
             this.panel5.ResumeLayout(false);
             this.panel5.PerformLayout();
-            this.panel6.ResumeLayout(false);
-            this.panel6.PerformLayout();
+            this.panelAFRdivisor.ResumeLayout(false);
+            this.panelAFRdivisor.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1007,10 +1007,10 @@ namespace WoolichDecoder
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label lblTotalPackets;
         private System.Windows.Forms.Label lblTotalPacketsCount;
-        private System.Windows.Forms.Button btnAFR;
+        private System.Windows.Forms.Button btnAFRdivisor;
         private System.Windows.Forms.TextBox AFRdivisor;
-        private System.Windows.Forms.Panel panel6;
-        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Panel panelAFRdivisor;
+        private System.Windows.Forms.Label lblAFRdivisor;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.ComboBox cmbTextFilter;
     }

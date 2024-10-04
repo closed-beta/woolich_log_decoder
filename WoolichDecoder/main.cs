@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -69,6 +70,10 @@ namespace WoolichDecoder
             System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             System.Globalization.CultureInfo.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
             InitializeComponent();
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            string version = assembly.GetName().Version.ToString();
+            string fileVersion = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+            this.Text = $"Woolich File Decoder {fileVersion}";
             cmbExportType.SelectedIndex = 0;
             cmbExportFormat.SelectedIndex = 0;
             cmbLogsLocation.SelectedIndex = 0;
@@ -1316,8 +1321,13 @@ namespace WoolichDecoder
                 }
             }
 
-            // Enable or disable the CRCsize textbox based on selected Type
-            CRCsize.Enabled = (selectedTypeIndex == 2); // Enable if CRC is selected
+         
+            CRCsize.Visible = (selectedTypeIndex == 2); 
+            lblCRCsize.Visible = (selectedTypeIndex == 2);
+            bool isVisible = new[] { 0, 1 }.Contains(selectedTypeIndex);
+            lblAFRdivisor.Visible = isVisible;
+            btnAFRdivisor.Visible = isVisible;
+            panelAFRdivisor.Visible = isVisible;
 
             // Ensure cmbExportType and cmbExportFormat are enabled if cmbExportMode is not 1
             cmbExportType.Enabled = true;
@@ -2046,8 +2056,6 @@ namespace WoolichDecoder
                 }
             });
         }
-
-
     }
 }
 
