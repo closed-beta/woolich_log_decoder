@@ -1,4 +1,6 @@
-﻿namespace WoolichDecoder
+﻿using System.Reflection;
+
+namespace WoolichDecoder
 {
     partial class WoolichFileDecoderForm
     {
@@ -924,7 +926,10 @@
             this.MaximumSize = new System.Drawing.Size(1300, 625);
             this.MinimumSize = new System.Drawing.Size(1300, 625);
             this.Name = "WoolichFileDecoderForm";
-            this.Text = "Woolich File Decoder";
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            string version = assembly.GetName().Version.ToString();
+            string fileVersion = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+            this.Text = $"Woolich File Decoder {fileVersion}";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.App_Close);
             this.Load += new System.EventHandler(this.App_Load);
             this.panel1.ResumeLayout(false);
