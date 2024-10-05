@@ -403,9 +403,9 @@ namespace WoolichDecoder
             this.label5.Location = new System.Drawing.Point(873, 41);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(35, 15);
+            this.label5.Size = new System.Drawing.Size(39, 15);
             this.label5.TabIndex = 19;
-            this.label5.Text = "log: ";
+            this.label5.Text = "Log: ";
             // 
             // label6
             // 
@@ -699,9 +699,9 @@ namespace WoolichDecoder
             this.label17.Location = new System.Drawing.Point(468, 42);
             this.label17.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(73, 15);
+            this.label17.Size = new System.Drawing.Size(77, 15);
             this.label17.TabIndex = 37;
-            this.label17.Text = "feedback: ";
+            this.label17.Text = "Feedback: ";
             // 
             // label19
             // 
@@ -871,7 +871,7 @@ namespace WoolichDecoder
             this.panelAFRdivisor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panelAFRdivisor.Controls.Add(this.AFRdivisor);
             this.panelAFRdivisor.Controls.Add(this.btnAFRdivisor);
-            this.panelAFRdivisor.Location = new System.Drawing.Point(132, 406);
+            this.panelAFRdivisor.Location = new System.Drawing.Point(198, 406);
             this.panelAFRdivisor.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panelAFRdivisor.Name = "panelAFRdivisor";
             this.panelAFRdivisor.Size = new System.Drawing.Size(139, 29);
@@ -882,7 +882,7 @@ namespace WoolichDecoder
             // 
             this.lblAFRdivisor.AutoSize = true;
             this.lblAFRdivisor.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblAFRdivisor.Location = new System.Drawing.Point(133, 388);
+            this.lblAFRdivisor.Location = new System.Drawing.Point(199, 388);
             this.lblAFRdivisor.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblAFRdivisor.Name = "lblAFRdivisor";
             this.lblAFRdivisor.Size = new System.Drawing.Size(85, 15);
